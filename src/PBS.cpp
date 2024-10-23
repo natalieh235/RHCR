@@ -85,7 +85,7 @@ void PBS::copy_conflicts(const list<Conflict>& conflicts, list<Conflict>& copy, 
     runtime_copy_conflicts += (double)(std::clock() - t) / CLOCKS_PER_SEC;
 }
 
-
+// find conflicts between a1 and a2 ad place them in the conflicts list
 void PBS::find_conflicts(list<Conflict>& conflicts, int a1, int a2)
 {
     clock_t t = clock();
@@ -165,6 +165,7 @@ void PBS::find_conflicts(list<Conflict>& conflicts, int a1, int a2)
 	runtime_detect_conflicts += (double)(std::clock() - t) / CLOCKS_PER_SEC;
 }
 
+// looks through a list of conflicts and compares all pairs
 void PBS::find_conflicts(list<Conflict>& conflicts)
 {
     for (int a1 = 0; a1 < num_of_agents; a1++)
@@ -221,29 +222,6 @@ void PBS::choose_conflict(PBSNode &node)
 	    return;
 
     node.conflict = node.conflicts.front();
-
-
-	/*vector<int> lower_nodes(num_of_agents, -1);
-	 * double product = -1;
-    for (auto conflict : node.conflicts)
-    {
-        int a1 = std::get<0>(*conflict);
-        int a2 = std::get<1>(*conflict);
-        node.priorities.update_number_of_lower_nodes(lower_nodes, a1);
-        node.priorities.update_number_of_lower_nodes(lower_nodes, a2);
-        double new_product = (lower_nodes[a1] + 0.01) * (lower_nodes[a2] + 0.01);
-        if (new_product > product)
-        {
-            node.conflict = conflict;
-            product = new_product;
-        }
-        else if (new_product == product && std::get<4>(*conflict) < std::get<4>(*node.conflict)) // choose the earliest
-        {
-            node.conflict = conflict;
-        }
-    }
-
-    return;*/
 
 	// choose the earliest
     for (auto conflict : node.conflicts)
@@ -515,10 +493,6 @@ bool PBS::generate_child(PBSNode* node, PBSNode* parent)
             return false;
     }
 
-
-
-
-
     node->num_of_collisions = node->conflicts.size();
 
 	//Estimate h value
@@ -533,10 +507,12 @@ bool PBS::generate_child(PBSNode* node, PBSNode* parent)
 
 bool PBS::generate_root_node()
 {
+    std::cout << "Generating root node" << std::endl;
     clock_t time = std::clock();
 	dummy_start = new PBSNode();
 	
 	// initialize paths_found_initially
+    // 
 	paths.resize(num_of_agents, nullptr);
 	
     if (screen == 2)
@@ -544,8 +520,10 @@ bool PBS::generate_root_node()
 
     //dummy_start->priorities.copy(initial_priorities);
 
+    // if initial paths exist, put them in the dummy_start node
     if (!initial_paths.empty())
     {
+        std::cout << "Initial paths not empty" << std::endl;
         for (int i = 0; i < num_of_agents; i++)
         {
             if (!initial_paths[i].empty())
@@ -558,7 +536,7 @@ bool PBS::generate_root_node()
         }
     }
 
-
+    // for each agent
     for (int i = 0; i < num_of_agents; i++) 
 	{
         if (paths[i] != nullptr)
@@ -567,12 +545,17 @@ bool PBS::generate_root_node()
         double path_cost;
         int start_location  = starts[i].location;
         clock_t t = std::clock();
+        // copy reservation table
 		rt.copy(initial_rt);
         rt.build(paths, initial_constraints, dummy_start->priorities.get_reachable_nodes(i), i, start_location);
         runtime_get_higher_priority_agents += dummy_start->priorities.runtime;
         runtime_rt += (double)(std::clock() - t) / CLOCKS_PER_SEC;
+
+        // heuristics
         vector< vector<double> > h_values(goal_locations[i].size());
         t = std::clock();
+
+        // run the single agent path planner for this agent
         path = path_planner.run(G, starts[i], goal_locations[i], rt);
 		runtime_plan_paths += (double)(std::clock() - t) / CLOCKS_PER_SEC;
         path_cost = path_planner.path_cost;
@@ -591,6 +574,8 @@ bool PBS::generate_root_node()
         dummy_start->makespan = std::max(dummy_start->makespan, paths[i]->size() - 1);
         dummy_start->g_val += path_cost;
 	}
+
+    // will place conflicts in the node in dummy_start->conflicts
     find_conflicts(dummy_start->conflicts);
     if (!lazyPriority)
     {
@@ -598,6 +583,7 @@ bool PBS::generate_root_node()
             return false;
     }
 
+    // update parameters of dummy_start
 	dummy_start->f_val = dummy_start->g_val;
     dummy_start->num_of_collisions = dummy_start->conflicts.size();
     min_f_val = dummy_start->f_val;
@@ -605,6 +591,8 @@ bool PBS::generate_root_node()
     best_node = dummy_start;
     HL_num_generated++;
     dummy_start->time_generated = HL_num_generated;
+
+    // add node to dfs
     push_node(dummy_start);
     if (screen == 2)
     {
@@ -682,7 +670,10 @@ bool PBS::run(const vector<State>& starts,
 			break;
 		}
 
+        // pop node, first one will be dummy_start
 		PBSNode* curr = pop_node();
+
+        // idk some updating stuff
 		update_paths(curr);
 
         if (curr->conflicts.empty())
@@ -693,26 +684,40 @@ bool PBS::run(const vector<State>& starts,
             break;
         }
 	
+        // looks throug conflicts in node->conflicts
+        // also sets node.earliest_collision
 		choose_conflict(*curr);
 
+        // best node is the one with the latest collision, ties broken by which has higher f
+        // best node is the one you want to explore next
         update_best_node(curr);
 
-		 //Expand the node
+		// Expand the node
 		HL_num_expanded++;
 
 		curr->time_expanded = HL_num_expanded;
 		if(screen == 2)
 			std::cout << "Expand Node " << curr->time_generated << " ( cost = " << curr->f_val << " , #conflicts = " <<
 			curr->num_of_collisions << " ) on conflict " << curr->conflict << std::endl;
-		PBSNode* n[2];
+		
+        // Expand into 2 nodes
+        PBSNode* n[2];
         for (auto & i : n)
                 i = new PBSNode();
+        
+        // set n1 priority to a1, a2 and n2 priority to a2, a1
 	    resolve_conflict(curr->conflict, n[0], n[1]);
 
         // int loc = std::get<2>(*curr->conflict);
+        // then 
         vector<Path*> copy(paths);
         for (auto & i : n)
         {
+            // copy over parent priorities to child one
+            // then add the newly generated priority
+            // copy all conflicts
+            // replan the higher priority one? 
+            // update num_collisions and update h and f vals
             bool sol = generate_child(i, curr);
             if (sol)
             {
@@ -745,6 +750,7 @@ bool PBS::run(const vector<State>& starts,
 		    paths = copy;
         }
 
+        // add nodes to dfs
         if (!solution_found)
         {
             if (n[0] != nullptr && n[1] != nullptr)
@@ -770,6 +776,7 @@ bool PBS::run(const vector<State>& starts,
                 push_node(n[1]);
             } else
             {
+                // i think no good stores impossible orderings/nodes
                 // std::cout << "*******A new nogood ********" << endl;
                 nogood.emplace(std::get<0>(curr->conflict), std::get<1>(curr->conflict));
             }
@@ -928,7 +935,7 @@ void PBS::print_results() const
 {
     std::cout << "PBS:";
 	if(solution_cost >= 0) // solved
-		std::cout << "Succeed,";
+		std::cout << "Succeed!!!!!!,";
 	else if(solution_cost == -1) // time_out
 		std::cout << "Timeout,";
 	else if(solution_cost == -2) // no solution
@@ -936,11 +943,11 @@ void PBS::print_results() const
 	else if (solution_cost == -3) // nodes out
 		std::cout << "Nodesout,";
 
-	std::cout << runtime << "," <<
-		HL_num_expanded << "," << HL_num_generated << "," <<
-		solution_cost << "," << min_sum_of_costs << "," <<
-		avg_path_length << "," << dummy_start->num_of_collisions << "," <<
-		runtime_plan_paths << "," << runtime_rt << "," <<
+	std::cout << runtime << ",Num expanded: " <<
+		HL_num_expanded << ",num_gen: " << HL_num_generated << ",sol_cost: " <<
+		solution_cost << ",min_sum: " << min_sum_of_costs << ",avg_len: " <<
+		avg_path_length << ",num_cols: " << dummy_start->num_of_collisions << ", runtime: " <<
+		runtime_plan_paths << ", rrt?: " << runtime_rt << "," <<
 		runtime_get_higher_priority_agents << "," <<
 		runtime_copy_priorities << "," <<
 		runtime_detect_conflicts << "," <<
@@ -955,11 +962,11 @@ void PBS::save_results(const std::string &fileName, const std::string &instanceN
 {
 	std::ofstream stats;
 	stats.open(fileName, std::ios::app);
-	stats << runtime << "," <<
-		HL_num_expanded << "," << HL_num_generated << "," <<
-		LL_num_expanded << "," << LL_num_generated << "," <<
-		solution_cost << "," << min_sum_of_costs << "," <<
-		avg_path_length << "," << dummy_start->num_of_collisions << "," <<
+	stats << runtime << ",hl num_exp: " <<
+		HL_num_expanded << ",hl num_gen: " << HL_num_generated << ",ll num_exp: " <<
+		LL_num_expanded << ",ll num_gen: " << LL_num_generated << ",sol_cost: " <<
+		solution_cost << ",min_sum: " << min_sum_of_costs << ",avg_path: " <<
+		avg_path_length << ",num_col: " << dummy_start->num_of_collisions << ",name: " <<
 		instanceName << std::endl;
 	stats.close();
 }
@@ -1011,22 +1018,6 @@ void PBS::get_solution()
 
     for (int k = 0; k < num_of_agents; k++)
     {
-        /*if (k == 250)
-            cout << solution[k] << endl;
-        solution[k].clear();
-        rt.build(solution, initial_constraints, k);
-        vector< vector<double> > h_values(goal_locations[k].size());
-        for (int j = 0; j < (int) goal_locations[k].size(); j++)
-        {
-            h_values[j] = G.heuristics.at(goal_locations[k][j]);
-        }
-        solution[k] = path_planner.run(G, starts[k], goal_locations[k], rt, h_values);
-        if (solution[k].empty())
-            cout << "ERROR" << endl;
-        rt.clear();
-        LL_num_expanded += path_planner.num_expanded;
-        LL_num_generated += path_planner.num_generated;*/
-        //solution_cost += path_planner.path_cost;
         avg_path_length += paths[k]->size();
     }
     avg_path_length /= num_of_agents;

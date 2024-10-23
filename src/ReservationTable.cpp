@@ -3,11 +3,15 @@
 // update SIT at the given location
 void ReservationTable::updateSIT(size_t location)
 {
+	// if the location is not in the SIT
 	if (sit.find(location) == sit.end())
 	{
+		// look for location in constraint table
 		const auto& it = ct.find(location);
+		// if entry exists
 		if (it != ct.end())
 		{
+			// it->second is a list of pair<int, int> (time ranges)
 			for (auto time_range : it->second)
 				insertConstraint2SIT(location, time_range.first, time_range.second);
 			ct.erase(it);
@@ -155,20 +159,28 @@ void ReservationTable::insertConstraint2SIT(int location, int t_min, int t_max)
 
 void ReservationTable::insertSoftConstraint2SIT(int location, int t_min, int t_max)
 {
+	// if doesn't exist already
     if (sit.find(location) == sit.end())
     {
+		// mark from 0 to tmin as safe, false = no conflicts
         if (t_min > 0)
         {
 			sit[location].emplace_back(0, t_min, false);
         }
+
+		// mark the interval as has a collision
 		sit[location].emplace_back(t_min, t_max, true);
 		sit[location].emplace_back(t_max, INTERVAL_MAX, false);
         return;
     }
+
+	// if location exists
     for (auto it = sit[location].begin(); it != sit[location].end(); it++)
     {
+		// cur interval is before
         if (t_min >= std::get<1>(*it))
             continue;
+		// intervals intersect
         else if (t_max <= std::get<0>(*it))
             break;
 		else if (std::get<2>(*it)) // the interval already has conflicts. No need to update

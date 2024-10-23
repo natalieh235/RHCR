@@ -166,6 +166,8 @@ int main(int argc, char** argv)
     // make dictionary
 	boost::filesystem::path dir(vm["output"].as<std::string>() +"/");
 	boost::filesystem::create_directories(dir);
+
+	// log = True saves the search trees
 	if (vm["log"].as<bool>())
 	{
 		boost::filesystem::path dir1(vm["output"].as<std::string>() + "/goal_nodes/");
@@ -175,6 +177,7 @@ int main(int argc, char** argv)
 	}
 
 
+	// KIVA is warehouse sorting scenario
 	if (vm["scenario"].as<string>() == "KIVA")
 	{
 		KivaGrid G;
@@ -182,6 +185,7 @@ int main(int argc, char** argv)
 			return -1;
 		MAPFSolver* solver = set_solver(G, vm);
 		KivaSystem system(G, *solver);
+		std::cout << "rotation: " << system.consider_rotation << std::endl;
 		set_parameters(system, vm);
 		G.preprocessing(system.consider_rotation);
 		system.simulate(vm["simulation_time"].as<int>());

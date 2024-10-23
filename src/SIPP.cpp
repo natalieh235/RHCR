@@ -58,6 +58,7 @@ Path SIPP::run(const BasicGraph& G, const State& start,
                const vector<pair<int, int> >& goal_location,
                ReservationTable& rt)
 {
+    // cout << "SIPP::run" << endl;
     num_expanded = 0;
     num_generated = 0;
     runtime = 0;
@@ -126,7 +127,60 @@ Path SIPP::run(const BasicGraph& G, const State& start,
 			return path;
 		}
 
+        std::vector<std::vector<int>> turn_boxes = {
+            {-402, 442, -1193, -1071},
+            {-400, 629, -1091, -969},
+            {-399, 797, -989, -867},
+            {-398, 895, -887, -765},
+            {-398, 982, -785, -662},
+            {-399, 1021, -682, -560},
+            {-401, 1087, -580, -458},
+            {-396, 1114, -478, -356},
+            {-403, 1153, -376, -254},
+            {-412, 1173, -274, -152},
+            {-456, 1192, -172, -49},
+            {-461, 1190, -69, 53},
+            {-457, 1193, 33, 155},
+            {-415, 1178, 135, 257},
+            {-375, 1165, 237, 358},
+            {-270, 1129, 338, 461}
+        };
 
+        int turn_time = 2
+
+        // assume this is a right turn
+        int orientation = 1 
+
+        // profile = get_turn_profile(action);
+        int required_turn_timestep = curr.state.timestep + turn_time;
+        int location = curr->state.location // stationary?
+        
+        // for every safe interval for this location with lower bound min_time to arrive at location and upper bound the current safe interval
+        for (auto interval : rt.getSafeIntervals(curr->state.location, location, required_turn_timestep, std::get<1>(curr->interval) + 1))
+        {
+            generate_node(interval, curr, G, location, min_timestep, orientation, h_val);
+        }
+
+        
+        // for (auto box: turn_boxes){
+        //     // Check if the box fits within the current safe interval
+        //     if (!is_within_safe_interval(curr.state.location, box, required_timestep)) {
+        //         continue;  // Skip this expansion if the turn collides or doesn't fit
+        //     }
+            
+        //     // Generate a new node following the turn profile
+        //     State new_state;
+        //     new_state.location = curr.state.location;  // The vehicle doesn't move forward during the turn
+        //     new_state.timestep = required_timestep;
+        //     new_state.orientation = get_orientation_for_box(box);
+        //     new_state.turn_profile_id = profile.id;
+            
+        //     // Add the new state to the open list
+        //     add_to_open_list(new_state);
+        // }
+
+
+        // std::cout << "current state: " << curr->state << std::endl;
         // expand the nodes
         for (int orientation = 0; orientation < 4; orientation++) // move
         {
@@ -140,10 +194,15 @@ Path SIPP::run(const BasicGraph& G, const State& start,
             if (degree > std::get<1>(curr->interval) - curr->state.timestep) // don't have enough time to turn
                 continue;
             int location = curr->state.location + G.move[orientation];
+            
             double h_val = compute_h_value(G, location, curr->goal_id, goal_location);
             if (h_val > INT_MAX)   // This vertex cannot reach the goal vertex
                 continue;
+            
+            // time to completion
             int min_timestep = curr->state.timestep + degree + 1;
+
+            // for each safe interval of location vertex and traversed edge
             for (auto interval : rt.getSafeIntervals(curr->state.location, location, min_timestep, std::get<1>(curr->interval) + 1))
             {
                 if (curr->state.orientation < 0)
@@ -345,6 +404,7 @@ Path SIPP::run(const BasicGraph& G, const State& start,
 void SIPP::generate_node(const Interval& interval, SIPPNode* curr, const BasicGraph& G,
         int location, int min_timestep, int orientation, double h_val)
 {
+    // max(interval_start, action_end)
     int timestep  = max(std::get<0>(interval), min_timestep);
     int wait_time = timestep - curr->state.timestep - 1; // inlcude rotate time
     double g_val = curr->g_val + wait_time * G.get_weight(curr->state.location, curr->state.location)
@@ -358,22 +418,7 @@ void SIPP::generate_node(const Interval& interval, SIPPNode* curr, const BasicGr
 
     // try to retrieve it from the hash table
     auto it = allNodes_table.find(next);
-    /*if (it != allNodes_table.end() && (*it)->state.timestep != next->state.timestep)
-    { // arrive at the same interval at different timestep
-        int waiting_time = (*it)->state.timestep - next->state.timestep;
-        double waiting_cost = abs(G.get_weight(next->state.location, next->state.location) * waiting_time);
-        if (waiting_time > 0 && next->getFVal() + waiting_cost <= (*it)->getFVal())
-        { // next arrives later with a smaller cost
-            // let the following update it with next
-        }
-        else if (waiting_time < 0 && next->getFVal() >= (*it)->getFVal() + waiting_cost)
-        { // next arrives earlier with a larger cost
-            delete next; // so delete next
-            return;
-        }
-        else // next arrives with a smaller cost, so they cannot be regarded as the same state
-            it = allNodes_table.end(); // TODO: fix this bug! When later inserting this node to allNodes_table, it will not override the previous node.
-    }*/
+
     if (it == allNodes_table.end())
     {
         next->open_handle = open_list.push(next);

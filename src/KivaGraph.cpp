@@ -41,6 +41,7 @@ bool KivaGrid::load_weighted_map(std::string fname)
 	boost::tokenizer< boost::char_separator<char> > tok(line, sep);
 	boost::tokenizer< boost::char_separator<char> >::iterator beg = tok.begin();
 	this->rows = atoi((*beg).c_str()); // read number of cols
+	// std::cout << "Num rows: " << this->rows << std::endl;
 	beg++;
 	this->cols = atoi((*beg).c_str()); // read number of rows
 	move[0] = 1;

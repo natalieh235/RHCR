@@ -11,6 +11,7 @@ public:
 	{
 		bool operator()(const PBSNode* n1, const PBSNode* n2) const
 		{
+			// order by cost, break ties by # of collisions
             if (n1->f_val == n2->f_val)
             {
                 return n1->num_of_collisions >= n2->num_of_collisions;

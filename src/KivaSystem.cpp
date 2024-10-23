@@ -19,6 +19,7 @@ void KivaSystem::initialize()
 	goal_locations.resize(num_of_drives);
 	paths.resize(num_of_drives);
 	finished_tasks.resize(num_of_drives);
+	consider_rotation = true;
 	bool succ = load_records(); // continue simulating from the records
 	if (!succ)
 	{
@@ -38,6 +39,7 @@ void KivaSystem::initialize_start_locations()
 	// Choose random start locations
 	// Any non-obstacle locations can be start locations
 	// Start locations should be unique
+	std::cout << "initializing location" << consider_rotation << std::endl;
 	for (int k = 0; k < num_of_drives; k++)
 	{
 		int orientation = -1;
@@ -212,6 +214,7 @@ void KivaSystem::simulate(int simulation_time)
 
 		update_start_locations();
 		update_goal_locations();
+		std::cout << "Calling solve..." << std::endl;
 		solve();
 
 		// move drives
@@ -237,7 +240,7 @@ void KivaSystem::simulate(int simulation_time)
 	}
 
 	update_start_locations();
-	std::cout << std::endl << "Done!" << std::endl;
+	std::cout << std::endl << "AM I DONE!" << std::endl;
 	save_results();
 }
 
