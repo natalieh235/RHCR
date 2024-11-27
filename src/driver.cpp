@@ -180,7 +180,9 @@ int main(int argc, char** argv)
 	// KIVA is warehouse sorting scenario
 	if (vm["scenario"].as<string>() == "KIVA")
 	{
-		KivaGrid G;
+		double robot_height = 1.0;
+		double robot_width = 2.0;
+		KivaGrid G = KivaGrid(robot_width, robot_height);
 		if (!G.load_map(vm["map"].as<std::string>()))
 			return -1;
 		MAPFSolver* solver = set_solver(G, vm);

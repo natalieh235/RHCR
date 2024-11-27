@@ -1,5 +1,5 @@
 #include "SIPP.h"
-
+#include <cstdlib>
 
 Path SIPP::updatePath(const BasicGraph& G, const SIPPNode* goal)
 {
@@ -26,6 +26,9 @@ Path SIPP::updatePath(const BasicGraph& G, const SIPPNode* goal)
             const SIPPNode* prev = curr->parent;
             int degree = G.get_rotate_degree(prev->state.orientation, curr->state.orientation);
             int t = prev->state.timestep + 1;
+
+            // std::cout << "curr " << curr->state << " interval: " << curr->interval << std::endl;
+            // std::cout << "prev: " << curr->parent->state << " interval: " << curr->parent->interval << std::endl;
             if (degree == 1) // turn right or turn left
             {
                 path[t] = State(prev->state.location, t, curr->state.orientation);
@@ -40,16 +43,265 @@ Path SIPP::updatePath(const BasicGraph& G, const SIPPNode* goal)
             }
             while ( t < curr->state.timestep)
             {
+                // std::cout << "waiting? " << curr->state << std::endl;
                 path[t] = State(prev->state.location, t, curr->state.orientation); // wait at prev location
                 t++;
             }
-            path[curr->state.timestep] = State(curr->state.location, curr->state.timestep, curr->state.orientation); // move to current location
+            path[curr->state.timestep] = State(curr->state); // move to current location
             curr = prev;
         }
     }
     return path;
 }
 
+void SIPP::fill_primitives() {
+    std::cout << "SIPP: filling primitives" << std::endl;
+    float MAXV  = 2.0;
+    float MAX_ACC = 1.0;
+    int minimalTransitionCost = 1; // the minimum cost to go from one cell to next (0.5s = 5 timesteps).
+    int dx[4] = {0, -1, 0, 1}, dy[4] = {1, 0, -1, 0};
+    // int turn_dx[4] = {}
+    
+    //  turn from 0 to 1
+    Primitive tmp;
+    tmp.mvs = {Primitive::move(0, 1, 1, 1, 0, 0), Primitive::move(-1, 1, 1, 1, 1, 0), 
+            Primitive::move(-1, 0, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
+    tmp.v = 0;
+    tmp.o = 1;
+    motion_primitives[0][0].emplace_back(tmp);
+
+    tmp.mvs.clear();
+
+    // turn from 0 to 3
+    tmp.mvs = {Primitive::move(0, 1, 1, 1, 0, 0), Primitive::move(1, 1, 1, 1, 1, 0), 
+            Primitive::move(1, 0, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
+    tmp.v = 0;
+    tmp.o = 3;
+    motion_primitives[0][0].emplace_back(tmp);
+    tmp.mvs.clear();
+
+    // 1 to 2
+    tmp.mvs = {Primitive::move(-1, 0, 1, 1, 0, 0), Primitive::move(-1, -1, 1, 1, 1, 0), 
+            Primitive::move(0, -1, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
+    tmp.v = 0;
+    tmp.o = 2;
+    motion_primitives[1][0].emplace_back(tmp);
+    tmp.mvs.clear();
+
+    // 1 to 0
+    tmp.mvs = {Primitive::move(-1, 0, 1, 1, 0, 0), Primitive::move(-1, 1, 1, 1, 1, 0), 
+            Primitive::move(0, 1, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
+    tmp.v = 0;
+    tmp.o = 0;
+    motion_primitives[1][0].emplace_back(tmp);
+    tmp.mvs.clear();
+
+    // 2 to 3
+    tmp.mvs = {Primitive::move(0, -1, 1, 1, 0, 0), Primitive::move(1, -1, 1, 1, 1, 0), 
+            Primitive::move(1, 0, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
+    tmp.v = 0;
+    tmp.o = 3;
+    motion_primitives[2][0].emplace_back(tmp);
+    tmp.mvs.clear();
+
+    // 2 to 1
+    tmp.mvs = {Primitive::move(0, -1, 1, 1, 0, 0), Primitive::move(-1, -1, 1, 1, 1, 0), 
+            Primitive::move(-1, 0, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
+    tmp.v = 0;
+    tmp.o = 1;
+    motion_primitives[2][0].emplace_back(tmp);
+    tmp.mvs.clear();
+
+    // 3 to 0
+    tmp.mvs = {Primitive::move(1, 0, 1, 1, 0, 0), Primitive::move(1, 1, 1, 1, 1, 0), 
+            Primitive::move(0, 1, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
+    tmp.v = 0;
+    tmp.o = 0;
+    motion_primitives[3][0].emplace_back(tmp);
+    tmp.mvs.clear();
+
+    // 3 to 2
+    tmp.mvs = {Primitive::move(1, 0, 1, 1, 0, 0), Primitive::move(1, -1, 1, 1, 1, 0), 
+            Primitive::move(0, -1, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
+    tmp.v = 0;
+    tmp.o = 2;
+    motion_primitives[3][0].emplace_back(tmp);
+    tmp.mvs.clear();
+
+    for (int o = 0; o < MXO; ++o) {
+        std::cout << "primitives for " << o << std::endl;
+        // ACCELERATION
+        // Primitive tmp;
+        tmp.v = 1; // ending velocity 1
+        tmp.o=o; // end orientation is the same
+
+        // (0, 0)  (0, 1)
+        // (1, 0)
+        tmp.mvs = {
+            Primitive::move(dx[o]*0, dy[o]*0, 0, 1, o, 0), // time = 0, occupies first cell for 1 second
+            Primitive::move(dx[o]*1, dy[o]*1, 0, 1, o, 0), // time = 1, displacement is 1 cell
+            Primitive::move(dx[o]*2, dy[o]*2, 1, 1, o, 0),
+            Primitive::move(dx[o]*3, dy[o]*3, 1, 1, o, 1),
+            // Primitive::move(dx[o]*4, dy[o]*4, 1, 1, o, 0)
+        };
+
+        motion_primitives[o][0].push_back(tmp);
+
+        std::cout << "acclereation: " << tmp << std::endl;
+
+        // deceleration
+        tmp.mvs.clear();
+        tmp.v = 0;
+        tmp.o = o;
+        tmp.mvs = {
+            Primitive::move(dx[o]*0, dy[o]*0, 0, 1, o, 0), 
+            Primitive::move(dx[o]*1, dy[o]*1, 0, 1, o, 0), 
+            Primitive::move(dx[o]*2, dy[o]*2, 1, 1, o, 0),
+            Primitive::move(dx[o]*3, dy[o]*3, 1, 1, o, 1),
+            // Primitive::move(dx[o]*4, dy[o]*4, 1, 1, o, 0)
+        };
+
+        motion_primitives[o][1].push_back(tmp);
+
+        std::cout << "decel: " << tmp << std::endl;
+
+        // just go forward
+        // goes forward with constant velocity in 1 timestep, can only do with vel=1
+        // because robot has width 2.0, covers cells 0-2
+        tmp.mvs = {Primitive::move(0, 0, 0, 0, o, 0), 
+                    Primitive::move(dx[o], dy[o], 0, 1, o, 0), 
+                    Primitive::move(dx[o]*2, dy[o]*2, 0, 1, o, 0)};
+        tmp.o = o;
+        tmp.v = 1;
+        motion_primitives[o][1].emplace_back(tmp);
+
+        std::cout << "constant: " << tmp << std::endl;
+    }
+}
+
+void SIPP::generate_successors(SIPPNode* curr, const BasicGraph &G, ReservationTable &rt, 
+    int t_lower, int t_upper, const vector<pair<int, int> >& goal_location) {
+    
+    std::cout << "generating successors for " << curr->state << std::endl;
+    // for possible primitives with that starting velocity
+    for (auto &mp: motion_primitives[curr->state.orientation][curr->state.velocity]) {
+        // std::cout << "applying primitive " << mp << std::endl;
+        auto cur_xy = G.get_xy(curr->state.location);
+        int next_location = G.get_location(mp.mvs.back().dx + cur_xy.first, mp.mvs.back().dy + cur_xy.second);
+        double h_val = compute_h_value(G, next_location, curr->goal_id, goal_location);
+
+        apply_primitive(curr, G, rt, t_lower, t_upper, mp, h_val);
+    }
+}
+
+// Generate acceleration primitive
+// Primitive generate_acceleration_primitive(double v0, double vf, double max_acc, int cur_o) {
+//     vector<Primitive::move> moves;
+//     int dx = 0, dy = 1; 
+
+//     // Iterate over velocity increments
+//     for (int v = v0 + 1; v <= vf; ++v) {
+//         double t = (v - v0) / max_acc; // Time to reach vf
+//         double s = v0 * t + 0.5 * max_acc * t * t;          // Distance traveled
+//         int cells = static_cast<int>(s / grid_size);        // Convert to grid cells
+
+//         // Add move to primitive
+//         moves.emplace_back(dx * cells, dy * cells, static_cast<int>(t), static_cast<int>(t), cur_o, vf == max_v);
+//     }
+
+//     // Return the Primitive
+//     return Primitive(moves, cur_o, max_v);
+// }
+
+// generate wait intervals (belongs to safe interval)
+// node to extand: n = (v, [tl, tu])
+// outputs set of time intervals st. each ti belongs to one of the safe intervals of the target
+// intervals do not overlap
+void SIPP::apply_primitive(SIPPNode* curr, const BasicGraph &G, ReservationTable &rt, 
+    int t_lower, int t_upper, Primitive mp, double h_val) {
+
+    std::cout << "SIPP: applying primitive: " << mp << std::endl;
+    vector<pair<int, int>> time_intervals, tmp;
+    time_intervals.push_back({t_lower, t_upper});
+    bool endCellTouched = false;
+    pair<int, int> xy = G.get_xy(curr->state.location);
+    int x = xy.first, y = xy.second;
+    int xx = xy.first, yy = xy.second, past_time = 0;
+    int next_location;
+    // std::cout << "initial xx " << xx << " initial yy" << yy << std::endl;
+
+    // for each primitive
+    for (auto mv:mp.mvs) {
+        xx = x + mv.dx;
+        yy = y + mv.dy;
+
+        if (xx < 0 || xx >= G.get_rows() || yy < 0 || y >= G.get_cols()) {
+            std::cout << "  apply primitive generates is invalid" << std::endl;
+            return;
+        }
+
+        next_location = G.get_location(xx, yy);
+        if (!G.valid_move(next_location, mv.cur_o)) {
+            return;
+        }
+
+        int completion_time = mv.ftt - past_time;
+
+        for (auto &it: time_intervals) {
+            // std::cout << "curr interval: " << it.first << ", " << it.second << std::endl;
+            
+            int t_l = min(INTERVAL_MAX, it.first + completion_time); // time needed to complete this one move in the primitive
+            int t_u = min(INTERVAL_MAX, it.second + completion_time);
+
+            // std::cout << "starting: " << t_l << ", " << t_u << ", next location " << next_location << std::endl;
+
+            auto vertex_intervals = rt.getSafeIntervals(next_location, t_l, t_u);
+
+            for (auto &safe_it: vertex_intervals) {
+                // std::cout << "safe interval: " << std::get<0>(safe_it) << ", " << std::get<1>(safe_it) << std::endl;
+                // how do i generate new projected intervals?
+                int new_tl = max(t_l, std::get<0>(safe_it));
+                int new_tu = min(t_u, std::get<1>(safe_it) - mv.swt);
+
+                // std::cout << "new bounds " << new_tl << ", " << new_tu << std::endl;
+ 
+                // if waiting is allowed at the target vertex, extend the safe interval
+                // to the upper bound of the SI at the target vertex
+                if (new_tl <= new_tu && (mv.isEndCell && !endCellTouched) && mp.v == 0) {
+                    // std::cout << "adjusting, " << std::get<0>(safe_it) - mv.swt << std::endl;
+                    new_tu = std::get<1>(safe_it) - mv.swt;
+                }
+
+                if (new_tl <= new_tu) {
+                    // std::cout << "found interval " << new_tl << ", " << new_tu << std::endl;
+                    tmp.push_back({new_tl, new_tu});
+                }
+            }
+        }
+
+        time_intervals = tmp;
+        tmp.clear();
+        past_time = mv.ftt;
+        if(mv.isEndCell){
+            endCellTouched = true;
+        }
+
+        // std::cout << "done with move " << std::endl;
+    }
+
+    vector<pair<int, int>> intervals;
+    
+    for (auto it: time_intervals) {
+        int adjusted_tl = std::get<0>(it) + mp.mvs.back().swt;
+        int adjusted_tu = std::get<1>(it)+mp.mvs.back().swt;
+        State next_state = State(next_location, adjusted_tl, mp.o, mp.v);
+        generate_node({adjusted_tl, adjusted_tu, 0}, curr, next_state, G, 
+            t_lower+mp.mvs.back().swt + mp.mvs.back().ftt, h_val);
+        std::cout << "generating node with tl " << std::get<0>(it) << " + " << mp.mvs.back().swt
+            << ", tu " << std::get<1>(it) << " + " << mp.mvs.back().swt << ", min timestep " 
+            << t_lower+mp.mvs.back().swt + mp.mvs.back().ftt << " state: " << next_state << std::endl;
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // return true if a path found (and updates vector<int> path) or false if no path exists
@@ -58,26 +310,42 @@ Path SIPP::run(const BasicGraph& G, const State& start,
                const vector<pair<int, int> >& goal_location,
                ReservationTable& rt)
 {
-    // cout << "SIPP::run" << endl;
+    // std::cout << "SIPP: running SIPP" << std::endl;
+    // ROBOT_HEIGHT = 1.5
+    // ROBOT_WIDTH = 3
     num_expanded = 0;
     num_generated = 0;
     runtime = 0;
     clock_t t = std::clock();
+    
+
+    // heuristic from start to end
 	double h_val = compute_h_value(G, start.location, 0, goal_location);
+
 	if (h_val > INT_MAX)
 	{
 		cout << "The start and goal locations are disconnected!" << endl;
 		return Path();
 	}
+
+    // Start at the first safe interval
+    // beginning state is the start.location @ first safe interval
     Interval interval = rt.getFirstSafeInterval(start.location);
-	
+
+    // if first safe interval starts at 0
     if (std::get<0>(interval) == 0)
     {
         auto node = new SIPPNode(start, 0, h_val, interval, nullptr, 0);
         num_generated++;
+
+        // reference to node in open_list (a fibonacci heap)
         node->open_handle = open_list.push(node);
         node->in_openlist = true;
+
+        // unordered set of all nodes
         allNodes_table.insert(node);
+
+        // track min f_val
         min_f_val = node->getFVal();
         focal_bound = min_f_val * suboptimal_bound;
         node->focal_handle = focal_list.push(node);
@@ -100,87 +368,43 @@ Path SIPP::run(const BasicGraph& G, const State& start,
 	int earliest_holding_time = 0;
 	if (hold_endpoints)
 		earliest_holding_time = rt.getHoldingTimeFromSIT(goal_location.back().first);
+
+    // std::cout << "starting focal list, " << focal_list.size() << std::endl;
+    // take from focal list
     while (!focal_list.empty())
     {
         SIPPNode* curr = focal_list.top(); focal_list.pop();
-        open_list.erase(curr->open_handle);
-        curr->in_openlist = false;
+        // std::cout << "focal size, " << focal_list.size() << std::endl;
+        open_list.erase(curr->open_handle); // remove from open
+        curr->in_openlist = false; // removed
         num_expanded++;
 
-         // update goal id
+        // update goal id
         if (curr->state.location == goal_location[curr->goal_id].first &&
-			curr->state.timestep >= goal_location[curr->goal_id].second) // reach the goal location after its release time
+            curr->state.timestep >= goal_location[curr->goal_id].second) // reach the goal location after its release time
         {
+            cout << "SIPP: reached goal location " << curr->goal_id << ", " << curr->state << endl;
             curr->goal_id++;
-			if (curr->goal_id == (int)goal_location.size() &&
-				earliest_holding_time > curr->state.timestep)
-				curr->goal_id--;
+            if (curr->goal_id == (int)goal_location.size() &&
+                earliest_holding_time > curr->state.timestep)
+                curr->goal_id--;
         }
-		// check if the popped node is a goal
-		if (curr->goal_id == (int)goal_location.size())
-		{
-			Path path = updatePath(G, curr);
-			releaseClosedListNodes();
-			open_list.clear();
-			focal_list.clear();
-			runtime = (std::clock() - t) * 1.0 / CLOCKS_PER_SEC;
-			return path;
-		}
-
-        std::vector<std::vector<int>> turn_boxes = {
-            {-402, 442, -1193, -1071},
-            {-400, 629, -1091, -969},
-            {-399, 797, -989, -867},
-            {-398, 895, -887, -765},
-            {-398, 982, -785, -662},
-            {-399, 1021, -682, -560},
-            {-401, 1087, -580, -458},
-            {-396, 1114, -478, -356},
-            {-403, 1153, -376, -254},
-            {-412, 1173, -274, -152},
-            {-456, 1192, -172, -49},
-            {-461, 1190, -69, 53},
-            {-457, 1193, 33, 155},
-            {-415, 1178, 135, 257},
-            {-375, 1165, 237, 358},
-            {-270, 1129, 338, 461}
-        };
-
-        int turn_time = 2
-
-        // assume this is a right turn
-        int orientation = 1 
-
-        // profile = get_turn_profile(action);
-        int required_turn_timestep = curr.state.timestep + turn_time;
-        int location = curr->state.location // stationary?
-        
-        // for every safe interval for this location with lower bound min_time to arrive at location and upper bound the current safe interval
-        for (auto interval : rt.getSafeIntervals(curr->state.location, location, required_turn_timestep, std::get<1>(curr->interval) + 1))
+        // check if agent has reached all goal locations
+        if (curr->goal_id == (int)goal_location.size())
         {
-            generate_node(interval, curr, G, location, min_timestep, orientation, h_val);
+            Path path = updatePath(G, curr);
+            releaseClosedListNodes();
+            open_list.clear();
+            focal_list.clear();
+            runtime = (std::clock() - t) * 1.0 / CLOCKS_PER_SEC;
+            cout << "SIPP: returning path" << curr->goal_id << endl;
+            return path;
         }
 
+        // std::cout << "=========" << std::endl;
+        // std::cout << "SIPP: curr state: " << curr->state << std::endl;
+        // std::cout << "SIPP: current interval: " << curr->interval << std::endl;
         
-        // for (auto box: turn_boxes){
-        //     // Check if the box fits within the current safe interval
-        //     if (!is_within_safe_interval(curr.state.location, box, required_timestep)) {
-        //         continue;  // Skip this expansion if the turn collides or doesn't fit
-        //     }
-            
-        //     // Generate a new node following the turn profile
-        //     State new_state;
-        //     new_state.location = curr.state.location;  // The vehicle doesn't move forward during the turn
-        //     new_state.timestep = required_timestep;
-        //     new_state.orientation = get_orientation_for_box(box);
-        //     new_state.turn_profile_id = profile.id;
-            
-        //     // Add the new state to the open list
-        //     add_to_open_list(new_state);
-        // }
-
-
-        // std::cout << "current state: " << curr->state << std::endl;
         // expand the nodes
         for (int orientation = 0; orientation < 4; orientation++) // move
         {
@@ -191,62 +415,54 @@ Path SIPP::run(const BasicGraph& G, const State& start,
                 degree = 0;
             else
                 degree = G.get_rotate_degree(curr->state.orientation, orientation);
+
             if (degree > std::get<1>(curr->interval) - curr->state.timestep) // don't have enough time to turn
                 continue;
+
             int location = curr->state.location + G.move[orientation];
-            
+
+            if (!G.valid_move(location, orientation)) {
+                continue;
+            }
+
             double h_val = compute_h_value(G, location, curr->goal_id, goal_location);
             if (h_val > INT_MAX)   // This vertex cannot reach the goal vertex
                 continue;
-            
-            // time to completion
             int min_timestep = curr->state.timestep + degree + 1;
-
-            // for each safe interval of location vertex and traversed edge
             for (auto interval : rt.getSafeIntervals(curr->state.location, location, min_timestep, std::get<1>(curr->interval) + 1))
             {
-                if (curr->state.orientation < 0)
-                    generate_node(interval, curr, G, location, min_timestep, -1, h_val);
-                else
-                    generate_node(interval, curr, G, location, min_timestep, orientation, h_val);
+                if (curr->state.orientation < 0) {
+                    State next_state = State(location, min_timestep, -1, 0);
+                    generate_node(interval, curr, next_state, G, min_timestep, h_val);
+                }
+                else {
+                    State next_state = State(location, min_timestep, orientation, 0);
+                    generate_node(interval, curr, next_state, G, min_timestep, h_val);
+                }
             }
 
         }  // end for loop that generates successors
 
-        if(rt.use_cat) // wait to the successive interval
-        {
-            int location = curr->state.location;
-            int min_timestep = std::get<1>(curr->interval);
-            int orientation = curr->state.orientation;
-            Interval interval;
-            bool found = rt.findSafeInterval(interval, location, min_timestep);
-            if (found)
-            {
-				if (curr->state.orientation < 0)
-				{
-					generate_node(interval, curr, G, location, min_timestep, -1, curr->h_val);
-				}
-				else
-				{
-					generate_node(interval, curr, G, location, min_timestep, orientation, curr->h_val);
-					generate_node(interval, curr, G, location, min_timestep, (orientation + 1) % 4, curr->h_val);
-					generate_node(interval, curr, G, location, min_timestep, (orientation + 3) % 4, curr->h_val);
-					if (std::get<1>(curr->interval) - curr->state.timestep > 1)
-						generate_node(interval, curr, G, location, min_timestep, (orientation + 2) % 4, curr->h_val);
-				}
-            }
-        }
+        // generate_successors(curr, G, rt, 
+        //     std::get<0>(curr->interval), std::get<1>(curr->interval),
+        //     goal_location);
+        
 
         // update FOCAL if min f-val increased
         if (open_list.empty())  // in case OPEN is empty, no path found
         {
+            // std::cout << "SIPP: open list empty" << std::endl;
             if(prioritize_start) // the agent has the highest priority at its start location
             {
+                // std::cout << "prioritize start" << std::endl;
                 // This is correct only when k_robust <= 1. Otherwise, agents might not be able to
                 // wait at its start locations due to initial constraints caused by the previous actions
                 // of other agents.
                 Interval interval = rt.getFirstSafeInterval(start.location);
                 Interval interval2 = make_tuple(std::get<1>(interval), INTERVAL_MAX, 0);
+                if (std::get<1>(interval) == INTERVAL_MAX) {
+                    break;
+                }
                 double h_val = compute_h_value(G, start.location, 0, goal_location);
                 auto node2 = new SIPPNode(start, 0, h_val, interval2, nullptr, 0);
                 num_generated++;
@@ -262,7 +478,7 @@ Path SIPP::run(const BasicGraph& G, const State& start,
                 break;
             }
         }
-        else
+        else // add to focal list
         {
             SIPPNode* open_head = open_list.top();
             if (open_head->getFVal() > min_f_val)
@@ -271,14 +487,16 @@ Path SIPP::run(const BasicGraph& G, const State& start,
                 double new_focal_bound = new_min_f_val * suboptimal_bound;
                 for (SIPPNode* n : open_list)
                 {
-                    if (n->getFVal() > focal_bound && n->getFVal() <= new_focal_bound)
+                    if (n->getFVal() > focal_bound && n->getFVal() <= new_focal_bound) {
+                        // std::cout << "adding node from open to focal, " << n->state << std::endl;
                         n->focal_handle = focal_list.push(n);
+                    }
                 }
                 min_f_val = new_min_f_val;
                 focal_bound = new_focal_bound;
             }
         }
-
+        // std::cout << "focal size at end, " << focal_list.size() << std::endl;
     }  // end while loop
 
     // no path found
@@ -288,139 +506,32 @@ Path SIPP::run(const BasicGraph& G, const State& start,
     return Path();
 }
 
-
-/*void SIPP::generate_node(SIPPNode* curr, const SortationGrid& G,
-                         int location, int timestep, int orientation, double h_val)
-{
-    int wait_time = timestep - curr->state.timestep - 1; // inlcude rotate time
-    double travel_time = 1;
-    if (!travel_times.empty())
-    {
-        int dir = G.get_direction(curr->state.location, location);
-        travel_time += travel_times[curr->state.location][dir];
-    }
-    double g_val = curr->g_val + travel_time * (wait_time * G.get_weight(curr->state.location, curr->state.location)
-                   + G.get_weight(curr->state.location, location));
-
-    int conflicts = curr->conflicts;
-
-    // generate (maybe temporary) node
-    auto next = new SIPPNode(State(location, timestep, orientation),
-                             g_val, h_val, Interval(window + 1, INTERVAL_MAX, 0), curr, conflicts);
-
-    // try to retrieve it from the hash table
-    auto it = allNodes_table.find(next);
-    if (it != allNodes_table.end() && (*it)->state.timestep != next->state.timestep)
-    { // arrive at the same interval at different timestep
-        int waiting_time = (*it)->state.timestep - next->state.timestep;
-        double waiting_cost = abs(G.get_weight(next->state.location, next->state.location) * waiting_time);
-        double next_f_val = next->getFVal() + waiting_cost;
-        if (waiting_time > 0 && next_f_val <= (*it)->getFVal())
-        { // next arrives earlier with a smaller cost
-            // so delete it
-            // let the following update it with next
-        }
-        else if (waiting_time < 0 && next_f_val >= (*it)->getFVal())
-        { // it arrives earlier with a smaller cost
-            delete next; // so delete next
-            return;
-        }
-        else // the later node arrives with a smaller cost, so they cannot be regarded as the same state
-            it = allNodes_table.end();
-    }
-    if (it == allNodes_table.end())
-    {
-        next->open_handle = open_list.push(next);
-        next->in_openlist = true;
-        num_generated++;
-        if (next->getFVal() <= focal_bound)
-            next->focal_handle = focal_list.push(next);
-        allNodes_table.insert(next);
-        return;
-    }
-
-    // update existing node if needed (only in the open_list)
-    SIPPNode* existing_next = *it;
-    double existing_f_val = existing_next->getFVal();
-
-    if (existing_next->in_openlist)
-    {  // if its in the open list
-        if (existing_f_val > g_val + h_val ||
-            (existing_f_val == g_val + h_val && existing_next->conflicts > conflicts))
-        {
-            // if f-val decreased through this new path (or it remains the same and there's less internal conflicts)
-            bool add_to_focal = false;  // check if it was above the focal bound before and now below (thus need to be inserted)
-            bool update_in_focal = false;  // check if it was inside the focal and needs to be updated (because f-val changed)
-            bool update_open = false;
-            if ((g_val + h_val) <= focal_bound)
-            {  // if the new f-val qualify to be in FOCAL
-                if (existing_f_val > focal_bound)
-                    add_to_focal = true;  // and the previous f-val did not qualify to be in FOCAL then add
-                else
-                    update_in_focal = true;  // and the previous f-val did qualify to be in FOCAL then update
-            }
-            if (existing_f_val > g_val + h_val)
-                update_open = true;
-            // update existing node
-            existing_next->state = next->state;
-            existing_next->g_val = g_val;
-            existing_next->h_val = h_val;
-            existing_next->parent = curr;
-            existing_next->depth = next->depth;
-            existing_next->conflicts = conflicts;
-            // existing_next->move = next->move;
-
-            if (update_open)
-                open_list.increase(existing_next->open_handle);  // increase because f-val improved
-            if (add_to_focal)
-                existing_next->focal_handle = focal_list.push(existing_next);
-            if (update_in_focal)
-                focal_list.update(existing_next->focal_handle);  // should we do update? yes, because number of conflicts may go up or down
-        }
-    }
-    else
-    {  // if its in the closed list (reopen)
-        if (existing_f_val > g_val + h_val ||
-            (existing_f_val == g_val + h_val && existing_next->conflicts > conflicts))
-        {
-            // if f-val decreased through this new path (or it remains the same and there's less internal conflicts)
-            existing_next->state = next->state;
-            existing_next->g_val = g_val;
-            existing_next->h_val = h_val;
-            existing_next->parent = curr;
-            existing_next->depth = next->depth;
-            existing_next->conflicts = conflicts;
-            existing_next->open_handle = open_list.push(existing_next);
-            existing_next->in_openlist = true;
-            if (existing_f_val <= focal_bound)
-                existing_next->focal_handle = focal_list.push(existing_next);
-        }
-    }  // end update a node in closed list
-
-    delete(next);  // not needed anymore -- we already generated it before
-}*/
-
-
-void SIPP::generate_node(const Interval& interval, SIPPNode* curr, const BasicGraph& G,
-        int location, int min_timestep, int orientation, double h_val)
+void SIPP::generate_node(const Interval& interval, SIPPNode* curr, State next_state, const BasicGraph& G,
+        int min_timestep, double h_val)
 {
     // max(interval_start, action_end)
     int timestep  = max(std::get<0>(interval), min_timestep);
-    int wait_time = timestep - curr->state.timestep - 1; // inlcude rotate time
+    int wait_time = timestep - curr->state.timestep - 1; // inlcude move time
     double g_val = curr->g_val + wait_time * G.get_weight(curr->state.location, curr->state.location)
-                   + G.get_weight(curr->state.location, location);
+                   + G.get_weight(curr->state.location, next_state.location);
 
+    // interval is start, end, has_conflict
     int conflicts = std::get<2>(interval) + curr->conflicts;
 
     // generate (maybe temporary) node
-    auto next = new SIPPNode(State(location, timestep, orientation),
+    auto next = new SIPPNode(next_state,
                              g_val, h_val, interval, curr, conflicts);
+
+    
+    // std::cout << "generate node: new state is " << next->state << std::endl;
 
     // try to retrieve it from the hash table
     auto it = allNodes_table.find(next);
 
+    // if this node does not exist in allNodes
     if (it == allNodes_table.end())
     {
+        // std::cout << "node doesn't exist" << next->state << std::endl;
         next->open_handle = open_list.push(next);
         next->in_openlist = true;
         num_generated++;
@@ -436,6 +547,9 @@ void SIPP::generate_node(const Interval& interval, SIPPNode* curr, const BasicGr
 
     if (existing_next->in_openlist)
     {  // if its in the open list
+        //  the existing node has a higher cost than the new node
+        // ties broken by number of conflicts
+        // relax the edge
         if (existing_f_val > g_val + h_val ||
             (existing_f_val == g_val + h_val && existing_next->conflicts > conflicts))
         {

@@ -289,6 +289,7 @@ double PBS::get_path_cost(const Path& path) const
     return cost;
 }
 
+// find_path
 bool PBS::find_path(PBSNode* node, int agent)
 {
     Path path;
@@ -296,6 +297,8 @@ bool PBS::find_path(PBSNode* node, int agent)
 
     clock_t t = std::clock();
 	rt.copy(initial_rt);
+    std::cout << "pbs find path" << initial_constraints.size() << std::endl;
+    //                                      high priority agents
     rt.build(paths, initial_constraints, node->priorities.get_reachable_nodes(agent),
              agent, starts[agent].location);
     runtime_get_higher_priority_agents += node->priorities.runtime;
@@ -303,7 +306,13 @@ bool PBS::find_path(PBSNode* node, int agent)
     runtime_rt += (double)(std::clock() - t) / CLOCKS_PER_SEC;
 
     t = std::clock();
+    std::cout << "PBS find_path: running SIPP for agent " << agent << std::endl;
     path = path_planner.run(G, starts[agent], goal_locations[agent], rt);
+    
+    // for (auto p: path) {
+    //     std::cout << "pbs: " << p << std::endl;
+    // }
+    // std::cout << 
 	runtime_plan_paths += (double)(std::clock() - t) / CLOCKS_PER_SEC;
     path_cost = path_planner.path_cost;
     // t = std::clock();
@@ -324,12 +333,14 @@ bool PBS::find_path(PBSNode* node, int agent)
     node->g_val = node->g_val - old_cost + path_cost;
     for (auto it = node->paths.begin(); it != node->paths.end(); ++it)
     {
+        // erase the old path
         if (std::get<0>(*it) == agent)
         {
             node->paths.erase(it);
             break;
         }
     }
+    // add the new one
     node->paths.emplace_back(agent, path);
     paths[agent] = &node->paths.back().second;
     return true;
@@ -354,11 +365,13 @@ void PBS::find_replan_agents(PBSNode* node, const list<Conflict>& conflicts,
         unordered_set<int>& replan)
 {
     clock_t t2 = clock();
+    // for each conflict
     for (const auto& conflict : conflicts)
     {
 
         int a1, a2, v1, v2, t;
         std::tie(a1, a2, v1, v2, t) = conflict;
+        // if a1 or a2 are already being replanned
         if (replan.find(a1) != replan.end() || replan.find(a2) != replan.end())
             continue;
         else if (prioritize_start && wait_at_start(*paths[a1], v1, t))
@@ -373,6 +386,7 @@ void PBS::find_replan_agents(PBSNode* node, const list<Conflict>& conflicts,
         }
         if (node->priorities.connected(a1, a2))
         {
+            // if a1 has lower priority ? 
             replan.insert(a1);
             continue;
         }
@@ -393,12 +407,14 @@ bool PBS::find_consistent_paths(PBSNode* node, int agent)
     unordered_set<int> replan;
     if (agent >= 0 && agent < num_of_agents)
         replan.insert(agent);
+
     find_replan_agents(node, node->conflicts, replan);
     /*clock_t t2 = clock();
     PathTable pt(paths, window, k_robust);
     runtime_detect_conflicts += (double)(std::clock() - t2) / CLOCKS_PER_SEC;*/
     while (!replan.empty())
     {
+        // if u run low lvl too many times? 
         if (count > (int) node->paths.size() * 5)
         {
             runtime_find_consistent_paths += (double)(std::clock() - t) / CLOCKS_PER_SEC;
@@ -410,13 +426,19 @@ bool PBS::find_consistent_paths(PBSNode* node, int agent)
         /*t2 = clock();
         pt.remove(paths[a], a);
         runtime_detect_conflicts += (double)(std::clock() - t2) / CLOCKS_PER_SEC;*/
+
+        // try to find a path for agent a
         if (!find_path(node, a))
         {
             runtime_find_consistent_paths += (double)(std::clock() - t) / CLOCKS_PER_SEC;
             return false;
         }
+
+        // remove old conflicts that included this agent
         remove_conflicts(node->conflicts, a);
         list<Conflict> new_conflicts;
+
+        // find conflicts that include the agent w/ new path
         find_conflicts(new_conflicts, a);
         /*t2 = clock();
         std::list< std::shared_ptr<Conflict> > new_conflicts = pt.add(paths[a], a);
@@ -507,7 +529,7 @@ bool PBS::generate_child(PBSNode* node, PBSNode* parent)
 
 bool PBS::generate_root_node()
 {
-    std::cout << "Generating root node" << std::endl;
+    std::cout << "PBS: Generating PBS root node" << std::endl;
     clock_t time = std::clock();
 	dummy_start = new PBSNode();
 	
@@ -536,6 +558,7 @@ bool PBS::generate_root_node()
         }
     }
 
+    std::cout << " PBS: in initial " << initial_constraints.size() << std::endl;
     // for each agent
     for (int i = 0; i < num_of_agents; i++) 
 	{
@@ -556,7 +579,9 @@ bool PBS::generate_root_node()
         t = std::clock();
 
         // run the single agent path planner for this agent
+        std::cout << " PBS: in initial, running SIPP for " << i << std::endl;
         path = path_planner.run(G, starts[i], goal_locations[i], rt);
+  
 		runtime_plan_paths += (double)(std::clock() - t) / CLOCKS_PER_SEC;
         path_cost = path_planner.path_cost;
         rt.clear();
@@ -565,14 +590,16 @@ bool PBS::generate_root_node()
 
         if (path.empty())
         {
-            std::cout << "NO SOLUTION EXISTS";
             return false;
         }
-
         dummy_start->paths.emplace_back(i, path);
         paths[i] = &dummy_start->paths.back().second;
         dummy_start->makespan = std::max(dummy_start->makespan, paths[i]->size() - 1);
         dummy_start->g_val += path_cost;
+
+        // for (auto p: path) {
+        //     std::cout << "pbs root: " << p << std::endl;
+        // }
 	}
 
     // will place conflicts in the node in dummy_start->conflicts
@@ -959,7 +986,7 @@ void PBS::print_results() const
 }
 
 void PBS::save_results(const std::string &fileName, const std::string &instanceName) const
-{
+{\
 	std::ofstream stats;
 	stats.open(fileName, std::ios::app);
 	stats << runtime << ",hl num_exp: " <<

@@ -43,6 +43,8 @@ public:
 	int getHoldingTimeFromCT(int location) const;
     set<int> getConstrainedTimesteps(int location) const;
 
+    void insertConstraint2SIT(int location, int t_min, int t_max);
+
 	ReservationTable(const BasicGraph& G): G(G) {}
 private:
 	const BasicGraph& G;
@@ -58,7 +60,7 @@ private:
 
 
 
-    void insertConstraint2SIT(int location, int t_min, int t_max);
+    // void insertConstraint2SIT(int location, int t_min, int t_max);
     void insertSoftConstraint2SIT(int location, int t_min, int t_max);
     void insertConstraints4starts(const vector<Path*>& paths, int current_agent, int start_location);	
 	void insertPath2CAT(const Path& path); //  insert the path to the conflict avoidance table

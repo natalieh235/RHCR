@@ -44,6 +44,8 @@ typedef tuple<int, int, int, int, int> Conflict;
 // typedef vector<unordered_set<std::pair<int,int> > > ConstraintTable;
 typedef tuple<int, int, bool> Interval; // [t_min, t_max), have conflicts or not
 #define INTERVAL_MAX 10000
+#define MXO 4
+#define MXV 2
 
 ostream& operator<<(ostream& os, const Constraint& constraint);
 

@@ -119,10 +119,12 @@ set<int> ReservationTable::getConstrainedTimesteps(int location) const
 
 void ReservationTable::insertConstraint2SIT(int location, int t_min, int t_max)
 {
+	// if location not in sit
     if (sit.find(location) == sit.end())
     {
         if (t_min > 0)
-        {
+        { 
+			// there is a safe interval before t_min
 			sit[location].emplace_back(0, t_min, 0);
         }
 		sit[location].emplace_back(t_max, INTERVAL_MAX, 0);
@@ -255,11 +257,15 @@ void ReservationTable::insertPath2CT(const Path& path)
 
 void ReservationTable::addInitialConstraints(const list< tuple<int, int, int> >& initial_constraints, int current_agent)
 {
+	// std::cout << "in add initial, " << initial_constraints.size() << std::endl;
 	for (auto con : initial_constraints)
 	{
+		// std::cout << "in add initial, " << con << ", " << current_agent << std::endl;
 		if (std::get<0>(con) != current_agent && 0 <= std::get<1>(con) && std::get<1>(con) < G.types.size() &&
-			G.types[std::get<1>(con)] != "Magic")
-			ct[std::get<1>(con)].emplace_back(0, min(window, std::get<2>(con)));
+			G.types[std::get<1>(con)] != "Magic") {
+				std::cout << "adding constraint " << con << std::endl;
+				ct[std::get<1>(con)].emplace_back(0, min(window, std::get<2>(con)));
+			}
 	}
 }
 
@@ -434,28 +440,36 @@ void ReservationTable::insertConstraints4starts(const vector<Path*>& paths, int 
 }
 
 // [lower_bound, upper_bound)
+// safe intervals at location that intersect with lower_bound, upperbound
+// lower bound is the min time that the robot arrives at location, upper_bound is when the node's safe interval ends and it has to leave
 list<Interval> ReservationTable::getSafeIntervals(int location, int lower_bound, int upper_bound)
 {
     list<Interval> safe_intervals;
     if (lower_bound >= upper_bound)
         return safe_intervals;
 
+	// sit maps location(v/edge) -> list of intervals
+	// looks in conflict table for conflics involving this location and updates SIT 
 	updateSIT(location);
 	
 	auto it = sit.find(location);
+	// if location not in sit
     if (it == sit.end()) 
     {
+		// always safe
 		safe_intervals.emplace_back(0, INTERVAL_MAX, 0);
 		return safe_intervals;
     }
 
+	// otherwise, for each safe interval
     for(auto interval : it->second)
     {
+		//  no intersection
         if (lower_bound >= std::get<1>(interval))
             continue;
         else if (upper_bound <= std::get<0>(interval))
             break;
-        else
+        else // intersection found
         {
             safe_intervals.emplace_back(interval);
         }
@@ -473,6 +487,7 @@ list<Interval> ReservationTable::getSafeIntervals(int from, int to, int lower_bo
 	auto safe_vertex_intervals = getSafeIntervals(to, lower_bound, upper_bound);
 	auto safe_edge_intervals = getSafeIntervals(getEdgeIndex(from, to), lower_bound, upper_bound);
 
+	// get edge and vertex intervals and merge them
 	list<Interval> safe_intervals;
 	auto it1 = safe_vertex_intervals.begin();
 	auto it2 = safe_edge_intervals.begin();
@@ -498,6 +513,8 @@ Interval ReservationTable::getFirstSafeInterval(int location)
     {
 		return Interval(0, INTERVAL_MAX, 0);
     }
+
+	// it->second is the actual interval, it->first is the key in the map
     return it->second.front();
 }
 

@@ -107,6 +107,11 @@ std::list<State> BasicGraph::get_reverse_neighbors(const State& s) const
     return rneighbors;
 }
 
+bool BasicGraph::valid_move(int loc, int dir) const {
+    // std::cout << "Basic graph valid move" << std::endl;
+    return (weights[loc][dir] < WEIGHT_MAX - 1);
+}
+
 
 double BasicGraph::get_weight(int from, int to) const
 {

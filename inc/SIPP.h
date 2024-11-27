@@ -74,10 +74,38 @@ public:
             return (n1 == n2) ||
                   (n1 && n2 && n1->state.location == n2->state.location &&
                   n1->state.orientation == n2->state.orientation &&
+                  n1->state.velocity == n2->state.velocity &&
                   n1->interval == n2->interval &&
                   n1->goal_id == n2->goal_id);
         }
     };
+};
+
+class Primitive{
+public:
+    struct move{
+        // ftt (first-touch-time) = (t_lower) in the paper. 
+        // swt (sweeping time) = (t_upper - t_lower) in the paper.
+        move(int dx, int dy, int ftt, int swt, int cur_o, bool isEndCell):dx(dx),dy(dy),ftt(ftt),swt(swt),cur_o(cur_o),isEndCell(isEndCell){}
+        int dx, dy, ftt, swt, cur_o;
+        bool isEndCell; // flag if this cell is still touched at the end of the primitive. `swt` in this case is equal to the remaining time until the end of the primitive.
+    };
+    vector<move> mvs;
+    int o, v;
+    Primitive(){
+        mvs.clear();
+        o = v = 0;
+    }
+    Primitive(vector<move> mvs, int o, int v):
+    mvs(std::move(mvs)),o(o),v(v){}
+    friend ostream &operator<<( ostream &output, const Primitive &p ) {
+        output << "Moves:"<<endl;
+        for(auto it:p.mvs){
+            output << "  dx:"<<it.dx<<", dy:"<<it.dy<<", ftt:"<<it.ftt<<", swt:"<<it.swt<<endl;
+        }
+        output<<"Final_o:"<<p.o<<", Final_v:"<<p.v<<endl;
+        return output;
+    }
 };
 
 
@@ -87,20 +115,36 @@ public:
     Path run(const BasicGraph& G, const State& start,
              const vector<pair<int, int> >& goal_location,
              ReservationTable& RT);
+    
+    void apply_primitive(SIPPNode* curr, const BasicGraph &G, ReservationTable &rt, 
+        int t_lower, int t_upper, Primitive mp, double h_val);
+    void fill_primitives();
+
 	string getName() const { return "SIPP"; }
     SIPP(): SingleAgentSolver() {}
 
 private:
+    vector<Primitive> motion_primitives[MXO][MXV];
     // define typedefs and handles for heap and hash_map
     fibonacci_heap< SIPPNode*, compare<SIPPNode::compare_node> > open_list;
     fibonacci_heap< SIPPNode*, compare<SIPPNode::secondary_compare_node> > focal_list;
     unordered_set< SIPPNode*, SIPPNode::Hasher, SIPPNode::EqNode> allNodes_table;
 	inline void releaseClosedListNodes();
 
-    void generate_node(const Interval& interval, SIPPNode* curr, const BasicGraph& G,
-                       int location, int min_timestep, int orientation, double h_val);
+    // float max_velocity;
+    // float max_acc;
+
+    void generate_node(const Interval& interval, SIPPNode* curr, State next_state, const BasicGraph& G,
+                       int min_timestep, double h_val);
     // Updates the path
     Path updatePath(const BasicGraph& G, const SIPPNode* goal);
 
+    void generate_successors(SIPPNode* curr, const BasicGraph &G, 
+        ReservationTable &rt, int t_lower, int t_upper, 
+        const vector<pair<int, int> >& goal_location);
+    // void apply_primitive(SIPPNode* curr, BasicGraph &G, 
+    //     ReservationTable &rt, int t_lower, int t_upper, Primitive mp);
+
 };
+
 

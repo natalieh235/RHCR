@@ -207,15 +207,19 @@ void BasicSystem::update_paths(const std::vector<Path*>& MAPF_paths, int max_tim
 
 void BasicSystem::update_paths(const std::vector<Path>& MAPF_paths, int max_timestep = INT_MAX)
 {
+    std::cout << "updating paths" << std::endl;
     for (int k = 0; k < num_of_drives; k++)
     {
+        std::cout << "drive " << k << std::endl;
         int length = min(max_timestep, (int) MAPF_paths[k].size());
         paths[k].resize(timestep + length);
+        // std::cout << "after resizing" << std::endl;
         for (int t = 0; t < length; t++)
         {
             paths[k][timestep + t] = MAPF_paths[k][t];
             paths[k][timestep + t].timestep = timestep + t;
         }
+        std::cout << paths[k] << std::endl;
     }
 }
 
@@ -455,6 +459,7 @@ void BasicSystem::add_partial_priorities(const vector<Path>& initial_paths, Prio
 
 void BasicSystem::save_results()
 {
+    std::cout << "saving results" << outfile << std::endl;
 	if (screen)
 		std::cout << "*** Saving " << seed << " ***" << std::endl;
     clock_t t = std::clock();
@@ -476,6 +481,10 @@ void BasicSystem::save_results()
         << "hold_endpoints: " << hold_endpoints << std::endl;
 
     output.close();
+
+    for (auto path: paths) {
+        std::cout << "results path: " << path <<  " , " << timestep << std::endl;
+    }
 
     // tasks
     output.open(outfile + "/tasks.txt", std::ios::out);
@@ -567,6 +576,7 @@ void BasicSystem::update_travel_times(unordered_map<int, double>& travel_times)
 
 void BasicSystem::solve()
 {
+    std::cout << "basic system solve called" << std::endl;
     LRA_called = false;
 	LRAStar lra(G, solver.path_planner);
 	lra.simulation_window = simulation_window;
@@ -599,6 +609,7 @@ void BasicSystem::solve()
 	 else // PBS or ECBS
 	 {
 		 //PriorityGraph initial_priorities;
+        //  std::cout << "solver initial constraints: " << solver.initial_constraints.size() << std::endl;
 		 update_initial_constraints(solver.initial_constraints);
 
 		 // solve
@@ -661,7 +672,9 @@ void BasicSystem::solve()
 		 }
 		 else
 		 {
+            std::cout << "BasicSystem.cpp: starting solve" << std::endl;
             bool sol = solver.run(starts, goal_locations, time_limit);
+            std::cout << "pbs returned " << sol << std::endl;
             if (sol)
             {
                 if (log)
@@ -674,6 +687,7 @@ void BasicSystem::solve()
                 update_paths(lra.solution);
             }
 		 }
+         std::cout << "almost done.." << outfile << std::endl;
 		 if (log)
 			 solver.save_search_tree(outfile + "/search_trees/" + std::to_string(timestep) + ".gv");
 

@@ -19,7 +19,7 @@ void KivaSystem::initialize()
 	goal_locations.resize(num_of_drives);
 	paths.resize(num_of_drives);
 	finished_tasks.resize(num_of_drives);
-	consider_rotation = true;
+	// consider_rotation = true;
 	bool succ = load_records(); // continue simulating from the records
 	if (!succ)
 	{
@@ -46,8 +46,13 @@ void KivaSystem::initialize_start_locations()
 		if (consider_rotation)
 		{
 			orientation = rand() % 4;
+			while (!G.valid_move(G.agent_home_locations[k], orientation)) {
+				orientation = rand() % 4;
+			}
 		}
+
 		starts[k] = State(G.agent_home_locations[k], 0, orientation);
+		std::cout << "start for agent " << k << "is " << starts[k] << std::endl;
 		paths[k].emplace_back(starts[k]);
 		finished_tasks[k].emplace_back(G.agent_home_locations[k], 0);
 	}
@@ -214,6 +219,7 @@ void KivaSystem::simulate(int simulation_time)
 
 		update_start_locations();
 		update_goal_locations();
+		// std::cout << "start size" << starts.size() << " end size" << goal_locations.size() << std::endl;
 		std::cout << "Calling solve..." << std::endl;
 		solve();
 

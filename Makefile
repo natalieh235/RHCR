@@ -117,6 +117,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named lifelong_lib
+
+# Build rule for target.
+lifelong_lib: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 lifelong_lib
+.PHONY : lifelong_lib
+
+# fast build rule for target.
+lifelong_lib/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/build
+.PHONY : lifelong_lib/fast
+
+#=============================================================================
 # Target rules for targets named lifelong
 
 # Build rule for target.
@@ -129,12 +142,25 @@ lifelong/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/build
 .PHONY : lifelong/fast
 
+#=============================================================================
+# Target rules for targets named test_driver
+
+# Build rule for target.
+test_driver: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_driver
+.PHONY : test_driver
+
+# fast build rule for target.
+test_driver/fast:
+	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/test_driver.dir/build.make tests/CMakeFiles/test_driver.dir/build
+.PHONY : test_driver/fast
+
 src/BasicGraph.o: src/BasicGraph.cpp.o
 .PHONY : src/BasicGraph.o
 
 # target to build an object file
 src/BasicGraph.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/BasicGraph.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/BasicGraph.cpp.o
 .PHONY : src/BasicGraph.cpp.o
 
 src/BasicGraph.i: src/BasicGraph.cpp.i
@@ -142,7 +168,7 @@ src/BasicGraph.i: src/BasicGraph.cpp.i
 
 # target to preprocess a source file
 src/BasicGraph.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/BasicGraph.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/BasicGraph.cpp.i
 .PHONY : src/BasicGraph.cpp.i
 
 src/BasicGraph.s: src/BasicGraph.cpp.s
@@ -150,7 +176,7 @@ src/BasicGraph.s: src/BasicGraph.cpp.s
 
 # target to generate assembly for a file
 src/BasicGraph.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/BasicGraph.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/BasicGraph.cpp.s
 .PHONY : src/BasicGraph.cpp.s
 
 src/BasicSystem.o: src/BasicSystem.cpp.o
@@ -158,7 +184,7 @@ src/BasicSystem.o: src/BasicSystem.cpp.o
 
 # target to build an object file
 src/BasicSystem.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/BasicSystem.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/BasicSystem.cpp.o
 .PHONY : src/BasicSystem.cpp.o
 
 src/BasicSystem.i: src/BasicSystem.cpp.i
@@ -166,7 +192,7 @@ src/BasicSystem.i: src/BasicSystem.cpp.i
 
 # target to preprocess a source file
 src/BasicSystem.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/BasicSystem.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/BasicSystem.cpp.i
 .PHONY : src/BasicSystem.cpp.i
 
 src/BasicSystem.s: src/BasicSystem.cpp.s
@@ -174,7 +200,7 @@ src/BasicSystem.s: src/BasicSystem.cpp.s
 
 # target to generate assembly for a file
 src/BasicSystem.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/BasicSystem.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/BasicSystem.cpp.s
 .PHONY : src/BasicSystem.cpp.s
 
 src/BeeGraph.o: src/BeeGraph.cpp.o
@@ -182,7 +208,7 @@ src/BeeGraph.o: src/BeeGraph.cpp.o
 
 # target to build an object file
 src/BeeGraph.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/BeeGraph.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/BeeGraph.cpp.o
 .PHONY : src/BeeGraph.cpp.o
 
 src/BeeGraph.i: src/BeeGraph.cpp.i
@@ -190,7 +216,7 @@ src/BeeGraph.i: src/BeeGraph.cpp.i
 
 # target to preprocess a source file
 src/BeeGraph.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/BeeGraph.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/BeeGraph.cpp.i
 .PHONY : src/BeeGraph.cpp.i
 
 src/BeeGraph.s: src/BeeGraph.cpp.s
@@ -198,7 +224,7 @@ src/BeeGraph.s: src/BeeGraph.cpp.s
 
 # target to generate assembly for a file
 src/BeeGraph.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/BeeGraph.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/BeeGraph.cpp.s
 .PHONY : src/BeeGraph.cpp.s
 
 src/BeeSystem.o: src/BeeSystem.cpp.o
@@ -206,7 +232,7 @@ src/BeeSystem.o: src/BeeSystem.cpp.o
 
 # target to build an object file
 src/BeeSystem.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/BeeSystem.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/BeeSystem.cpp.o
 .PHONY : src/BeeSystem.cpp.o
 
 src/BeeSystem.i: src/BeeSystem.cpp.i
@@ -214,7 +240,7 @@ src/BeeSystem.i: src/BeeSystem.cpp.i
 
 # target to preprocess a source file
 src/BeeSystem.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/BeeSystem.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/BeeSystem.cpp.i
 .PHONY : src/BeeSystem.cpp.i
 
 src/BeeSystem.s: src/BeeSystem.cpp.s
@@ -222,7 +248,7 @@ src/BeeSystem.s: src/BeeSystem.cpp.s
 
 # target to generate assembly for a file
 src/BeeSystem.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/BeeSystem.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/BeeSystem.cpp.s
 .PHONY : src/BeeSystem.cpp.s
 
 src/ECBS.o: src/ECBS.cpp.o
@@ -230,7 +256,7 @@ src/ECBS.o: src/ECBS.cpp.o
 
 # target to build an object file
 src/ECBS.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/ECBS.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/ECBS.cpp.o
 .PHONY : src/ECBS.cpp.o
 
 src/ECBS.i: src/ECBS.cpp.i
@@ -238,7 +264,7 @@ src/ECBS.i: src/ECBS.cpp.i
 
 # target to preprocess a source file
 src/ECBS.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/ECBS.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/ECBS.cpp.i
 .PHONY : src/ECBS.cpp.i
 
 src/ECBS.s: src/ECBS.cpp.s
@@ -246,7 +272,7 @@ src/ECBS.s: src/ECBS.cpp.s
 
 # target to generate assembly for a file
 src/ECBS.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/ECBS.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/ECBS.cpp.s
 .PHONY : src/ECBS.cpp.s
 
 src/ECBSNode.o: src/ECBSNode.cpp.o
@@ -254,7 +280,7 @@ src/ECBSNode.o: src/ECBSNode.cpp.o
 
 # target to build an object file
 src/ECBSNode.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/ECBSNode.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/ECBSNode.cpp.o
 .PHONY : src/ECBSNode.cpp.o
 
 src/ECBSNode.i: src/ECBSNode.cpp.i
@@ -262,7 +288,7 @@ src/ECBSNode.i: src/ECBSNode.cpp.i
 
 # target to preprocess a source file
 src/ECBSNode.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/ECBSNode.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/ECBSNode.cpp.i
 .PHONY : src/ECBSNode.cpp.i
 
 src/ECBSNode.s: src/ECBSNode.cpp.s
@@ -270,7 +296,7 @@ src/ECBSNode.s: src/ECBSNode.cpp.s
 
 # target to generate assembly for a file
 src/ECBSNode.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/ECBSNode.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/ECBSNode.cpp.s
 .PHONY : src/ECBSNode.cpp.s
 
 src/ID.o: src/ID.cpp.o
@@ -278,7 +304,7 @@ src/ID.o: src/ID.cpp.o
 
 # target to build an object file
 src/ID.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/ID.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/ID.cpp.o
 .PHONY : src/ID.cpp.o
 
 src/ID.i: src/ID.cpp.i
@@ -286,7 +312,7 @@ src/ID.i: src/ID.cpp.i
 
 # target to preprocess a source file
 src/ID.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/ID.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/ID.cpp.i
 .PHONY : src/ID.cpp.i
 
 src/ID.s: src/ID.cpp.s
@@ -294,7 +320,7 @@ src/ID.s: src/ID.cpp.s
 
 # target to generate assembly for a file
 src/ID.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/ID.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/ID.cpp.s
 .PHONY : src/ID.cpp.s
 
 src/KivaGraph.o: src/KivaGraph.cpp.o
@@ -302,7 +328,7 @@ src/KivaGraph.o: src/KivaGraph.cpp.o
 
 # target to build an object file
 src/KivaGraph.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/KivaGraph.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/KivaGraph.cpp.o
 .PHONY : src/KivaGraph.cpp.o
 
 src/KivaGraph.i: src/KivaGraph.cpp.i
@@ -310,7 +336,7 @@ src/KivaGraph.i: src/KivaGraph.cpp.i
 
 # target to preprocess a source file
 src/KivaGraph.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/KivaGraph.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/KivaGraph.cpp.i
 .PHONY : src/KivaGraph.cpp.i
 
 src/KivaGraph.s: src/KivaGraph.cpp.s
@@ -318,7 +344,7 @@ src/KivaGraph.s: src/KivaGraph.cpp.s
 
 # target to generate assembly for a file
 src/KivaGraph.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/KivaGraph.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/KivaGraph.cpp.s
 .PHONY : src/KivaGraph.cpp.s
 
 src/KivaSystem.o: src/KivaSystem.cpp.o
@@ -326,7 +352,7 @@ src/KivaSystem.o: src/KivaSystem.cpp.o
 
 # target to build an object file
 src/KivaSystem.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/KivaSystem.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/KivaSystem.cpp.o
 .PHONY : src/KivaSystem.cpp.o
 
 src/KivaSystem.i: src/KivaSystem.cpp.i
@@ -334,7 +360,7 @@ src/KivaSystem.i: src/KivaSystem.cpp.i
 
 # target to preprocess a source file
 src/KivaSystem.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/KivaSystem.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/KivaSystem.cpp.i
 .PHONY : src/KivaSystem.cpp.i
 
 src/KivaSystem.s: src/KivaSystem.cpp.s
@@ -342,7 +368,7 @@ src/KivaSystem.s: src/KivaSystem.cpp.s
 
 # target to generate assembly for a file
 src/KivaSystem.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/KivaSystem.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/KivaSystem.cpp.s
 .PHONY : src/KivaSystem.cpp.s
 
 src/LRAStar.o: src/LRAStar.cpp.o
@@ -350,7 +376,7 @@ src/LRAStar.o: src/LRAStar.cpp.o
 
 # target to build an object file
 src/LRAStar.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/LRAStar.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/LRAStar.cpp.o
 .PHONY : src/LRAStar.cpp.o
 
 src/LRAStar.i: src/LRAStar.cpp.i
@@ -358,7 +384,7 @@ src/LRAStar.i: src/LRAStar.cpp.i
 
 # target to preprocess a source file
 src/LRAStar.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/LRAStar.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/LRAStar.cpp.i
 .PHONY : src/LRAStar.cpp.i
 
 src/LRAStar.s: src/LRAStar.cpp.s
@@ -366,7 +392,7 @@ src/LRAStar.s: src/LRAStar.cpp.s
 
 # target to generate assembly for a file
 src/LRAStar.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/LRAStar.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/LRAStar.cpp.s
 .PHONY : src/LRAStar.cpp.s
 
 src/MAPFSolver.o: src/MAPFSolver.cpp.o
@@ -374,7 +400,7 @@ src/MAPFSolver.o: src/MAPFSolver.cpp.o
 
 # target to build an object file
 src/MAPFSolver.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/MAPFSolver.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/MAPFSolver.cpp.o
 .PHONY : src/MAPFSolver.cpp.o
 
 src/MAPFSolver.i: src/MAPFSolver.cpp.i
@@ -382,7 +408,7 @@ src/MAPFSolver.i: src/MAPFSolver.cpp.i
 
 # target to preprocess a source file
 src/MAPFSolver.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/MAPFSolver.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/MAPFSolver.cpp.i
 .PHONY : src/MAPFSolver.cpp.i
 
 src/MAPFSolver.s: src/MAPFSolver.cpp.s
@@ -390,7 +416,7 @@ src/MAPFSolver.s: src/MAPFSolver.cpp.s
 
 # target to generate assembly for a file
 src/MAPFSolver.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/MAPFSolver.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/MAPFSolver.cpp.s
 .PHONY : src/MAPFSolver.cpp.s
 
 src/OnlineGraph.o: src/OnlineGraph.cpp.o
@@ -398,7 +424,7 @@ src/OnlineGraph.o: src/OnlineGraph.cpp.o
 
 # target to build an object file
 src/OnlineGraph.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/OnlineGraph.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/OnlineGraph.cpp.o
 .PHONY : src/OnlineGraph.cpp.o
 
 src/OnlineGraph.i: src/OnlineGraph.cpp.i
@@ -406,7 +432,7 @@ src/OnlineGraph.i: src/OnlineGraph.cpp.i
 
 # target to preprocess a source file
 src/OnlineGraph.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/OnlineGraph.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/OnlineGraph.cpp.i
 .PHONY : src/OnlineGraph.cpp.i
 
 src/OnlineGraph.s: src/OnlineGraph.cpp.s
@@ -414,7 +440,7 @@ src/OnlineGraph.s: src/OnlineGraph.cpp.s
 
 # target to generate assembly for a file
 src/OnlineGraph.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/OnlineGraph.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/OnlineGraph.cpp.s
 .PHONY : src/OnlineGraph.cpp.s
 
 src/OnlineSystem.o: src/OnlineSystem.cpp.o
@@ -422,7 +448,7 @@ src/OnlineSystem.o: src/OnlineSystem.cpp.o
 
 # target to build an object file
 src/OnlineSystem.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/OnlineSystem.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/OnlineSystem.cpp.o
 .PHONY : src/OnlineSystem.cpp.o
 
 src/OnlineSystem.i: src/OnlineSystem.cpp.i
@@ -430,7 +456,7 @@ src/OnlineSystem.i: src/OnlineSystem.cpp.i
 
 # target to preprocess a source file
 src/OnlineSystem.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/OnlineSystem.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/OnlineSystem.cpp.i
 .PHONY : src/OnlineSystem.cpp.i
 
 src/OnlineSystem.s: src/OnlineSystem.cpp.s
@@ -438,7 +464,7 @@ src/OnlineSystem.s: src/OnlineSystem.cpp.s
 
 # target to generate assembly for a file
 src/OnlineSystem.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/OnlineSystem.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/OnlineSystem.cpp.s
 .PHONY : src/OnlineSystem.cpp.s
 
 src/PBS.o: src/PBS.cpp.o
@@ -446,7 +472,7 @@ src/PBS.o: src/PBS.cpp.o
 
 # target to build an object file
 src/PBS.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/PBS.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/PBS.cpp.o
 .PHONY : src/PBS.cpp.o
 
 src/PBS.i: src/PBS.cpp.i
@@ -454,7 +480,7 @@ src/PBS.i: src/PBS.cpp.i
 
 # target to preprocess a source file
 src/PBS.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/PBS.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/PBS.cpp.i
 .PHONY : src/PBS.cpp.i
 
 src/PBS.s: src/PBS.cpp.s
@@ -462,7 +488,7 @@ src/PBS.s: src/PBS.cpp.s
 
 # target to generate assembly for a file
 src/PBS.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/PBS.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/PBS.cpp.s
 .PHONY : src/PBS.cpp.s
 
 src/PBSNode.o: src/PBSNode.cpp.o
@@ -470,7 +496,7 @@ src/PBSNode.o: src/PBSNode.cpp.o
 
 # target to build an object file
 src/PBSNode.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/PBSNode.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/PBSNode.cpp.o
 .PHONY : src/PBSNode.cpp.o
 
 src/PBSNode.i: src/PBSNode.cpp.i
@@ -478,7 +504,7 @@ src/PBSNode.i: src/PBSNode.cpp.i
 
 # target to preprocess a source file
 src/PBSNode.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/PBSNode.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/PBSNode.cpp.i
 .PHONY : src/PBSNode.cpp.i
 
 src/PBSNode.s: src/PBSNode.cpp.s
@@ -486,7 +512,7 @@ src/PBSNode.s: src/PBSNode.cpp.s
 
 # target to generate assembly for a file
 src/PBSNode.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/PBSNode.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/PBSNode.cpp.s
 .PHONY : src/PBSNode.cpp.s
 
 src/PathTable.o: src/PathTable.cpp.o
@@ -494,7 +520,7 @@ src/PathTable.o: src/PathTable.cpp.o
 
 # target to build an object file
 src/PathTable.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/PathTable.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/PathTable.cpp.o
 .PHONY : src/PathTable.cpp.o
 
 src/PathTable.i: src/PathTable.cpp.i
@@ -502,7 +528,7 @@ src/PathTable.i: src/PathTable.cpp.i
 
 # target to preprocess a source file
 src/PathTable.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/PathTable.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/PathTable.cpp.i
 .PHONY : src/PathTable.cpp.i
 
 src/PathTable.s: src/PathTable.cpp.s
@@ -510,7 +536,7 @@ src/PathTable.s: src/PathTable.cpp.s
 
 # target to generate assembly for a file
 src/PathTable.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/PathTable.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/PathTable.cpp.s
 .PHONY : src/PathTable.cpp.s
 
 src/PriorityGraph.o: src/PriorityGraph.cpp.o
@@ -518,7 +544,7 @@ src/PriorityGraph.o: src/PriorityGraph.cpp.o
 
 # target to build an object file
 src/PriorityGraph.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/PriorityGraph.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/PriorityGraph.cpp.o
 .PHONY : src/PriorityGraph.cpp.o
 
 src/PriorityGraph.i: src/PriorityGraph.cpp.i
@@ -526,7 +552,7 @@ src/PriorityGraph.i: src/PriorityGraph.cpp.i
 
 # target to preprocess a source file
 src/PriorityGraph.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/PriorityGraph.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/PriorityGraph.cpp.i
 .PHONY : src/PriorityGraph.cpp.i
 
 src/PriorityGraph.s: src/PriorityGraph.cpp.s
@@ -534,7 +560,7 @@ src/PriorityGraph.s: src/PriorityGraph.cpp.s
 
 # target to generate assembly for a file
 src/PriorityGraph.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/PriorityGraph.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/PriorityGraph.cpp.s
 .PHONY : src/PriorityGraph.cpp.s
 
 src/ReservationTable.o: src/ReservationTable.cpp.o
@@ -542,7 +568,7 @@ src/ReservationTable.o: src/ReservationTable.cpp.o
 
 # target to build an object file
 src/ReservationTable.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/ReservationTable.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/ReservationTable.cpp.o
 .PHONY : src/ReservationTable.cpp.o
 
 src/ReservationTable.i: src/ReservationTable.cpp.i
@@ -550,7 +576,7 @@ src/ReservationTable.i: src/ReservationTable.cpp.i
 
 # target to preprocess a source file
 src/ReservationTable.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/ReservationTable.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/ReservationTable.cpp.i
 .PHONY : src/ReservationTable.cpp.i
 
 src/ReservationTable.s: src/ReservationTable.cpp.s
@@ -558,7 +584,7 @@ src/ReservationTable.s: src/ReservationTable.cpp.s
 
 # target to generate assembly for a file
 src/ReservationTable.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/ReservationTable.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/ReservationTable.cpp.s
 .PHONY : src/ReservationTable.cpp.s
 
 src/SIPP.o: src/SIPP.cpp.o
@@ -566,7 +592,7 @@ src/SIPP.o: src/SIPP.cpp.o
 
 # target to build an object file
 src/SIPP.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/SIPP.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/SIPP.cpp.o
 .PHONY : src/SIPP.cpp.o
 
 src/SIPP.i: src/SIPP.cpp.i
@@ -574,7 +600,7 @@ src/SIPP.i: src/SIPP.cpp.i
 
 # target to preprocess a source file
 src/SIPP.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/SIPP.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/SIPP.cpp.i
 .PHONY : src/SIPP.cpp.i
 
 src/SIPP.s: src/SIPP.cpp.s
@@ -582,7 +608,7 @@ src/SIPP.s: src/SIPP.cpp.s
 
 # target to generate assembly for a file
 src/SIPP.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/SIPP.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/SIPP.cpp.s
 .PHONY : src/SIPP.cpp.s
 
 src/SingleAgentSolver.o: src/SingleAgentSolver.cpp.o
@@ -590,7 +616,7 @@ src/SingleAgentSolver.o: src/SingleAgentSolver.cpp.o
 
 # target to build an object file
 src/SingleAgentSolver.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/SingleAgentSolver.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/SingleAgentSolver.cpp.o
 .PHONY : src/SingleAgentSolver.cpp.o
 
 src/SingleAgentSolver.i: src/SingleAgentSolver.cpp.i
@@ -598,7 +624,7 @@ src/SingleAgentSolver.i: src/SingleAgentSolver.cpp.i
 
 # target to preprocess a source file
 src/SingleAgentSolver.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/SingleAgentSolver.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/SingleAgentSolver.cpp.i
 .PHONY : src/SingleAgentSolver.cpp.i
 
 src/SingleAgentSolver.s: src/SingleAgentSolver.cpp.s
@@ -606,7 +632,7 @@ src/SingleAgentSolver.s: src/SingleAgentSolver.cpp.s
 
 # target to generate assembly for a file
 src/SingleAgentSolver.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/SingleAgentSolver.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/SingleAgentSolver.cpp.s
 .PHONY : src/SingleAgentSolver.cpp.s
 
 src/SortingGraph.o: src/SortingGraph.cpp.o
@@ -614,7 +640,7 @@ src/SortingGraph.o: src/SortingGraph.cpp.o
 
 # target to build an object file
 src/SortingGraph.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/SortingGraph.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/SortingGraph.cpp.o
 .PHONY : src/SortingGraph.cpp.o
 
 src/SortingGraph.i: src/SortingGraph.cpp.i
@@ -622,7 +648,7 @@ src/SortingGraph.i: src/SortingGraph.cpp.i
 
 # target to preprocess a source file
 src/SortingGraph.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/SortingGraph.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/SortingGraph.cpp.i
 .PHONY : src/SortingGraph.cpp.i
 
 src/SortingGraph.s: src/SortingGraph.cpp.s
@@ -630,7 +656,7 @@ src/SortingGraph.s: src/SortingGraph.cpp.s
 
 # target to generate assembly for a file
 src/SortingGraph.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/SortingGraph.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/SortingGraph.cpp.s
 .PHONY : src/SortingGraph.cpp.s
 
 src/SortingSystem.o: src/SortingSystem.cpp.o
@@ -638,7 +664,7 @@ src/SortingSystem.o: src/SortingSystem.cpp.o
 
 # target to build an object file
 src/SortingSystem.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/SortingSystem.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/SortingSystem.cpp.o
 .PHONY : src/SortingSystem.cpp.o
 
 src/SortingSystem.i: src/SortingSystem.cpp.i
@@ -646,7 +672,7 @@ src/SortingSystem.i: src/SortingSystem.cpp.i
 
 # target to preprocess a source file
 src/SortingSystem.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/SortingSystem.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/SortingSystem.cpp.i
 .PHONY : src/SortingSystem.cpp.i
 
 src/SortingSystem.s: src/SortingSystem.cpp.s
@@ -654,7 +680,7 @@ src/SortingSystem.s: src/SortingSystem.cpp.s
 
 # target to generate assembly for a file
 src/SortingSystem.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/SortingSystem.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/SortingSystem.cpp.s
 .PHONY : src/SortingSystem.cpp.s
 
 src/StateTimeAStar.o: src/StateTimeAStar.cpp.o
@@ -662,7 +688,7 @@ src/StateTimeAStar.o: src/StateTimeAStar.cpp.o
 
 # target to build an object file
 src/StateTimeAStar.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/StateTimeAStar.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/StateTimeAStar.cpp.o
 .PHONY : src/StateTimeAStar.cpp.o
 
 src/StateTimeAStar.i: src/StateTimeAStar.cpp.i
@@ -670,7 +696,7 @@ src/StateTimeAStar.i: src/StateTimeAStar.cpp.i
 
 # target to preprocess a source file
 src/StateTimeAStar.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/StateTimeAStar.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/StateTimeAStar.cpp.i
 .PHONY : src/StateTimeAStar.cpp.i
 
 src/StateTimeAStar.s: src/StateTimeAStar.cpp.s
@@ -678,7 +704,7 @@ src/StateTimeAStar.s: src/StateTimeAStar.cpp.s
 
 # target to generate assembly for a file
 src/StateTimeAStar.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/StateTimeAStar.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/StateTimeAStar.cpp.s
 .PHONY : src/StateTimeAStar.cpp.s
 
 src/States.o: src/States.cpp.o
@@ -686,7 +712,7 @@ src/States.o: src/States.cpp.o
 
 # target to build an object file
 src/States.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/States.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/States.cpp.o
 .PHONY : src/States.cpp.o
 
 src/States.i: src/States.cpp.i
@@ -694,7 +720,7 @@ src/States.i: src/States.cpp.i
 
 # target to preprocess a source file
 src/States.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/States.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/States.cpp.i
 .PHONY : src/States.cpp.i
 
 src/States.s: src/States.cpp.s
@@ -702,7 +728,7 @@ src/States.s: src/States.cpp.s
 
 # target to generate assembly for a file
 src/States.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/States.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/States.cpp.s
 .PHONY : src/States.cpp.s
 
 src/WHCAStar.o: src/WHCAStar.cpp.o
@@ -710,7 +736,7 @@ src/WHCAStar.o: src/WHCAStar.cpp.o
 
 # target to build an object file
 src/WHCAStar.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/WHCAStar.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/WHCAStar.cpp.o
 .PHONY : src/WHCAStar.cpp.o
 
 src/WHCAStar.i: src/WHCAStar.cpp.i
@@ -718,7 +744,7 @@ src/WHCAStar.i: src/WHCAStar.cpp.i
 
 # target to preprocess a source file
 src/WHCAStar.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/WHCAStar.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/WHCAStar.cpp.i
 .PHONY : src/WHCAStar.cpp.i
 
 src/WHCAStar.s: src/WHCAStar.cpp.s
@@ -726,7 +752,7 @@ src/WHCAStar.s: src/WHCAStar.cpp.s
 
 # target to generate assembly for a file
 src/WHCAStar.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/WHCAStar.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/WHCAStar.cpp.s
 .PHONY : src/WHCAStar.cpp.s
 
 src/common.o: src/common.cpp.o
@@ -734,7 +760,7 @@ src/common.o: src/common.cpp.o
 
 # target to build an object file
 src/common.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/common.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/common.cpp.o
 .PHONY : src/common.cpp.o
 
 src/common.i: src/common.cpp.i
@@ -742,7 +768,7 @@ src/common.i: src/common.cpp.i
 
 # target to preprocess a source file
 src/common.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/common.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/common.cpp.i
 .PHONY : src/common.cpp.i
 
 src/common.s: src/common.cpp.s
@@ -750,7 +776,7 @@ src/common.s: src/common.cpp.s
 
 # target to generate assembly for a file
 src/common.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/common.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/common.cpp.s
 .PHONY : src/common.cpp.s
 
 src/driver.o: src/driver.cpp.o
@@ -758,6 +784,7 @@ src/driver.o: src/driver.cpp.o
 
 # target to build an object file
 src/driver.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/driver.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/driver.cpp.o
 .PHONY : src/driver.cpp.o
 
@@ -766,6 +793,7 @@ src/driver.i: src/driver.cpp.i
 
 # target to preprocess a source file
 src/driver.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/driver.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/driver.cpp.i
 .PHONY : src/driver.cpp.i
 
@@ -774,6 +802,7 @@ src/driver.s: src/driver.cpp.s
 
 # target to generate assembly for a file
 src/driver.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/driver.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong.dir/build.make CMakeFiles/lifelong.dir/src/driver.cpp.s
 .PHONY : src/driver.cpp.s
 
@@ -786,6 +815,8 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... lifelong"
+	@echo "... lifelong_lib"
+	@echo "... test_driver"
 	@echo "... src/BasicGraph.o"
 	@echo "... src/BasicGraph.i"
 	@echo "... src/BasicGraph.s"

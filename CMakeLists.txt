@@ -4,8 +4,8 @@ cmake_minimum_required (VERSION 2.6)
 set(CMAKE_CXX_STANDARD 11)
 
 IF(NOT CMAKE_BUILD_TYPE)
-    #SET(CMAKE_BUILD_TYPE "DEBUG")
-    SET(CMAKE_BUILD_TYPE "RELEASE")
+    SET(CMAKE_BUILD_TYPE "DEBUG")
+    # SET(CMAKE_BUILD_TYPE "RELEASE")
     #SET(CMAKE_BUILD_TYPE "RELWITHDEBINFO")
     #SET(CMAKE_BUILD_TYPE "MINSIZEREL")
 ENDIF()
@@ -17,6 +17,12 @@ file(GLOB SOURCES "src/*.cpp")
 find_package( Boost 1.49.0 REQUIRED COMPONENTS program_options system filesystem)
 include_directories( ${Boost_INCLUDE_DIRS} )
 
+# Create a library from the source files
+add_library(lifelong_lib ${SOURCES})
 
-add_executable(lifelong ${SOURCES} )
-target_link_libraries(lifelong ${Boost_LIBRARIES})
+# add_executable(lifelong ${SOURCES} )
+# target_link_libraries(lifelong ${Boost_LIBRARIES})
+add_executable(lifelong src/driver.cpp)
+target_link_libraries(lifelong lifelong_lib ${Boost_LIBRARIES})
+
+add_subdirectory(tests)

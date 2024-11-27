@@ -8,6 +8,9 @@
 class BasicGraph
 {
 public:
+    BasicGraph() {}
+    BasicGraph(double width, double height): robot_width(width), robot_height(height) {}
+
     vector<std::string> types;
     unordered_map<int, vector<double>> heuristics;
     virtual ~BasicGraph()= default;
@@ -25,7 +28,8 @@ public:
     int get_cols() const { return cols; }
     int size() const { return rows * cols; }
 
-    bool valid_move(int loc, int dir) const {return (weights[loc][dir] < WEIGHT_MAX - 1); }
+    // bool valid_move(int loc, int dir) const {return (weights[loc][dir] < WEIGHT_MAX - 1); }
+    virtual bool valid_move(int loc, int dir) const;
     int get_Manhattan_distance(int loc1, int loc2) const;
     int move[4];
     void copy(const BasicGraph& copy);
@@ -39,4 +43,10 @@ public:
     int cols;
     vector<vector<double> > weights; // (directed) weighted 4-neighbor grid
     bool consider_rotation;
+
+    std::pair<int, int> get_xy(int location) const {return std::make_pair(location/cols, location%cols);}
+    int get_location(int x, int y) const {return (x * cols + y);}
+
+    double robot_width = 1.0;
+    double robot_height = 1.0;
 };

@@ -1,0 +1,174 @@
+loading unweighted map
+*** Loading map ***
+Map size: 12x13 with 18 endpoints and 8 home stations.
+Done! (0 s)
+*** PreProcessing map ***
+*** rotation ***0
+Done! (0 s)
+initial con 1
+SIPP: filling primitives
+primitives for 0
+acclereation: Moves:
+  dx:0, dy:0, ftt:0, swt:1
+  dx:0, dy:1, ftt:0, swt:1
+  dx:0, dy:2, ftt:1, swt:1
+  dx:0, dy:3, ftt:1, swt:1
+  dx:0, dy:4, ftt:1, swt:1
+Final_o:0, Final_v:1
+
+decel: Moves:
+  dx:0, dy:0, ftt:0, swt:1
+  dx:0, dy:1, ftt:0, swt:1
+  dx:0, dy:2, ftt:1, swt:1
+  dx:0, dy:3, ftt:1, swt:1
+  dx:0, dy:4, ftt:1, swt:1
+Final_o:0, Final_v:0
+
+constant: Moves:
+  dx:0, dy:0, ftt:0, swt:0
+  dx:0, dy:1, ftt:0, swt:1
+  dx:0, dy:2, ftt:0, swt:1
+Final_o:0, Final_v:1
+
+primitives for 1
+acclereation: Moves:
+  dx:0, dy:0, ftt:0, swt:1
+  dx:-1, dy:0, ftt:0, swt:1
+  dx:-2, dy:0, ftt:1, swt:1
+  dx:-3, dy:0, ftt:1, swt:1
+  dx:-4, dy:0, ftt:1, swt:1
+Final_o:1, Final_v:1
+
+decel: Moves:
+  dx:0, dy:0, ftt:0, swt:1
+  dx:-1, dy:0, ftt:0, swt:1
+  dx:-2, dy:0, ftt:1, swt:1
+  dx:-3, dy:0, ftt:1, swt:1
+  dx:-4, dy:0, ftt:1, swt:1
+Final_o:1, Final_v:0
+
+constant: Moves:
+  dx:0, dy:0, ftt:0, swt:0
+  dx:-1, dy:0, ftt:0, swt:1
+  dx:-2, dy:0, ftt:0, swt:1
+Final_o:1, Final_v:1
+
+primitives for 2
+acclereation: Moves:
+  dx:0, dy:0, ftt:0, swt:1
+  dx:0, dy:-1, ftt:0, swt:1
+  dx:0, dy:-2, ftt:1, swt:1
+  dx:0, dy:-3, ftt:1, swt:1
+  dx:0, dy:-4, ftt:1, swt:1
+Final_o:2, Final_v:1
+
+decel: Moves:
+  dx:0, dy:0, ftt:0, swt:1
+  dx:0, dy:-1, ftt:0, swt:1
+  dx:0, dy:-2, ftt:1, swt:1
+  dx:0, dy:-3, ftt:1, swt:1
+  dx:0, dy:-4, ftt:1, swt:1
+Final_o:2, Final_v:0
+
+constant: Moves:
+  dx:0, dy:0, ftt:0, swt:0
+  dx:0, dy:-1, ftt:0, swt:1
+  dx:0, dy:-2, ftt:0, swt:1
+Final_o:2, Final_v:1
+
+primitives for 3
+acclereation: Moves:
+  dx:0, dy:0, ftt:0, swt:1
+  dx:1, dy:0, ftt:0, swt:1
+  dx:2, dy:0, ftt:1, swt:1
+  dx:3, dy:0, ftt:1, swt:1
+  dx:4, dy:0, ftt:1, swt:1
+Final_o:3, Final_v:1
+
+decel: Moves:
+  dx:0, dy:0, ftt:0, swt:1
+  dx:1, dy:0, ftt:0, swt:1
+  dx:2, dy:0, ftt:1, swt:1
+  dx:3, dy:0, ftt:1, swt:1
+  dx:4, dy:0, ftt:1, swt:1
+Final_o:3, Final_v:0
+
+constant: Moves:
+  dx:0, dy:0, ftt:0, swt:0
+  dx:1, dy:0, ftt:0, swt:1
+  dx:2, dy:0, ftt:0, swt:1
+Final_o:3, Final_v:1
+
+basic system solve called
+BasicSystem.cpp: starting solve
+PBS: Generating PBS root node
+Generate root CT node ...
+ PBS: in initial 0
+ PBS: in initial, running SIPP for 0
+starting focal list, 1
+=========
+SIPP: curr state: Loc: 131,Orient: 1,Timestep: 0,Vel: 0
+SIPP: current interval: [0,10000)(0)
+generating successors for Loc: 131,Orient: 1,Timestep: 0,Vel: 0
+SIPP: applying primitive: Moves:
+  dx:-1, dy:0, ftt:1, swt:1
+  dx:-1, dy:-1, ftt:1, swt:1
+  dx:0, dy:-1, ftt:1, swt:1
+  dx:0, dy:0, ftt:1, swt:1
+Final_o:2, Final_v:0
+
+SIPP: applying primitive: Moves:
+  dx:-1, dy:0, ftt:1, swt:1
+  dx:-1, dy:1, ftt:1, swt:1
+  dx:0, dy:1, ftt:1, swt:1
+  dx:0, dy:0, ftt:1, swt:1
+Final_o:0, Final_v:0
+
+SIPP: applying primitive: Moves:
+  dx:0, dy:0, ftt:0, swt:1
+  dx:-1, dy:0, ftt:0, swt:1
+  dx:-2, dy:0, ftt:1, swt:1
+  dx:-3, dy:0, ftt:1, swt:1
+  dx:-4, dy:0, ftt:1, swt:1
+Final_o:1, Final_v:1
+
+generating node with tl 1 + 1, tu 9999 + 1, min timestep 2 state: Loc: 79,Orient: 1,Timestep: 2,Vel: 1
+adding node from open to focal, Loc: 79,Orient: 1,Timestep: 2,Vel: 1
+=========
+SIPP: curr state: Loc: 79,Orient: 1,Timestep: 2,Vel: 1
+SIPP: current interval: [2,10000)(0)
+generating successors for Loc: 79,Orient: 1,Timestep: 2,Vel: 1
+SIPP: applying primitive: Moves:
+  dx:0, dy:0, ftt:0, swt:1
+  dx:-1, dy:0, ftt:0, swt:1
+  dx:-2, dy:0, ftt:1, swt:1
+  dx:-3, dy:0, ftt:1, swt:1
+  dx:-4, dy:0, ftt:1, swt:1
+Final_o:1, Final_v:0
+
+generating node with tl 3 + 1, tu 9999 + 1, min timestep 4 state: Loc: 27,Orient: 1,Timestep: 4,Vel: 0
+SIPP: applying primitive: Moves:
+  dx:0, dy:0, ftt:0, swt:0
+  dx:-1, dy:0, ftt:0, swt:1
+  dx:-2, dy:0, ftt:0, swt:1
+Final_o:1, Final_v:1
+
+generating node with tl 2 + 1, tu 9999 + 1, min timestep 3 state: Loc: 53,Orient: 1,Timestep: 3,Vel: 1
+adding node from open to focal, Loc: 27,Orient: 1,Timestep: 4,Vel: 0
+SIPP: reached goal location 0, Loc: 27,Orient: 1,Timestep: 4,Vel: 0
+SIPP: returning path0
+Done! (0.000518s)
+PBS:Succeed!!!!!!,0.000562,Num expanded: 0,num_gen: 1,sol_cost: 2.14748e+09,min_sum: 8,avg_len: 5,num_cols: 0, runtime: 0.000446, rrt?: 5e-05,1e-06,0,0,0,0,2e-06,0
+pbs returned 1
+updating paths
+drive 0
+(131,1,0, 0)->(131,1,1, 0)->(79,1,2, 1)->(79,1,3, 0)->(27,1,4, 0)->
+
+almost done.../
+1 tasks has been finished
+saving results./
+*** Saving 0 ***
+results path: (131,1,0, 0)->(131,1,1, 0)->(79,1,2, 1)->(79,1,3, 0)->(27,1,4, 0)->(27,1,5, 0)->(27,1,6, 0)->(27,1,7, 0)->(27,1,8, 0)->(27,1,9, 0)->(27,1,10, 0)->
+ , 5
+Done! (0 s)
+All planning small tests passed!
