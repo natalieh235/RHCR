@@ -54,6 +54,7 @@ Path SIPP::updatePath(const BasicGraph& G, const SIPPNode* goal)
     return path;
 }
 
+// for grid agents
 void SIPP::fill_primitives() {
     std::cout << "SIPP: filling primitives" << std::endl;
     float MAXV  = 2.0;
@@ -62,86 +63,30 @@ void SIPP::fill_primitives() {
     int dx[4] = {0, -1, 0, 1}, dy[4] = {1, 0, -1, 0};
     // int turn_dx[4] = {}
     
-    //  turn from 0 to 1
-    Primitive tmp;
-    tmp.mvs = {Primitive::move(0, 1, 1, 1, 0, 0), Primitive::move(-1, 1, 1, 1, 1, 0), 
-            Primitive::move(-1, 0, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
-    tmp.v = 0;
-    tmp.o = 1;
-    motion_primitives[0][0].emplace_back(tmp);
-
-    tmp.mvs.clear();
-
-    // turn from 0 to 3
-    tmp.mvs = {Primitive::move(0, 1, 1, 1, 0, 0), Primitive::move(1, 1, 1, 1, 1, 0), 
-            Primitive::move(1, 0, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
-    tmp.v = 0;
-    tmp.o = 3;
-    motion_primitives[0][0].emplace_back(tmp);
-    tmp.mvs.clear();
-
-    // 1 to 2
-    tmp.mvs = {Primitive::move(-1, 0, 1, 1, 0, 0), Primitive::move(-1, -1, 1, 1, 1, 0), 
-            Primitive::move(0, -1, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
-    tmp.v = 0;
-    tmp.o = 2;
-    motion_primitives[1][0].emplace_back(tmp);
-    tmp.mvs.clear();
-
-    // 1 to 0
-    tmp.mvs = {Primitive::move(-1, 0, 1, 1, 0, 0), Primitive::move(-1, 1, 1, 1, 1, 0), 
-            Primitive::move(0, 1, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
-    tmp.v = 0;
-    tmp.o = 0;
-    motion_primitives[1][0].emplace_back(tmp);
-    tmp.mvs.clear();
-
-    // 2 to 3
-    tmp.mvs = {Primitive::move(0, -1, 1, 1, 0, 0), Primitive::move(1, -1, 1, 1, 1, 0), 
-            Primitive::move(1, 0, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
-    tmp.v = 0;
-    tmp.o = 3;
-    motion_primitives[2][0].emplace_back(tmp);
-    tmp.mvs.clear();
-
-    // 2 to 1
-    tmp.mvs = {Primitive::move(0, -1, 1, 1, 0, 0), Primitive::move(-1, -1, 1, 1, 1, 0), 
-            Primitive::move(-1, 0, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
-    tmp.v = 0;
-    tmp.o = 1;
-    motion_primitives[2][0].emplace_back(tmp);
-    tmp.mvs.clear();
-
-    // 3 to 0
-    tmp.mvs = {Primitive::move(1, 0, 1, 1, 0, 0), Primitive::move(1, 1, 1, 1, 1, 0), 
-            Primitive::move(0, 1, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
-    tmp.v = 0;
-    tmp.o = 0;
-    motion_primitives[3][0].emplace_back(tmp);
-    tmp.mvs.clear();
-
-    // 3 to 2
-    tmp.mvs = {Primitive::move(1, 0, 1, 1, 0, 0), Primitive::move(1, -1, 1, 1, 1, 0), 
-            Primitive::move(0, -1, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
-    tmp.v = 0;
-    tmp.o = 2;
-    motion_primitives[3][0].emplace_back(tmp);
-    tmp.mvs.clear();
+    for (int o = 0; o < MXO; ++o) {
+        Primitive tmp;
+        tmp.mvs = {Primitive::move(0, 0, 0, 1, (o + 1) % MXO, 1)}; // 1 second to rotate
+        tmp.o = (o + 1) % MXO;
+        tmp.v = 0;
+        motion_primitives[o][0].emplace_back(tmp);
+        tmp.mvs.clear();
+        tmp.mvs = {Primitive::move(0, 0, 0, 1, (o + 3) % MXO, 1)};
+        tmp.o = (o + 3) % MXO;
+        motion_primitives[o][0].emplace_back(tmp);
+    }
+   
 
     for (int o = 0; o < MXO; ++o) {
+        Primitive tmp;
         std::cout << "primitives for " << o << std::endl;
         // ACCELERATION
         // Primitive tmp;
         tmp.v = 1; // ending velocity 1
         tmp.o=o; // end orientation is the same
 
-        // (0, 0)  (0, 1)
-        // (1, 0)
         tmp.mvs = {
             Primitive::move(dx[o]*0, dy[o]*0, 0, 1, o, 0), // time = 0, occupies first cell for 1 second
-            Primitive::move(dx[o]*1, dy[o]*1, 0, 1, o, 0), // time = 1, displacement is 1 cell
-            Primitive::move(dx[o]*2, dy[o]*2, 1, 1, o, 0),
-            Primitive::move(dx[o]*3, dy[o]*3, 1, 1, o, 1),
+            Primitive::move(dx[o]*1, dy[o]*1, 1, 1, o, 1), // time = 1, displacement is 1 cell
             // Primitive::move(dx[o]*4, dy[o]*4, 1, 1, o, 0)
         };
 
@@ -155,9 +100,7 @@ void SIPP::fill_primitives() {
         tmp.o = o;
         tmp.mvs = {
             Primitive::move(dx[o]*0, dy[o]*0, 0, 1, o, 0), 
-            Primitive::move(dx[o]*1, dy[o]*1, 0, 1, o, 0), 
-            Primitive::move(dx[o]*2, dy[o]*2, 1, 1, o, 0),
-            Primitive::move(dx[o]*3, dy[o]*3, 1, 1, o, 1),
+            Primitive::move(dx[o]*1, dy[o]*1, 1, 1, o, 1)
             // Primitive::move(dx[o]*4, dy[o]*4, 1, 1, o, 0)
         };
 
@@ -169,8 +112,7 @@ void SIPP::fill_primitives() {
         // goes forward with constant velocity in 1 timestep, can only do with vel=1
         // because robot has width 2.0, covers cells 0-2
         tmp.mvs = {Primitive::move(0, 0, 0, 0, o, 0), 
-                    Primitive::move(dx[o], dy[o], 0, 1, o, 0), 
-                    Primitive::move(dx[o]*2, dy[o]*2, 0, 1, o, 0)};
+                    Primitive::move(dx[o], dy[o], 0, 1, o, 1)};
         tmp.o = o;
         tmp.v = 1;
         motion_primitives[o][1].emplace_back(tmp);
@@ -178,6 +120,132 @@ void SIPP::fill_primitives() {
         std::cout << "constant: " << tmp << std::endl;
     }
 }
+
+// // for large agents
+// void SIPP::fill_primitives() {
+//     std::cout << "SIPP: filling primitives" << std::endl;
+//     float MAXV  = 2.0;
+//     float MAX_ACC = 1.0;
+//     int minimalTransitionCost = 1; // the minimum cost to go from one cell to next (0.5s = 5 timesteps).
+//     int dx[4] = {0, -1, 0, 1}, dy[4] = {1, 0, -1, 0};
+//     // int turn_dx[4] = {}
+    
+//     //  turn from 0 to 1
+//     Primitive tmp;
+//     tmp.mvs = {Primitive::move(0, 1, 1, 1, 0, 0), Primitive::move(-1, 1, 1, 1, 1, 0), 
+//             Primitive::move(-1, 0, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
+//     tmp.v = 0;
+//     tmp.o = 1;
+//     motion_primitives[0][0].emplace_back(tmp);
+
+//     tmp.mvs.clear();
+
+//     // turn from 0 to 3
+//     tmp.mvs = {Primitive::move(0, 1, 1, 1, 0, 0), Primitive::move(1, 1, 1, 1, 1, 0), 
+//             Primitive::move(1, 0, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
+//     tmp.v = 0;
+//     tmp.o = 3;
+//     motion_primitives[0][0].emplace_back(tmp);
+//     tmp.mvs.clear();
+
+//     // 1 to 2
+//     tmp.mvs = {Primitive::move(-1, 0, 1, 1, 0, 0), Primitive::move(-1, -1, 1, 1, 1, 0), 
+//             Primitive::move(0, -1, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
+//     tmp.v = 0;
+//     tmp.o = 2;
+//     motion_primitives[1][0].emplace_back(tmp);
+//     tmp.mvs.clear();
+
+//     // 1 to 0
+//     tmp.mvs = {Primitive::move(-1, 0, 1, 1, 0, 0), Primitive::move(-1, 1, 1, 1, 1, 0), 
+//             Primitive::move(0, 1, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
+//     tmp.v = 0;
+//     tmp.o = 0;
+//     motion_primitives[1][0].emplace_back(tmp);
+//     tmp.mvs.clear();
+
+//     // 2 to 3
+//     tmp.mvs = {Primitive::move(0, -1, 1, 1, 0, 0), Primitive::move(1, -1, 1, 1, 1, 0), 
+//             Primitive::move(1, 0, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
+//     tmp.v = 0;
+//     tmp.o = 3;
+//     motion_primitives[2][0].emplace_back(tmp);
+//     tmp.mvs.clear();
+
+//     // 2 to 1
+//     tmp.mvs = {Primitive::move(0, -1, 1, 1, 0, 0), Primitive::move(-1, -1, 1, 1, 1, 0), 
+//             Primitive::move(-1, 0, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
+//     tmp.v = 0;
+//     tmp.o = 1;
+//     motion_primitives[2][0].emplace_back(tmp);
+//     tmp.mvs.clear();
+
+//     // 3 to 0
+//     tmp.mvs = {Primitive::move(1, 0, 1, 1, 0, 0), Primitive::move(1, 1, 1, 1, 1, 0), 
+//             Primitive::move(0, 1, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
+//     tmp.v = 0;
+//     tmp.o = 0;
+//     motion_primitives[3][0].emplace_back(tmp);
+//     tmp.mvs.clear();
+
+//     // 3 to 2
+//     tmp.mvs = {Primitive::move(1, 0, 1, 1, 0, 0), Primitive::move(1, -1, 1, 1, 1, 0), 
+//             Primitive::move(0, -1, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
+//     tmp.v = 0;
+//     tmp.o = 2;
+//     motion_primitives[3][0].emplace_back(tmp);
+//     tmp.mvs.clear();
+
+//     for (int o = 0; o < MXO; ++o) {
+//         std::cout << "primitives for " << o << std::endl;
+//         // ACCELERATION
+//         // Primitive tmp;
+//         tmp.v = 1; // ending velocity 1
+//         tmp.o=o; // end orientation is the same
+
+//         // (0, 0)  (0, 1)
+//         // (1, 0)
+//         tmp.mvs = {
+//             Primitive::move(dx[o]*0, dy[o]*0, 0, 1, o, 0), // time = 0, occupies first cell for 1 second
+//             Primitive::move(dx[o]*1, dy[o]*1, 0, 1, o, 0), // time = 1, displacement is 1 cell
+//             Primitive::move(dx[o]*2, dy[o]*2, 1, 1, o, 0),
+//             Primitive::move(dx[o]*3, dy[o]*3, 1, 1, o, 1),
+//             // Primitive::move(dx[o]*4, dy[o]*4, 1, 1, o, 0)
+//         };
+
+//         motion_primitives[o][0].push_back(tmp);
+
+//         std::cout << "acclereation: " << tmp << std::endl;
+
+//         // deceleration
+//         tmp.mvs.clear();
+//         tmp.v = 0;
+//         tmp.o = o;
+//         tmp.mvs = {
+//             Primitive::move(dx[o]*0, dy[o]*0, 0, 1, o, 0), 
+//             Primitive::move(dx[o]*1, dy[o]*1, 0, 1, o, 0), 
+//             Primitive::move(dx[o]*2, dy[o]*2, 1, 1, o, 0),
+//             Primitive::move(dx[o]*3, dy[o]*3, 1, 1, o, 1),
+//             // Primitive::move(dx[o]*4, dy[o]*4, 1, 1, o, 0)
+//         };
+
+//         motion_primitives[o][1].push_back(tmp);
+
+//         std::cout << "decel: " << tmp << std::endl;
+
+//         // just go forward
+//         // goes forward with constant velocity in 1 timestep, can only do with vel=1
+//         // because robot has width 2.0, covers cells 0-2
+//         tmp.mvs = {Primitive::move(0, 0, 0, 0, o, 0), 
+//                     Primitive::move(dx[o], dy[o], 0, 1, o, 0), 
+//                     Primitive::move(dx[o]*2, dy[o]*2, 0, 1, o, 0)};
+//         tmp.o = o;
+//         tmp.v = 1;
+//         motion_primitives[o][1].emplace_back(tmp);
+
+//         std::cout << "constant: " << tmp << std::endl;
+//     }
+// }
 
 void SIPP::generate_successors(SIPPNode* curr, const BasicGraph &G, ReservationTable &rt, 
     int t_lower, int t_upper, const vector<pair<int, int> >& goal_location) {

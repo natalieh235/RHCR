@@ -15,12 +15,17 @@ void KivaSystem::initialize()
 {
 	initialize_solvers();
 
+	std::cout << " intialized solvers "<< std::endl;
+
 	starts.resize(num_of_drives);
 	goal_locations.resize(num_of_drives);
 	paths.resize(num_of_drives);
 	finished_tasks.resize(num_of_drives);
+
+	std::cout << " resized"<< std::endl;
 	// consider_rotation = true;
 	bool succ = load_records(); // continue simulating from the records
+	std::cout << " load records"<< std::endl;
 	if (!succ)
 	{
 		timestep = 0;
@@ -52,7 +57,7 @@ void KivaSystem::initialize_start_locations()
 		}
 
 		starts[k] = State(G.agent_home_locations[k], 0, orientation);
-		std::cout << "start for agent " << k << "is " << starts[k] << std::endl;
+		std::cout << "start for agent " << k << " is " << starts[k] << std::endl;
 		paths[k].emplace_back(starts[k]);
 		finished_tasks[k].emplace_back(G.agent_home_locations[k], 0);
 	}
@@ -69,6 +74,7 @@ void KivaSystem::initialize_goal_locations()
 	{
 		int goal = G.endpoints[rand() % (int)G.endpoints.size()];
 		goal_locations[k].emplace_back(goal, 0);
+		std::cout << "goal for agent " << k << " is " << goal << std::endl;
 	}
 }
 
@@ -76,6 +82,7 @@ void KivaSystem::initialize_goal_locations()
 
 void KivaSystem::update_goal_locations()
 {
+	std::cout << "update goal locations, " << hold_endpoints << std::endl;
     if (!LRA_called)
         new_agents.clear();
 	if (hold_endpoints)
@@ -172,6 +179,7 @@ void KivaSystem::update_goal_locations()
 				if (goal_locations[k].empty())
 				{
 					goal = make_pair(curr, 0);
+					std::cout << "update goal locations: goal locations r empty " << curr << std::endl;
 				}
 				else
 				{
@@ -196,6 +204,7 @@ void KivaSystem::update_goal_locations()
 						std::cout << "The fiducial type should not be " << G.types[curr] << std::endl;
 						exit(-1);
 					}
+					std::cout << "update goal locations: next location is for " << k << " is " << next.first << std::endl;
 					goal_locations[k].emplace_back(next);
 					min_timesteps += G.get_Manhattan_distance(next.first, goal.first); // G.heuristics.at(next)[goal];
 					goal = next;
@@ -213,6 +222,8 @@ void KivaSystem::simulate(int simulation_time)
 	this->simulation_time = simulation_time;
 	initialize();
 
+	std::cout << "Nat :initalized" << std::endl;
+
 	for (; timestep < simulation_time; timestep += simulation_window)
 	{
 		std::cout << "Timestep " << timestep << std::endl;
@@ -220,7 +231,7 @@ void KivaSystem::simulate(int simulation_time)
 		update_start_locations();
 		update_goal_locations();
 		// std::cout << "start size" << starts.size() << " end size" << goal_locations.size() << std::endl;
-		std::cout << "Calling solve..." << std::endl;
+		// std::cout << "Calling solve..." << std::endl;
 		solve();
 
 		// move drives

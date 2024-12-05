@@ -75,7 +75,7 @@ void test_system() {
 
     std::cout << "initial con " << pbs->initial_constraints.size() << std::endl;
 
-    system.outfile = "../exp/symbotic_pbs_tests";
+    system.outfile = "../RHCR/exp/symbotic_pbs_tests";
 	system.screen = 2;
 	system.num_of_drives = 1;
 	system.time_limit = 60;
@@ -92,7 +92,7 @@ void test_system() {
     system.finished_tasks.resize(system.num_of_drives);
     system.paths.resize(system.num_of_drives);
 
-    system.outfile = "./";
+    // system.outfile = "./";
 
     system.starts = {State(131, 0, 1)};
     std::pair<int, int> goal1(20, 0);
@@ -101,7 +101,7 @@ void test_system() {
     path_planner->fill_primitives();
 
     system.solve();
-    system.timestep = 5;
+    // system.timestep = 5;
     auto new_finished_tasks = system.move();
 	std::cout << new_finished_tasks.size() << " tasks has been finished" << std::endl;
 

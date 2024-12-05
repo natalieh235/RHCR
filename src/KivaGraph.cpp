@@ -221,10 +221,11 @@ void KivaGrid::preprocessing(bool consider_rotation)
 	{
 		for (auto endpoint : endpoints)
 		{
-			// std::cout << "Preprocessing: computing heuristic for " << endpoint << std::endl;
 			heuristics[endpoint] = compute_heuristics(endpoint);
+			// std::cout << "Preprocessing: computing heuristic for " << endpoint << std::endl;
+				// << " H: " << heuristics[endpoint] << std::endl;
 			// for (auto h: heuristics[endpoint]) {
-				// std::cout << "heuristic: " << h << std::endl;
+			// 	std::cout << "heuristic: " << h << std::endl;
 			// }
 		}
 		for (auto home : agent_home_locations)

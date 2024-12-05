@@ -1,2 +1,2 @@
 1
-Agent-0;Loc: 131,Orient: 1,Timestep: 0,Vel: 0;Loc: 131,Orient: 1,Timestep: 1,Vel: 0;Loc: 79,Orient: 1,Timestep: 2,Vel: 1;Loc: 79,Orient: 1,Timestep: 3,Vel: 0;Loc: 27,Orient: 1,Timestep: 4,Vel: 0;Loc: 27,Orient: 1,Timestep: 5,Vel: 0;
+Agent-0;Loc: 131,Orient: 1,Timestep: 0,Vel: 0;Loc: 118,Orient: 1,Timestep: 1,Vel: 0;Loc: 105,Orient: 1,Timestep: 2,Vel: 0;Loc: 92,Orient: 1,Timestep: 3,Vel: 0;Loc: 79,Orient: 1,Timestep: 4,Vel: 0;Loc: 66,Orient: 1,Timestep: 5,Vel: 0;
