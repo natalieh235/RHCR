@@ -121,7 +121,9 @@ public:
     void fill_primitives();
 
 	string getName() const { return "SIPP"; }
-    SIPP(): SingleAgentSolver() {}
+    SIPP(): SingleAgentSolver() {
+        fill_primitives();
+    }
 
 private:
     vector<Primitive> motion_primitives[MXO][MXV];

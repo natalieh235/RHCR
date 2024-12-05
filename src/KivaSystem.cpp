@@ -15,6 +15,8 @@ void KivaSystem::initialize()
 {
 	initialize_solvers();
 
+	// solver.fill_primitives();
+
 	std::cout << " intialized solvers "<< std::endl;
 
 	starts.resize(num_of_drives);
@@ -236,6 +238,8 @@ void KivaSystem::simulate(int simulation_time)
 
 		// move drives
 		auto new_finished_tasks = move();
+
+		// std::cout << "Timestep 2 " << timestep << std::endl;
 		std::cout << new_finished_tasks.size() << " tasks has been finished" << std::endl;
 
 		// update tasks

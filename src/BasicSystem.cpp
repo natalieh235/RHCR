@@ -181,7 +181,7 @@ void BasicSystem::update_start_locations()
 {
     for (int k = 0; k < num_of_drives; k++)
     {
-        starts[k] = State(paths[k][timestep].location, 0, paths[k][timestep].orientation);
+        starts[k] = State(paths[k][timestep].location, 0, paths[k][timestep].orientation, paths[k][timestep].velocity);
     }
 }
 
@@ -195,7 +195,7 @@ void BasicSystem::update_paths(const std::vector<Path*>& MAPF_paths, int max_tim
         for (int t = 0; t < length; t++)
         {
             if (MAPF_paths[k]->at(t).location < 0)
-                paths[k][timestep + t] = State(-starts[k].location - 1, timestep + t, starts[k].orientation);
+                paths[k][timestep + t] = State(-starts[k].location - 1, timestep + t, starts[k].orientation, starts[k].velocity);
             else
             {
                 paths[k][timestep + t] = MAPF_paths[k]->at(t);
@@ -338,9 +338,11 @@ list<tuple<int, int, int>> BasicSystem::move()
     std::cout << "BasicSystem: move, " << start_timestep << ", " << end_timestep << std::endl;
 	list<tuple<int, int, int>> finished_tasks; // <agent_id, location, timestep>
 
+    
     for (int t = start_timestep; t <= end_timestep; t++)
     {
         for (int k = 0; k < num_of_drives; k++) {
+            std::cout << "initial paths: " << paths[k] << std::endl;
             // Agents waits at its current locations if no future paths are assigned
             while ((int) paths[k].size() <= t)
             { // This should not happen?
@@ -358,13 +360,6 @@ list<tuple<int, int, int>> BasicSystem::move()
             State curr = paths[k][t];
 
             std::cout << "MOVE: Drive: " << k << " has state " << curr << std::endl;
-
-            /* int wait_times = 0; // wait time at the current location
-            while (wait_times < t && paths[k][t - wait_times] != curr)
-            {
-                wait_times++;
-            }*/
-
             // remove goals if necessary
             if ((!hold_endpoints || paths[k].size() == t + 1) && !goal_locations[k].empty() && 
 				curr.location == goal_locations[k].front().first &&
@@ -376,46 +371,20 @@ list<tuple<int, int, int>> BasicSystem::move()
             }
 
             // check whether the move is valid
-            if (t > 0)
-            {
-                State prev = paths[k][t - 1];
+            // if (t > 0)
+            // {
+            //     State prev = paths[k][t - 1];
 
-                if (curr.location == prev.location)
-                {
-                    if (G.get_rotate_degree(prev.orientation, curr.orientation) == 2)
-                    {
-                        cout << "Drive " << k << " rotates 180 degrees from " << prev << " to " << curr << endl;
-                        save_results();
-                        exit(-1);
-                    }
-                }
-                else if (consider_rotation)
-                {
-                    if (prev.orientation != curr.orientation)
-					{
-						cout << "Drive " << k << " rotates while moving from " << prev << " to " << curr << endl;
-						save_results();
-						exit(-1);
-					}
-					else if ( !G.valid_move(prev.location, prev.orientation) ||
-                        prev.location + G.move[prev.orientation] != curr.location)
-                    {
-                        cout << "Drive " << k << " jump from " << prev << " to " << curr << endl;
-                        save_results();
-                        exit(-1);
-                    }
-                }
-				else
-				{
-					int dir = G.get_direction(prev.location, curr.location);
-					if (dir < 0 || !G.valid_move(prev.location, dir))
-					{
-						cout << "Drive " << k << " jump from " << prev << " to " << curr << endl;
-						save_results();
-						exit(-1);
-					}
-				}
-            }
+            //     if (curr.location == prev.location)
+            //     {
+            //         if (G.get_rotate_degree(prev.orientation, curr.orientation) == 2)
+            //         {
+            //             cout << "Drive " << k << " rotates 180 degrees from " << prev << " to " << curr << endl;
+            //             save_results();
+            //             exit(-1);
+            //         }
+            //     }
+            // }
 
             // Check whether this move has conflicts with other agents
 			if (G.types[curr.location] != "Magic")
@@ -512,6 +481,7 @@ void BasicSystem::save_results()
     }
     output.close();
 
+    std::cout << "writing to paths file " << timestep << std::endl;
     // paths
     output.open(outfile + "/paths.txt", std::ios::out);
     output << num_of_drives << std::endl;
@@ -770,6 +740,7 @@ bool BasicSystem::load_records()
 {
 	boost::char_separator<char> sep1(";");
 	boost::char_separator<char> sep2(",");
+    boost::char_separator<char> sep3(":");
 	string line;
 
 	// load paths
@@ -787,17 +758,23 @@ bool BasicSystem::load_records()
 	}
 	for (int k = 0; k < num_of_drives; k++)
 	{
+        // std::cout << "got hereee" << std::endl;
 		getline(myfile, line);
 		boost::tokenizer< boost::char_separator<char> > tok1(line, sep1);
-		for (auto task : tok1)
+ 
+		for (auto it = std::next(tok1.begin()); it != tok1.end(); ++it)
 		{
+            auto task = *it;
+            std::cout << "print: " << task << std::endl;
 			boost::tokenizer< boost::char_separator<char> > tok2(task, sep2);
 			boost::tokenizer< boost::char_separator<char> >::iterator beg = tok2.begin();
+            std::cout << "cur: " << *beg << std::endl;
 			int loc = atoi((*beg).c_str());
 			beg++;
 			int orientation = atoi((*beg).c_str());
 			beg++;
 			int time = atoi((*beg).c_str());
+            std::cout << loc <<" , "  <<  time << ", " << orientation << std::endl;
 			paths[k].emplace_back(loc, time, orientation);
 		}
 		timestep = min(timestep, paths[k].back().timestep);

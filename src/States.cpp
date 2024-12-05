@@ -3,10 +3,10 @@
 
 std::ostream & operator << (std::ostream &out, const State &s)
 {
-    out << "Loc: " << s.location << "," 
-        << "Orient: " << s.orientation << "," 
-        << "Timestep: " << s.timestep << "," 
-        << "Vel: " << s.velocity;
+    out << "Loc:" << s.location << "," 
+        << "Orient:" << s.orientation << "," 
+        << "Timestep:" << s.timestep << "," 
+        << "Vel:" << s.velocity;
     return out;
 }
 

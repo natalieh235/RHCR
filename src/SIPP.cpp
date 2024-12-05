@@ -29,22 +29,23 @@ Path SIPP::updatePath(const BasicGraph& G, const SIPPNode* goal)
 
             // std::cout << "curr " << curr->state << " interval: " << curr->interval << std::endl;
             // std::cout << "prev: " << curr->parent->state << " interval: " << curr->parent->interval << std::endl;
-            if (degree == 1) // turn right or turn left
-            {
-                path[t] = State(prev->state.location, t, curr->state.orientation);
-                t++;
-            }
-            else if (degree == 2) // turn back
-            {
-                path[t] = State(prev->state.location, t, (prev->state.orientation + 1) % 4); // turn right
-                t++;
-                path[t] = State(prev->state.location, t, curr->state.orientation); // turn right
-                t++;
-            }
+            // if (degree == 1) // turn right or turn left
+            // {
+            //     path[t] = State(prev->state.location, t, curr->state.orientation);
+            //     t++;
+            // }
+            // else if (degree == 2) // turn back
+            // {
+            //     path[t] = State(prev->state.location, t, (prev->state.orientation + 1) % 4); // turn right
+            //     t++;
+            //     path[t] = State(prev->state.location, t, curr->state.orientation); // turn right
+            //     t++;
+            // }
             while ( t < curr->state.timestep)
             {
                 // std::cout << "waiting? " << curr->state << std::endl;
-                path[t] = State(prev->state.location, t, curr->state.orientation); // wait at prev location
+                // path[t] = State(prev->state.location, t, curr->state.orientation, prev->state.velocity); // wait at prev location
+                path[t] = State(prev->state);
                 t++;
             }
             path[curr->state.timestep] = State(curr->state); // move to current location
@@ -76,6 +77,7 @@ void SIPP::fill_primitives() {
     }
    
 
+    bool bidirectional = true;
     for (int o = 0; o < MXO; ++o) {
         Primitive tmp;
         std::cout << "primitives for " << o << std::endl;
@@ -92,6 +94,19 @@ void SIPP::fill_primitives() {
 
         motion_primitives[o][0].push_back(tmp);
 
+        int next_orientation = (o + 2) % MXO;
+
+        if (bidirectional) {
+            tmp.mvs.clear();
+            tmp.mvs = {
+                Primitive::move(dx[next_orientation]*0, dy[next_orientation]*0, 0, 1, o, 0), // time = 0, occupies first cell for 1 second
+                Primitive::move(dx[next_orientation]*1, dy[next_orientation]*1, 1, 1, o, 1), // time = 1, displacement is 1 cell
+            };
+            tmp.o = next_orientation;
+            motion_primitives[o][0].push_back(tmp);
+        }
+        
+
         std::cout << "acclereation: " << tmp << std::endl;
 
         // deceleration
@@ -106,6 +121,18 @@ void SIPP::fill_primitives() {
 
         motion_primitives[o][1].push_back(tmp);
 
+        if (bidirectional) {
+            tmp.mvs.clear();
+            tmp.mvs = {
+                Primitive::move(dx[next_orientation]*0, dy[next_orientation]*0, 0, 1, o, 0), 
+                Primitive::move(dx[next_orientation]*1, dy[next_orientation]*1, 1, 1, o, 1)
+                // Primitive::move(dx[o]*4, dy[o]*4, 1, 1, o, 0)
+            };
+            tmp.o = next_orientation;
+            motion_primitives[o][1].push_back(tmp);
+        }
+
+
         std::cout << "decel: " << tmp << std::endl;
 
         // just go forward
@@ -116,6 +143,14 @@ void SIPP::fill_primitives() {
         tmp.o = o;
         tmp.v = 1;
         motion_primitives[o][1].emplace_back(tmp);
+
+        // if (bidirectional) {
+        //     tmp.mvs.clear();
+        //     tmp.mvs = {Primitive::move(0, 0, 0, 0, o, 0), 
+        //                 Primitive::move(dx[next_orientation], dy[next_orientation], 0, 1, o, 1)};
+        //     motion_primitives[o][1].emplace_back(tmp);
+        // }
+
 
         std::cout << "constant: " << tmp << std::endl;
     }
@@ -260,6 +295,7 @@ void SIPP::generate_successors(SIPPNode* curr, const BasicGraph &G, ReservationT
 
         apply_primitive(curr, G, rt, t_lower, t_upper, mp, h_val);
     }
+    std::cout << "========= end successors ========" << std::endl;
 }
 
 // Generate acceleration primitive
@@ -304,12 +340,14 @@ void SIPP::apply_primitive(SIPPNode* curr, const BasicGraph &G, ReservationTable
         yy = y + mv.dy;
 
         if (xx < 0 || xx >= G.get_rows() || yy < 0 || y >= G.get_cols()) {
-            std::cout << "  apply primitive generates is invalid" << std::endl;
+            // std::cout << "  apply primitive generates is invalid" << std::endl;
             return;
         }
 
         next_location = G.get_location(xx, yy);
+        // std::cout << "  apply primitive next loc: " << next_location << std::endl;
         if (!G.valid_move(next_location, mv.cur_o)) {
+            // std::cout << "  apply primitive next loc invalid" << std::endl;
             return;
         }
 
@@ -365,9 +403,10 @@ void SIPP::apply_primitive(SIPPNode* curr, const BasicGraph &G, ReservationTable
         State next_state = State(next_location, adjusted_tl, mp.o, mp.v);
         generate_node({adjusted_tl, adjusted_tu, 0}, curr, next_state, G, 
             t_lower+mp.mvs.back().swt + mp.mvs.back().ftt, h_val);
-        std::cout << "generating node with tl " << std::get<0>(it) << " + " << mp.mvs.back().swt
-            << ", tu " << std::get<1>(it) << " + " << mp.mvs.back().swt << ", min timestep " 
-            << t_lower+mp.mvs.back().swt + mp.mvs.back().ftt << " state: " << next_state << std::endl;
+        std::cout << "          generating new node with " << next_state << std::endl;
+        // std::cout << "generating node with tl " << std::get<0>(it) << " + " << mp.mvs.back().swt
+        //     << ", tu " << std::get<1>(it) << " + " << mp.mvs.back().swt << ", min timestep " 
+        //     << t_lower+mp.mvs.back().swt + mp.mvs.back().ftt << " state: " << next_state << std::endl;
     }
 }
 
@@ -465,55 +504,60 @@ Path SIPP::run(const BasicGraph& G, const State& start,
             open_list.clear();
             focal_list.clear();
             runtime = (std::clock() - t) * 1.0 / CLOCKS_PER_SEC;
-            cout << "SIPP: returning path" << curr->goal_id << endl;
+            cout << "SIPP: returning path" << curr->goal_id << "path: " << path << endl;
             return path;
         }
 
-        // std::cout << "=========" << std::endl;
-        // std::cout << "SIPP: curr state: " << curr->state << std::endl;
-        // std::cout << "SIPP: current interval: " << curr->interval << std::endl;
-        
-        // expand the nodes
-        for (int orientation = 0; orientation < 4; orientation++) // move
-        {
-            if (!G.valid_move(curr->state.location, orientation)) // the edge is blocked
-                continue;
-            int degree;
-            if (curr->state.orientation < 0)
-                degree = 0;
-            else
-                degree = G.get_rotate_degree(curr->state.orientation, orientation);
-
-            if (degree > std::get<1>(curr->interval) - curr->state.timestep) // don't have enough time to turn
-                continue;
-
-            int location = curr->state.location + G.move[orientation];
-
-            if (!G.valid_move(location, orientation)) {
-                continue;
-            }
-
-            double h_val = compute_h_value(G, location, curr->goal_id, goal_location);
-            if (h_val > INT_MAX)   // This vertex cannot reach the goal vertex
-                continue;
-            int min_timestep = curr->state.timestep + degree + 1;
-            for (auto interval : rt.getSafeIntervals(curr->state.location, location, min_timestep, std::get<1>(curr->interval) + 1))
+        bool use_primitives = true;
+        if (use_primitives) {
+            generate_successors(curr, G, rt, 
+            std::get<0>(curr->interval), std::get<1>(curr->interval),
+            goal_location);
+        } else {
+            std::cout << "=========" << std::endl;
+            std::cout << "SIPP: curr state: " << curr->state << std::endl;
+            std::cout << "SIPP: current interval: " << curr->interval << std::endl;
+            
+            // expand the nodes
+            for (int orientation = 0; orientation < 4; orientation++) // move
             {
-                if (curr->state.orientation < 0) {
-                    State next_state = State(location, min_timestep, -1, 0);
-                    generate_node(interval, curr, next_state, G, min_timestep, h_val);
-                }
-                else {
-                    State next_state = State(location, min_timestep, orientation, 0);
-                    generate_node(interval, curr, next_state, G, min_timestep, h_val);
-                }
-            }
+                if (!G.valid_move(curr->state.location, orientation)) // the edge is blocked
+                    continue;
+                int degree;
+                if (curr->state.orientation < 0)
+                    degree = 0;
+                else
+                    degree = G.get_rotate_degree(curr->state.orientation, orientation);
 
-        }  // end for loop that generates successors
+                if (degree > std::get<1>(curr->interval) - curr->state.timestep) // don't have enough time to turn
+                    continue;
 
-        // generate_successors(curr, G, rt, 
-        //     std::get<0>(curr->interval), std::get<1>(curr->interval),
-        //     goal_location);
+                int location = curr->state.location + G.move[orientation];
+
+                if (!G.valid_move(location, orientation)) {
+                    continue;
+                }
+
+                double h_val = compute_h_value(G, location, curr->goal_id, goal_location);
+                if (h_val > INT_MAX)   // This vertex cannot reach the goal vertex
+                    continue;
+                int min_timestep = curr->state.timestep + degree + 1;
+                for (auto interval : rt.getSafeIntervals(curr->state.location, location, min_timestep, std::get<1>(curr->interval) + 1))
+                {
+                    if (curr->state.orientation < 0) {
+                        State next_state = State(location, min_timestep, -1, 0);
+                        generate_node(interval, curr, next_state, G, min_timestep, h_val);
+                    }
+                    else {
+                        State next_state = State(location, min_timestep, orientation, 0);
+                        std::cout << "successor: " << next_state << std::endl;
+                        generate_node(interval, curr, next_state, G, min_timestep, h_val);
+                    }
+                }
+
+            }  // end for loop that generates successors
+        }
+
         
 
         // update FOCAL if min f-val increased
