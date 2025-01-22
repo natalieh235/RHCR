@@ -6,22 +6,16 @@
 
 void test_valid_move() {
     // Create a sample graph/grid (this will depend on how your Graph is implemented)
-    KivaGrid G = KivaGrid(2.0, 1.0);
-    G.load_map("../maps/testkiva.map");
-    G.preprocessing(true);
+    KivaGrid G = KivaGrid(1.5, 1.0);
+    assert((G.load_map("../maps/symbotic/symbotic_small.map")) == 1);
 
-    // Test 1: Valid move within grid boundaries
-    assert(G.valid_move(0, 0) == true); // Move from (2,2) in direction 0 (e.g., right), should be valid
+    std::cout << "14, 0" << G.valid_move(14, 0) << std::endl;
 
-    // Test 3: Valid move to another cell
-    assert(G.valid_move(5, 0) == true); 
+    std::cout << "14, 1" << G.valid_move(14, 1) << std::endl;
 
-    // Test 3: Valid move to another cell
-    assert(G.valid_move(5, 1) == true); 
+    std::cout << "14, 2" << G.valid_move(14, 2) << std::endl;
 
-    // Test 4: Invalid move into blocked cell (if your grid allows marking certain cells as blocked)
-    // G.blockCell(3, 3); // Block cell (3,3);
-    assert(G.valid_move(14, 1) == false); // Move from (2,3) to (3,3), should be invalid as it's blocked
+    std::cout << "14, 3" << G.valid_move(14, 3) << std::endl;
 
     std::cout << "All valid_move tests passed!" << std::endl;
 }
@@ -63,8 +57,8 @@ void test_generate_primitive() {
 }
 
 void test_system() {
-     KivaGrid G = KivaGrid(1.0, 1.0);
-    assert((G.load_map("../maps/symbotic_small.map")) == 1);
+    KivaGrid G = KivaGrid(1.0, 1.0);
+    assert((G.load_map("../maps/symbotic/symbotic_small.map")) == 1);
 
     SIPP *path_planner = new SIPP();
 
@@ -73,16 +67,19 @@ void test_system() {
     pbs->initial_constraints = {std::make_tuple(1, 2, 3)};
     G.preprocessing(false);
 
+
+    // 5 to 35
     std::cout << "initial con " << pbs->initial_constraints.size() << std::endl;
 
-    system.outfile = "../RHCR/exp/symbotic_pbs_tests";
+    system.outfile = "../RHCR/exp/fix_sipp_tests";
 	system.screen = 2;
 	system.num_of_drives = 1;
 	system.time_limit = 60;
 	system.simulation_window = 5;
 	system.planning_window = 1073741823;
 	system.travel_time_window = 0;
-	system.consider_rotation = false;
+    system.simulation_time = 200;
+	system.consider_rotation = true;
 	system.seed = 0;
 	srand(system.seed);
 
@@ -94,14 +91,15 @@ void test_system() {
 
     // system.outfile = "./";
 
-    system.starts = {State(131, 0, 1)};
-    std::pair<int, int> goal1(20, 0);
+    // State start_state(5, 0, 1);
+
+    system.starts = {State(5, 0, 1, 1)};
+    std::pair<int, int> goal1(35, 0);
     system.goal_locations = {{goal1}};
 
     path_planner->fill_primitives();
 
     system.solve();
-    // system.timestep = 5;
     auto new_finished_tasks = system.move();
 	std::cout << new_finished_tasks.size() << " tasks has been finished" << std::endl;
 
@@ -119,73 +117,73 @@ void test_system() {
     std::cout << "All planning small tests passed!" << std::endl;
 }
 
-void test_primitives_2() {
-    KivaGrid G = KivaGrid(1.0, 1.0);
-    assert((G.load_map("../maps/sippip.map")) == 1);
+// void test_primitives_2() {
+//     KivaGrid G = KivaGrid(1.0, 1.0);
+//     assert((G.load_map("../maps/sippip.map")) == 1);
 
-    G.preprocessing(true);
+//     G.preprocessing(true);
 
-    SIPP *planner = new SIPP();
-    ReservationTable *rt = new ReservationTable(G);
+//     SIPP *planner = new SIPP();
+//     ReservationTable *rt = new ReservationTable(G);
 
-    vector<tuple<int, int, int>> constraints = {
-        {0, 6, INTERVAL_MAX},
-        {2, 0, 5}
-    };
+//     vector<tuple<int, int, int>> constraints = {
+//         {0, 6, INTERVAL_MAX},
+//         {2, 0, 5}
+//     };
 
-    for (auto c: constraints) {
-        rt->insertConstraint2SIT(std::get<0>(c), std::get<1>(c), std::get<2>(c));
-    }
+//     for (auto c: constraints) {
+//         rt->insertConstraint2SIT(std::get<0>(c), std::get<1>(c), std::get<2>(c));
+//     }
 
-    planner->fill_primitives();
+//     planner->fill_primitives();
 
-    SIPPNode curr = SIPPNode(
-        State(1, 0, 0, 0), 
-        0,
-        1,
-        {0, 6, 0},
-        nullptr,
-        0
-    );
+//     SIPPNode curr = SIPPNode(
+//         State(1, 0, 0, 0), 
+//         0,
+//         1,
+//         {0, 6, 0},
+//         nullptr,
+//         0
+//     );
 
-    planner->run(G, State(0, 0, 0, 0), {make_pair(3, 0)}, *rt);
-}
+//     planner->run(G, State(0, 0, 0, 0), {make_pair(3, 0)}, *rt);
+// }
 
-void test_primitives() {
-    KivaGrid G = KivaGrid(1.0, 1.0);
-    assert((G.load_map("../maps/sippip_prim.map")) == 1);
+// void test_primitives() {
+//     KivaGrid G = KivaGrid(1.0, 1.0);
+//     assert((G.load_map("../maps/sippip_prim.map")) == 1);
 
-    G.preprocessing(false);
+//     G.preprocessing(false);
 
-    SIPP *planner = new SIPP();
-    ReservationTable *rt = new ReservationTable(G);
+//     SIPP *planner = new SIPP();
+//     ReservationTable *rt = new ReservationTable(G);
 
-    vector<tuple<int, int, int>> constraints = {{3, 0, 2}, {3, 20, INTERVAL_MAX},
-        {1, 0, 2}, {1, 18, INTERVAL_MAX},
-        {2, 2, 5}, {2, 15, 16}, {2, 21, INTERVAL_MAX}, 
-        {0, 1, 6}, {0, 11, 12}, {0, 22, INTERVAL_MAX}};
+//     vector<tuple<int, int, int>> constraints = {{3, 0, 2}, {3, 20, INTERVAL_MAX},
+//         {1, 0, 2}, {1, 18, INTERVAL_MAX},
+//         {2, 2, 5}, {2, 15, 16}, {2, 21, INTERVAL_MAX}, 
+//         {0, 1, 6}, {0, 11, 12}, {0, 22, INTERVAL_MAX}};
 
-    for (auto c: constraints) {
-        rt->insertConstraint2SIT(std::get<0>(c), std::get<1>(c), std::get<2>(c));
-    }
+//     for (auto c: constraints) {
+//         rt->insertConstraint2SIT(std::get<0>(c), std::get<1>(c), std::get<2>(c));
+//     }
 
-    Primitive turn;
-    turn.mvs.push_back(Primitive::move(1, 0, 0, 3, 0, 0));
-    turn.mvs.push_back(Primitive::move(1, -1, 2, 2, 0, 0));
-    turn.mvs.push_back(Primitive::move(0, -1, 3, 2, 0, 1));
+//     Primitive turn;
+//     turn.mvs.push_back(Primitive::move(1, 0, 0, 3, 0, 0));
+//     turn.mvs.push_back(Primitive::move(1, -1, 2, 2, 0, 0));
+//     turn.mvs.push_back(Primitive::move(0, -1, 3, 2, 0, 1));
 
-    SIPPNode curr = SIPPNode(
-        State(1, 0, -1, 0), 
-        0,
-        1,
-        {2, 17, 0},
-        nullptr,
-        0
-    );
+//     SIPPNode curr = SIPPNode(
+//         State(1, 0, -1, 0), 
+//         0,
+//         1,
+//         {2, 17, 0},
+//         nullptr,
+//         0
+//     );
 
-    // planner->apply_primitive(&curr, G, *rt, 2, 17, turn);
+//     // planner->apply_primitive(&curr, G, *rt, 2, 17, turn);
 
-}
+// }
 
 void test_small_plan() {
     // Create a sample graph/grid (this will depend on how your Graph is implemented)
@@ -263,6 +261,7 @@ int main() {
     // test_primitives();
     // test_primitives_2();
 
-    test_system();
+    // test_system();
+    test_valid_move();
     return 0;
 }

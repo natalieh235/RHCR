@@ -59,7 +59,18 @@ struct State
 
 std::ostream & operator << (std::ostream &out, const State &s);
 
+struct PathStep {
+    State state;           // The resulting state after applying the motion primitive
+    std::string primitive;   // The motion primitive that caused the transition
 
-typedef std::vector<State> Path;
+    PathStep(): state(State()), primitive("default") {}
+    PathStep(const State& s, const std::string& p) : state(s), primitive(p) {}
+    PathStep(const State& s) : state(s), primitive("default") {}
+    // PathStep(const SIPPNode* n) : state(n->state), primitive(n->primitive_name) {}
+};
+
+typedef std::vector<PathStep> Path;
+
+// typedef std::vector<State> Path;
 
 std::ostream & operator << (std::ostream &out, const Path &path);

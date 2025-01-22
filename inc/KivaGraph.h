@@ -16,5 +16,5 @@ public:
 private:
     bool load_weighted_map(string fname);
     bool load_unweighted_map(string fname);
-    std::vector<int> get_occupied_cells(int location, int orientation) const;
+    // std::vector<int> get_occupied_cells(int location, int orientation) const;
 };

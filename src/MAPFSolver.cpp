@@ -46,7 +46,7 @@ void MAPFSolver::print_solution() const
         cout << "Agent " << i << ":\t";
         for (const auto & loc : solution[i])
         {
-            cout << loc.location << ",";
+            cout << loc.state.location << ",";
         }
         cout << endl;
     }

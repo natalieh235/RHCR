@@ -64,6 +64,7 @@ public:
 private:
 
     std::vector< Path* > paths;
+    // std::vector< Path* > occupied_cells;
     list<PBSNode*> allNodes_table;
     list<PBSNode*> dfs;
 

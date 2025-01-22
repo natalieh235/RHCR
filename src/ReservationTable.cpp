@@ -219,15 +219,20 @@ void ReservationTable::insertPath2CT(const Path& path)
 	auto prev = path.begin();
 	auto curr = path.begin();
 	++curr;
-	while (curr != path.end() && curr->timestep - k_robust <= window)
+	while (curr != path.end() && curr->state.timestep - k_robust <= window)
 	{
-		if (prev->location != curr->location)
+		if (prev->state.location != curr->state.location)
 		{
-			if (G.types[prev->location] != "Magic")
-				ct[prev->location].emplace_back(prev->timestep - k_robust, curr->timestep + k_robust);
+			if (G.types[prev->state.location] != "Magic") {
+				for (auto cell: G.get_occupied_cells(prev->state.location, prev->state.orientation)) {
+					ct[cell].emplace_back(prev->state.timestep - k_robust, curr->state.timestep + k_robust);
+				}	
+			}
+
+			// TODO: WHAT IF PRIMITIVE SPANS MULTIPLE EDGES
 			if (k_robust == 0) // add edge constraint
 			{
-				ct[getEdgeIndex(curr->location, prev->location)].emplace_back(curr->timestep, curr->timestep + 1);
+				ct[getEdgeIndex(curr->state.location, prev->state.location)].emplace_back(curr->state.timestep, curr->state.timestep + 1);
 			}
 			prev = curr;
 		}
@@ -235,24 +240,31 @@ void ReservationTable::insertPath2CT(const Path& path)
 	}
 	if (curr != path.end())
 	{
-		if (G.types[prev->location] != "Magic")
-			ct[prev->location].emplace_back(prev->timestep - k_robust, curr->timestep + k_robust);
+		if (G.types[prev->state.location] != "Magic")
+			// ct[prev->state.location].emplace_back(prev->state.timestep - k_robust, curr->state.timestep + k_robust);
+			for (auto cell: G.get_occupied_cells(prev->state.location, prev->state.orientation)) {
+				ct[cell].emplace_back(prev->state.timestep - k_robust, curr->state.timestep + k_robust);
+			}	
 		if (k_robust == 0) // add edge constraint
 		{
-			ct[getEdgeIndex(curr->location, prev->location)].emplace_back(curr->timestep, curr->timestep + 1);
+			ct[getEdgeIndex(curr->state.location, prev->state.location)].emplace_back(curr->state.timestep, curr->state.timestep + 1);
 		}
 	}
 	else
 	{
-		if (G.types[prev->location] != "Magic")
-			ct[prev->location].emplace_back(prev->timestep - k_robust, path.back().timestep + 1 + k_robust);
+		if (G.types[prev->state.location] != "Magic")
+			for (auto cell: G.get_occupied_cells(prev->state.location, prev->state.orientation)) {
+				ct[cell].emplace_back(prev->state.timestep - k_robust, path.back().state.timestep + 1 + k_robust);
+			}	
+			// ct[prev->location].emplace_back(prev->timestep - k_robust, path.back().timestep + 1 + k_robust);
 		if (k_robust == 0) // add edge constraint
 		{
-			ct[getEdgeIndex(path.back().location, prev->location)].emplace_back(path.back().timestep, path.back().timestep + 1);
+			ct[getEdgeIndex(path.back().state.location, prev->state.location)].emplace_back(path.back().state.timestep, path.back().state.timestep + 1);
 		}
 	}
-	if (hold_endpoints && G.types[prev->location] != "Magic")
-		ct[path.back().location].emplace_back(path.back().timestep, INTERVAL_MAX);
+	if (hold_endpoints && G.types[prev->state.location] != "Magic") {
+		ct[path.back().state.location].emplace_back(path.back().state.timestep, INTERVAL_MAX);
+	}
 }
 
 void ReservationTable::addInitialConstraints(const list< tuple<int, int, int> >& initial_constraints, int current_agent)
@@ -279,7 +291,7 @@ void ReservationTable::insertPath2CAT(const Path& path)
 	int timestep = 0;
 	while (timestep <= max_timestep)
 	{
-		int location = path[timestep].location;
+		int location = path[timestep].state.location;
 		if (G.types[location] != "Magic")
 		{
 			for (int t = max(0, timestep - k_robust); t <= min((int)cat.size() - 1, timestep + k_robust); t++)
@@ -289,11 +301,11 @@ void ReservationTable::insertPath2CAT(const Path& path)
 		}
 		timestep++;
 	}
-	if (G.types[path.back().location] != "Magic")
+	if (G.types[path.back().state.location] != "Magic")
 	{
 		while (timestep < (int)cat.size()) // assume that the agent waits at its last location
 		{
-			cat[timestep][path.back().location] = true;
+			cat[timestep][path.back().state.location] = true;
 			timestep++;
 		}
 	}
@@ -421,17 +433,17 @@ void ReservationTable::insertConstraints4starts(const vector<Path*>& paths, int 
             continue;
         else if (i != current_agent)// prohibit the agent from conflicting with other agents at their start locations
         {
-            int start = paths[i]->front().location;
+            int start = paths[i]->front().state.location;
             if (start < 0 || G.types[start] == "Magic")
                 continue;
-            for (auto state : (*paths[i]))
+            for (auto step : (*paths[i]))
             {
-                if (state.location != start) // The agent starts to move
+                if (step.state.location != start) // The agent starts to move
                 {
-                    // The agent waits at its start locations between [appear_time, state.timestep - 1]
+                    // The agent waits at its start locations between [appear_time, step.state.timestep - 1]
                     // So other agents cannot use this start location between
                     // [appear_time - k_robust, state.timestep + k_robust - 1]
-                    ct[start].emplace_back(0, state.timestep + k_robust);
+                    ct[start].emplace_back(0, step.state.timestep + k_robust);
                     break;
                 }
             }

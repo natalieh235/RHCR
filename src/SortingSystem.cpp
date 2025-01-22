@@ -70,7 +70,7 @@ void SortingSystem::update_goal_locations()
 {
 	for (int k = 0; k < num_of_drives; k++)
 	{
-		pair<int, int> curr(paths[k][timestep].location, timestep); // current location
+		pair<int, int> curr(paths[k][timestep].state.location, timestep); // current location
 
 		pair<int, int> goal; // The last goal location
 		if (goal_locations[k].empty())

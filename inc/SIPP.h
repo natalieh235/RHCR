@@ -10,16 +10,31 @@ public:
 	SIPPNode* parent;
     Interval interval;
 
+    Path node_path;
+    std::string primitive_name;
+
+    std::pair<int, int> goal;
+
     // the following is used to comapre nodes in the OPEN list
     struct compare_node
     {
         // returns true if n1 > n2 (note -- this gives us *min*-heap).
         bool operator()(const SIPPNode* n1, const SIPPNode* n2) const
         {
-            if (n1->g_val + n1->h_val == n2->g_val + n2->h_val)
-                return n1->g_val <= n2->g_val;  // break ties towards larger g_vals
+            // if fvals the same
+            if (n1->g_val + n1->h_val == n2->g_val + n2->h_val) {
+                if (n1->g_val == n2->g_val) {
+                    return std::get<0>(n1->interval) >= std::get<0>(n2->interval);
+                }
+                return n1->g_val <= n2->g_val;
+            }
             return n1->g_val + n1->h_val >= n2->g_val + n2->h_val;
+
+            // nat: modified for sipp-ip?
+            // int n1_val = n1->interval.first + (n1->location)
+            // if (n1->interval.first)
         }
+
     };  // used by OPEN (heap) to compare nodes (top of the heap has min f-val, and then highest g-val)
 
     // the following is used to comapre nodes in the FOCAL list
@@ -48,18 +63,20 @@ public:
     SIPPNode(): StateTimeAStarNode(), parent(nullptr) {}
 
     SIPPNode(const State& state, double g_val, double h_val, const Interval& interval,
-            SIPPNode* parent, int conflicts):
-			StateTimeAStarNode(state, g_val, h_val, nullptr, conflicts), parent(parent), interval(interval)
+            SIPPNode* parent, int conflicts, std::pair<int, int> goal):
+			StateTimeAStarNode(state, g_val, h_val, nullptr, conflicts), parent(parent), interval(interval), goal(goal), primitive_name("default")
 	{
 		if (parent != nullptr)
 		{
 			depth = parent->depth + 1;
 			goal_id = parent->goal_id;
+            goal = parent -> goal;
 		}
 		else
 		{
 			depth = 0;
 			goal_id = 0;
+            goal = goal;
 		}
 	}
 
@@ -76,7 +93,9 @@ public:
                   n1->state.orientation == n2->state.orientation &&
                   n1->state.velocity == n2->state.velocity &&
                   n1->interval == n2->interval &&
-                  n1->goal_id == n2->goal_id);
+                  n1->goal_id == n2->goal_id &&
+                  n1->primitive_name == n2->primitive_name
+                  );
         }
     };
 };
@@ -92,18 +111,22 @@ public:
     };
     vector<move> mvs;
     int o, v;
+
+    std::string name; 
     Primitive(){
         mvs.clear();
         o = v = 0;
+        name = "default";
     }
     Primitive(vector<move> mvs, int o, int v):
     mvs(std::move(mvs)),o(o),v(v){}
     friend ostream &operator<<( ostream &output, const Primitive &p ) {
-        output << "Moves:"<<endl;
+        output << "Primitive: " << p.name << endl;
+        output << " Moves:"<<endl;
         for(auto it:p.mvs){
-            output << "  dx:"<<it.dx<<", dy:"<<it.dy<<", ftt:"<<it.ftt<<", swt:"<<it.swt<<endl;
+            output << "     dx:"<<it.dx<<", dy:"<<it.dy<<", ftt:"<<it.ftt<<", swt:"<<it.swt<<endl;
         }
-        output<<"Final_o:"<<p.o<<", Final_v:"<<p.v<<endl;
+        output<<"   Final_o:"<<p.o<<", Final_v:"<<p.v<<endl;
         return output;
     }
 };
@@ -117,7 +140,7 @@ public:
              ReservationTable& RT);
     
     void apply_primitive(SIPPNode* curr, const BasicGraph &G, ReservationTable &rt, 
-        int t_lower, int t_upper, Primitive mp, double h_val);
+        int t_lower, int t_upper, Primitive mp, int goal);
     void fill_primitives();
 
 	string getName() const { return "SIPP"; }
@@ -137,7 +160,7 @@ private:
     // float max_acc;
 
     void generate_node(const Interval& interval, SIPPNode* curr, State next_state, const BasicGraph& G,
-                       int min_timestep, double h_val);
+                       int min_timestep, double h_val, std::pair<int, int> goal, std::string primitive_name);
     // Updates the path
     Path updatePath(const BasicGraph& G, const SIPPNode* goal);
 

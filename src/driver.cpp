@@ -181,7 +181,7 @@ int main(int argc, char** argv)
 	if (vm["scenario"].as<string>() == "KIVA")
 	{
 		double robot_height = 1.0;
-		double robot_width = 1.0;
+		double robot_width = 1.5;
 		KivaGrid G = KivaGrid(robot_width, robot_height);
 		if (!G.load_map(vm["map"].as<std::string>()))
 			return -1;

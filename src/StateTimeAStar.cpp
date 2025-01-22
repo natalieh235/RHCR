@@ -75,6 +75,7 @@ Path StateTimeAStar::run(const BasicGraph& G, const State& start,
 
     while (!focal_list.empty())
     {
+
         StateTimeAStarNode* curr = focal_list.top(); focal_list.pop();
         open_list.erase(curr->open_handle);
         curr->in_openlist = false;

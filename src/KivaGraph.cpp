@@ -245,6 +245,7 @@ bool KivaGrid::valid_move(int loc, int dir) const
 	// std::cout << "Kiva grid valid move" << std::endl;
 	// std::cout << "evaluating cells: " << std::endl;
 	for (auto &cell: occupied_cells) {
+		// std::cout << "occupied: " << cell << std::endl;
 		if (types[cell] == "Obstacle") {
 			return false;
 		}
@@ -253,67 +254,67 @@ bool KivaGrid::valid_move(int loc, int dir) const
 	return true;
 }
 
-std::vector<int> KivaGrid::get_occupied_cells(int location, int orientation) const
-{
-	// x, y is the center of the cell at index location in row-major
-	double x = location % this->cols + 0.5; 
-	double y = location / this->cols + 0.5;
+// std::vector<int> KivaGrid::get_occupied_cells(int location, int orientation) const
+// {
+// 	// x, y is the center of the cell at index location in row-major
+// 	double x = location % this->cols + 0.5; 
+// 	double y = location / this->cols + 0.5;
 
-	int grid_height = 1;
-	int grid_width = 1;
+// 	int grid_height = 1;
+// 	int grid_width = 1;
 
-	std::vector<int> occupied_cells;
-	double orientation_radians = orientation * -M_PI / 2;
+// 	std::vector<int> occupied_cells;
+// 	double orientation_radians = orientation * -M_PI / 2;
 
-	std::vector<std::pair<double, double>> corners = {
-		{ x - robot_width/2, y - robot_height/2 },                                   // Top-left
-		{ x + robot_width/2, y - robot_height/2},                     // Top-right
-		{ x - robot_width/2, y + robot_height/2 },      // Bottom-right
-		{ x + robot_width/2, y + robot_height/2}                     // Bottom-left
-	};
+// 	std::vector<std::pair<double, double>> corners = {
+// 		{ x - robot_width/2, y - robot_height/2 },                                   // Top-left
+// 		{ x + robot_width/2, y - robot_height/2},                     // Top-right
+// 		{ x - robot_width/2, y + robot_height/2 },      // Bottom-right
+// 		{ x + robot_width/2, y + robot_height/2}                     // Bottom-left
+// 	};
 
-	// std::cout << "looking for occupied cells at: " << location << ", " << orientation << ", " << orientation_radians << std::endl;
-	// std::cout << "x y is " << x << ", " << y << std::endl;
-	// Rotate corners
-	for (auto& corner : corners) {
-		// std::cout << "old corner: " << corner.first << ", " << corner.second << std::endl;
-		double x_rotated = x + (corner.first - x) * cos(orientation_radians) - (corner.second - y) * sin(orientation_radians);
-		double y_rotated = y + (corner.first - x) * sin(orientation_radians) + (corner.second - y) * cos(orientation_radians);
-		corner.first = x_rotated;
-		corner.second = y_rotated;
-		// std::cout << "new corner: " << corner.first << ", " << corner.second << std::endl;
-	}
+// 	// std::cout << "looking for occupied cells at: " << location << ", " << orientation << ", " << orientation_radians << std::endl;
+// 	// std::cout << "x y is " << x << ", " << y << std::endl;
+// 	// Rotate corners
+// 	for (auto& corner : corners) {
+// 		// std::cout << "old corner: " << corner.first << ", " << corner.second << std::endl;
+// 		double x_rotated = x + (corner.first - x) * cos(orientation_radians) - (corner.second - y) * sin(orientation_radians);
+// 		double y_rotated = y + (corner.first - x) * sin(orientation_radians) + (corner.second - y) * cos(orientation_radians);
+// 		corner.first = x_rotated;
+// 		corner.second = y_rotated;
+// 		// std::cout << "new corner: " << corner.first << ", " << corner.second << std::endl;
+// 	}
 
-	double x_min = std::min({ corners[0].first, corners[1].first, corners[2].first, corners[3].first });
-	double x_max = std::max({ corners[0].first, corners[1].first, corners[2].first, corners[3].first });
-	double y_min = std::min({ corners[0].second, corners[1].second, corners[2].second, corners[3].second });
-	double y_max = std::max({ corners[0].second, corners[1].second, corners[2].second, corners[3].second });
+// 	double x_min = std::min({ corners[0].first, corners[1].first, corners[2].first, corners[3].first });
+// 	double x_max = std::max({ corners[0].first, corners[1].first, corners[2].first, corners[3].first });
+// 	double y_min = std::min({ corners[0].second, corners[1].second, corners[2].second, corners[3].second });
+// 	double y_max = std::max({ corners[0].second, corners[1].second, corners[2].second, corners[3].second });
 
-	// std::cout << "xmin " << x_min << "xmax " << x_max << "ymin " << y_min << "ymax " << y_max << std::endl;
+// 	// std::cout << "xmin " << x_min << "xmax " << x_max << "ymin " << y_min << "ymax " << y_max << std::endl;
 
-	// Convert bounding box to occupied cells
-    int start_col = static_cast<int>(std::floor(x_min));
-    int end_col = static_cast<int>(std::ceil(x_max));
-    int start_row = static_cast<int>(std::floor(y_min));
-    int end_row = static_cast<int>(std::ceil(y_max));
+// 	// Convert bounding box to occupied cells
+//     int start_col = static_cast<int>(std::floor(x_min));
+//     int end_col = static_cast<int>(std::ceil(x_max));
+//     int start_row = static_cast<int>(std::floor(y_min));
+//     int end_row = static_cast<int>(std::ceil(y_max));
 
-	// std::cout << "startcol " << start_col << "endcol " << end_col << "start_row " << start_row << "endrow " << end_row << std::endl;
+// 	// std::cout << "startcol " << start_col << "endcol " << end_col << "start_row " << start_row << "endrow " << end_row << std::endl;
 
-    // Check each cell in the bounding box
-    for (int row = start_row; row < end_row; ++row) {
-        for (int col = start_col; col < end_col; ++col) {
-            // Check if the cell is within grid bounds
-            if (row >= 0 && row < this->rows && col >= 0 && col < this->cols) {
-				// std::cout << "found cell: " << row * this->cols + col << std::endl;
-                occupied_cells.push_back(row * this->cols + col); // Add cell index to occupied cells
-            }
-        }
-    }
+//     // Check each cell in the bounding box
+//     for (int row = start_row; row < end_row; ++row) {
+//         for (int col = start_col; col < end_col; ++col) {
+//             // Check if the cell is within grid bounds
+//             if (row >= 0 && row < this->rows && col >= 0 && col < this->cols) {
+// 				// std::cout << "found cell: " << row * this->cols + col << std::endl;
+//                 occupied_cells.push_back(row * this->cols + col); // Add cell index to occupied cells
+//             }
+//         }
+//     }
 
-	// std::cout << "occupied cells: " << occupied_cells << std::endl;
-	// std::cout << "======" << std::endl;
-	return occupied_cells;
-}
+// 	// std::cout << "occupied cells: " << occupied_cells << std::endl;
+// 	// std::cout << "======" << std::endl;
+// 	return occupied_cells;
+// }
 
 // Helper function to check if a point is inside the rotated robot (as a polygon)
 bool point_inside_robot(double x, double y, const std::vector<std::pair<double, double>>& corners) {

@@ -12,14 +12,20 @@ std::ostream & operator << (std::ostream &out, const State &s)
 
 std::ostream & operator << (std::ostream &out, const Path &path)
 {
-    for (auto state : path)
+    for (auto step : path)
     {
-        if(state.location < 0)
+        State s = step.state;
+        if(s.location < 0)
             continue;
-        out << "(" << state.location << ","
-            << state.orientation << "," 
-            << state.timestep << ","
-            << state.velocity << ")->";
+        
+        if (step.primitive != "default") {
+            out << step.primitive << "->";
+        }
+
+        out << "(" << s.location << ","
+            << s.orientation << "," 
+            << s.timestep << ","
+            << s.velocity << ")->";
     }
     out << std::endl;
     return out;

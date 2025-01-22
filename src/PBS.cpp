@@ -97,16 +97,16 @@ void PBS::find_conflicts(list<Conflict>& conflicts, int a1, int a2)
 		size_t min_path_length = paths[a1]->size() < paths[a2]->size() ? paths[a1]->size() : paths[a2]->size();
 		for (size_t timestep = 0; timestep < min_path_length; timestep++)
 		{
-			int loc1 = paths[a1]->at(timestep).location;
-			int loc2 = paths[a2]->at(timestep).location;
+			int loc1 = paths[a1]->at(timestep).state.location;
+			int loc2 = paths[a2]->at(timestep).state.location;
 			if (loc1 == loc2 && G.types[loc1] != "Magic")
 			{
 				conflicts.emplace_back(a1, a2, loc1, -1, timestep);
 				return;
 			}
 			else if (timestep < min_path_length - 1
-				&& loc1 == paths[a2]->at(timestep + 1).location
-				&& loc2 == paths[a1]->at(timestep + 1).location)
+				&& loc1 == paths[a2]->at(timestep + 1).state.location
+				&& loc2 == paths[a1]->at(timestep + 1).state.location)
 			{
 				conflicts.emplace_back(a1, a2, loc1, loc2, timestep + 1); // edge conflict
 				return;
@@ -117,10 +117,10 @@ void PBS::find_conflicts(list<Conflict>& conflicts, int a1, int a2)
 		{
 			int a1_ = paths[a1]->size() < paths[a2]->size() ? a1 : a2;
 			int a2_ = paths[a1]->size() < paths[a2]->size() ? a2 : a1;
-			int loc1 = paths[a1_]->back().location;
+			int loc1 = paths[a1_]->back().state.location;
 			for (size_t timestep = min_path_length; timestep < paths[a2_]->size(); timestep++)
 			{
-				int loc2 = paths[a2_]->at(timestep).location;
+				int loc2 = paths[a2_]->at(timestep).state.location;
 				if (loc1 == loc2 && G.types[loc1] != "Magic")
 				{
 					conflicts.emplace_back(a1_, a2_, loc1, -1, timestep); // It's at least a semi conflict		
@@ -137,10 +137,10 @@ void PBS::find_conflicts(list<Conflict>& conflicts, int a1, int a2)
 		{
 			if (size2 <= timestep - k_robust)
 				break;
-			int loc = paths[a1]->at(timestep).location;
+			int loc = paths[a1]->at(timestep).state.location;
 			for (int i = max(0, timestep - k_robust); i <= min(timestep + k_robust, size2 - 1); i++)
 			{
-				if (loc == paths[a2]->at(i).location && G.types[loc] != "Magic")
+				if (loc == paths[a2]->at(i).state.location && G.types[loc] != "Magic")
 				{
 					conflicts.emplace_back(a1, a2, loc, -1, min(i, timestep)); // k-robust vertex conflict
 					runtime_detect_conflicts += (double)(std::clock() - t) / CLOCKS_PER_SEC;
@@ -149,10 +149,10 @@ void PBS::find_conflicts(list<Conflict>& conflicts, int a1, int a2)
 			}
 			if (k_robust == 0 && timestep < size1 - 1 && timestep < size2 - 1) // detect edge conflicts
 			{
-				int loc1 = paths[a1]->at(timestep).location;
-				int loc2 = paths[a2]->at(timestep).location;
-				if (loc1 != loc2 && loc1 == paths[a2]->at(timestep + 1).location
-						 && loc2 == paths[a1]->at(timestep + 1).location)
+				int loc1 = paths[a1]->at(timestep).state.location;
+				int loc2 = paths[a2]->at(timestep).state.location;
+				if (loc1 != loc2 && loc1 == paths[a2]->at(timestep + 1).state.location
+						 && loc2 == paths[a1]->at(timestep + 1).state.location)
 				{
 					conflicts.emplace_back(a1, a2, loc1, loc2, timestep + 1); // edge conflict
 					runtime_detect_conflicts += (double)(std::clock() - t) / CLOCKS_PER_SEC;
@@ -280,11 +280,11 @@ double PBS::get_path_cost(const Path& path) const
     for (int i = 0; i < (int)path.size() - 1; i++)
     {
         double travel_time = 1;
-        if (i > window && travel_times.find(path[i].location) != travel_times.end())
+        if (i > window && travel_times.find(path[i].state.location) != travel_times.end())
         {
-            travel_time += travel_times.at(path[i].location);
+            travel_time += travel_times.at(path[i].state.location);
         }
-        cost += G.get_weight(path[i].location, path[i + 1].location) * travel_time;
+        cost += G.get_weight(path[i].state.location, path[i + 1].state.location) * travel_time;
     }
     return cost;
 }
@@ -309,15 +309,8 @@ bool PBS::find_path(PBSNode* node, int agent)
     std::cout << "PBS find_path: running SIPP for agent " << agent << std::endl;
     path = path_planner.run(G, starts[agent], goal_locations[agent], rt);
     
-    // for (auto p: path) {
-    //     std::cout << "pbs: " << p << std::endl;
-    // }
-    // std::cout << 
 	runtime_plan_paths += (double)(std::clock() - t) / CLOCKS_PER_SEC;
     path_cost = path_planner.path_cost;
-    // t = std::clock();
-    // rt.clear();
-    // runtime_rt += (double)(std::clock() - t) / CLOCKS_PER_SEC;
     LL_num_expanded += path_planner.num_expanded;
     LL_num_generated += path_planner.num_generated;
 
@@ -350,11 +343,11 @@ bool PBS::find_path(PBSNode* node, int agent)
 // return true if the agent keeps waiting at its start location until at least timestep
 bool PBS::wait_at_start(const Path& path, int start_location, int timestep)
 {
-    for (auto& state : path)
+    for (auto& step : path)
     {
-        if (state.timestep > timestep)
+        if (step.state.timestep > timestep)
             return true;
-        else if (state.location != start_location)
+        else if (step.state.location != start_location)
             return false;
     }
     return false; // when the path is empty
@@ -558,7 +551,7 @@ bool PBS::generate_root_node()
         }
     }
 
-    std::cout << " PBS: in initial " << initial_constraints.size() << std::endl;
+    std::cout << " PBS: generating root node, constraints size " << initial_constraints.size() << std::endl;
     // for each agent
     for (int i = 0; i < num_of_agents; i++) 
 	{
@@ -579,7 +572,7 @@ bool PBS::generate_root_node()
         t = std::clock();
 
         // run the single agent path planner for this agent
-        std::cout << " PBS: in initial, running SIPP for " << i << std::endl;
+        std::cout << " PBS: generating root node, running SIPP for " << i << std::endl;
         path = path_planner.run(G, starts[i], goal_locations[i], rt);
   
 		runtime_plan_paths += (double)(std::clock() - t) / CLOCKS_PER_SEC;
@@ -590,6 +583,7 @@ bool PBS::generate_root_node()
 
         if (path.empty())
         {
+            std::cout << "empty path in root " << std::endl;
             return false;
         }
         dummy_start->paths.emplace_back(i, path);
@@ -700,7 +694,7 @@ bool PBS::run(const vector<State>& starts,
         // pop node, first one will be dummy_start
 		PBSNode* curr = pop_node();
 
-        // idk some updating stuff
+        // for paths found initially
 		update_paths(curr);
 
         if (curr->conflicts.empty())
@@ -723,14 +717,15 @@ bool PBS::run(const vector<State>& starts,
 		HL_num_expanded++;
 
 		curr->time_expanded = HL_num_expanded;
-		if(screen == 2)
+		// if(screen == 2)
 			std::cout << "Expand Node " << curr->time_generated << " ( cost = " << curr->f_val << " , #conflicts = " <<
 			curr->num_of_collisions << " ) on conflict " << curr->conflict << std::endl;
 		
         // Expand into 2 nodes
         PBSNode* n[2];
-        for (auto & i : n)
-                i = new PBSNode();
+        for (auto & i : n) {
+            i = new PBSNode();
+        }
         
         // set n1 priority to a1, a2 and n2 priority to a2, a1
 	    resolve_conflict(curr->conflict, n[0], n[1]);
@@ -896,8 +891,8 @@ void PBS::print_paths() const
 		if (paths[i] == nullptr)
             continue;
         std::cout << "Agent " << i << " (" << paths[i]->size() - 1 << "): ";
-		for (const auto& s : (*paths[i]))
-			std::cout << s.location << "->";
+		for (const auto& step : (*paths[i]))
+			std::cout << step.state.location << "->";
 		std::cout << std::endl;
 	}
 }
@@ -949,7 +944,7 @@ void PBS::update_CAT(int ex_ag)
             continue; 
 		for (int timestep = 0; timestep < (int)paths[ag]->size() - 1; timestep++)
 		{
-			int loc = paths[ag]->at(timestep).location;
+			int loc = paths[ag]->at(timestep).state.location;
 			if (loc < 0)
 			    continue;
 			for (int t = max(0, timestep - k_robust); t <= timestep + k_robust; t++)

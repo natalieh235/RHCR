@@ -181,7 +181,8 @@ void BasicSystem::update_start_locations()
 {
     for (int k = 0; k < num_of_drives; k++)
     {
-        starts[k] = State(paths[k][timestep].location, 0, paths[k][timestep].orientation, paths[k][timestep].velocity);
+        // starts[k] = State(paths[k][timestep].location, 0, paths[k][timestep].orientation, paths[k][timestep].velocity);
+        starts[k] = State(paths[k][timestep].state.location, 0, paths[k][timestep].state.orientation, paths[k][timestep].state.velocity);
     }
 }
 
@@ -194,12 +195,12 @@ void BasicSystem::update_paths(const std::vector<Path*>& MAPF_paths, int max_tim
         paths[k].resize(timestep + length);
         for (int t = 0; t < length; t++)
         {
-            if (MAPF_paths[k]->at(t).location < 0)
-                paths[k][timestep + t] = State(-starts[k].location - 1, timestep + t, starts[k].orientation, starts[k].velocity);
+            if (MAPF_paths[k]->at(t).state.location < 0)
+                paths[k][timestep + t] = PathStep(State(-starts[k].location - 1, timestep + t, starts[k].orientation, starts[k].velocity));
             else
             {
                 paths[k][timestep + t] = MAPF_paths[k]->at(t);
-                paths[k][timestep + t].timestep = timestep + t;
+                paths[k][timestep + t].state.timestep = timestep + t;
             }
         }
     }
@@ -208,17 +209,29 @@ void BasicSystem::update_paths(const std::vector<Path*>& MAPF_paths, int max_tim
 void BasicSystem::update_paths(const std::vector<Path>& MAPF_paths, int max_timestep = INT_MAX)
 {
     std::cout << "updating paths" << std::endl;
+    std::cout << "paths: " << MAPF_paths.size() << std::endl;
+    std::cout << "max timestep: " << max_timestep << std::endl;
+
+    if (MAPF_paths.empty()) {
+        return;
+    }
+    
     for (int k = 0; k < num_of_drives; k++)
     {
-        std::cout << "drive " << k << std::endl;
+        // check for empty path
+        if (MAPF_paths[k].empty())
+            continue;
+
         int length = min(max_timestep, (int) MAPF_paths[k].size());
+        
         paths[k].resize(timestep + length);
-        // std::cout << "after resizing" << std::endl;
+        std::cout << "after resizing" << paths[k].size() << std::endl;
         for (int t = 0; t < length; t++)
         {
             paths[k][timestep + t] = MAPF_paths[k][t];
-            paths[k][timestep + t].timestep = timestep + t;
+            paths[k][timestep + t].state.timestep = timestep + t;
         }
+        std::cout << "BasicSystem: updated path: " << std::endl;
         std::cout << paths[k] << std::endl;
     }
 }
@@ -234,8 +247,8 @@ void BasicSystem::update_initial_paths(vector<Path>& initial_paths) const
         int j = (int)paths[k].size() - 1;
         while (i >= 0 && j >= 0)
         {
-            while (j >= 0 && paths[k][j].location != goal_locations[k][i].first &&
-			paths[k][j].timestep >= goal_locations[k][i].second)
+            while (j >= 0 && paths[k][j].state.location != goal_locations[k][i].first &&
+			paths[k][j].state.timestep >= goal_locations[k][i].second)
                 j--;
             i--;
         }
@@ -249,7 +262,7 @@ void BasicSystem::update_initial_paths(vector<Path>& initial_paths) const
         for (int t = 0; t < (int)initial_paths[k].size(); t++)
         {
             initial_paths[k][t] = paths[k][timestep + t];
-            initial_paths[k][t].timestep = t;
+            initial_paths[k][t].state.timestep = t;
         }
     }
 }
@@ -262,7 +275,7 @@ void BasicSystem::update_initial_constraints(list< tuple<int, int, int> >& initi
         int prev_location = -1;
         for (int t = timestep; t > max(0, timestep - k_robust); t--)
         {
-            int curr_location = paths[k][t].location;
+            int curr_location = paths[k][t].state.location;
             if (curr_location < 0)
                 continue;
             else if (curr_location != prev_location)
@@ -285,23 +298,23 @@ bool BasicSystem::check_collisions(const vector<Path>& input_paths) const
 			size_t min_path_length = input_paths[a1].size() < input_paths[a2].size() ? input_paths[a1].size() : input_paths[a2].size();
 			for (size_t timestep = 0; timestep < min_path_length; timestep++)
 			{
-				int loc1 = input_paths[a1].at(timestep).location;
-				int loc2 = input_paths[a2].at(timestep).location;
+				int loc1 = input_paths[a1].at(timestep).state.location;
+				int loc2 = input_paths[a2].at(timestep).state.location;
 				if (loc1 == loc2)
 					return true;
 				else if (timestep < min_path_length - 1
-					&& loc1 == input_paths[a2].at(timestep + 1).location
-					&& loc2 == input_paths[a1].at(timestep + 1).location)
+					&& loc1 == input_paths[a2].at(timestep + 1).state.location
+					&& loc2 == input_paths[a1].at(timestep + 1).state.location)
 					return true;
 			}
 			if ((hold_endpoints || useDummyPaths) && input_paths[a1].size() != input_paths[a2].size())
 			{
 				int a1_ = input_paths[a1].size() < input_paths[a2].size() ? a1 : a2;
 				int a2_ = input_paths[a1].size() < input_paths[a2].size() ? a2 : a1;
-				int loc1 = input_paths[a1_].back().location;
+				int loc1 = input_paths[a1_].back().state.location;
 				for (size_t timestep = min_path_length; timestep < input_paths[a2_].size(); timestep++)
 				{
-					int loc2 = input_paths[a2_].at(timestep).location;
+					int loc2 = input_paths[a2_].at(timestep).state.location;
 					if (loc1 == loc2)
 						return true;
 				}
@@ -319,8 +332,8 @@ bool BasicSystem::congested() const
     for (const auto& path : paths)
     {
         int t = 0;
-        while (t < simulation_window && path[timestep].location == path[timestep + t].location &&
-                path[timestep].orientation == path[timestep + t].orientation)
+        while (t < simulation_window && path[timestep].state.location == path[timestep + t].state.location &&
+                path[timestep].state.orientation == path[timestep + t].state.orientation)
             t++;
         if (t == simulation_window)
             wait_agents++;
@@ -338,26 +351,29 @@ list<tuple<int, int, int>> BasicSystem::move()
     std::cout << "BasicSystem: move, " << start_timestep << ", " << end_timestep << std::endl;
 	list<tuple<int, int, int>> finished_tasks; // <agent_id, location, timestep>
 
-    
-    for (int t = start_timestep; t <= end_timestep; t++)
-    {
-        for (int k = 0; k < num_of_drives; k++) {
-            std::cout << "initial paths: " << paths[k] << std::endl;
-            // Agents waits at its current locations if no future paths are assigned
-            while ((int) paths[k].size() <= t)
-            { // This should not happen?
-                State final_state = paths[k].back();
-                paths[k].emplace_back(final_state.location, final_state.timestep + 1, final_state.orientation);
-            }
-        }
+    for (auto path: paths) {
+        std::cout << "current paths: " << path << std::endl;
     }
+    
+    // for (int t = start_timestep; t <= end_timestep; t++)
+    // {
+    //     for (int k = 0; k < num_of_drives; k++) {
+    //         // std::cout << "initial paths: " << paths[k] << std::endl;
+    //         // Agents waits at its current locations if no future paths are assigned
+    //         while ((int) paths[k].size() <= t)
+    //         { // This should not happen?
+    //             State final_state = paths[k].back().state;
+    //             paths[k].emplace_back(final_state.location, final_state.timestep + 1, final_state.orientation);
+    //         }
+    //     }
+    // }
 
 
     for (int t = start_timestep; t <= end_timestep; t++)
     {
         for (int k = 0; k < num_of_drives; k++)
         {
-            State curr = paths[k][t];
+            State curr = paths[k][t].state;
 
             std::cout << "MOVE: Drive: " << k << " has state " << curr << std::endl;
             // remove goals if necessary
@@ -395,10 +411,10 @@ list<tuple<int, int, int>> BasicSystem::move()
 					{
 						if ((int)paths[j].size() <= i)
 							break;
-						if (paths[j][i].location == curr.location)
+						if (paths[j][i].state.location == curr.location)
 						{
 							cout << "Drive " << k << " at " << curr << " has a conflict with drive " << j
-								<< " at " << paths[j][i] << endl;
+								<< " at " << paths[j][i].state << endl;
 							save_results(); //TODO: write termination reason to files
 							exit(-1);
 						}
@@ -490,8 +506,8 @@ void BasicSystem::save_results()
         output << "Agent-" << k << ";";
         for (auto p : paths[k])
         {
-            if (p.timestep <= timestep)
-                output << p << ";";
+            if (p.state.timestep <= timestep)
+                output << p.state << ";";
         }
         output << std::endl;
     }
@@ -518,10 +534,10 @@ void BasicSystem::update_travel_times(unordered_map<int, double>& travel_times)
         int t = timestep;
         while (t >= t_min)
         {
-            int loc = path[t].location;
-            int dir = path[t].orientation;
+            int loc = path[t].state.location;
+            int dir = path[t].state.orientation;
             int wait = 0;
-            while (t > wait && path[t - 1 - wait].location == loc && path[t - 1 - wait].orientation == dir)
+            while (t > wait && path[t - 1 - wait].state.location == loc && path[t - 1 - wait].state.orientation == dir)
                 wait++;
             auto it = travel_times.find(loc);
             if (it == travel_times.end())
@@ -605,7 +621,7 @@ void BasicSystem::solve()
                 for (int t = 0; t < (int)planned_paths[i].size(); t++)
                 {
                     planned_paths[i][t] = paths[i][timestep + t];
-                    planned_paths[i][t].timestep = t;
+                    planned_paths[i][t].state.timestep = t;
                 }
                 if (p == new_agents.end() || *p != i)
                 {
@@ -661,7 +677,6 @@ void BasicSystem::solve()
             update_paths(lra.solution);
         }
         }
-    //  std::cout << "almost done.." << outfile << std::endl;
         if (log)
             solver.save_search_tree(outfile + "/search_trees/" + std::to_string(timestep) + ".gv");
 
@@ -775,9 +790,9 @@ bool BasicSystem::load_records()
 			beg++;
 			int time = atoi((*beg).c_str());
             std::cout << loc <<" , "  <<  time << ", " << orientation << std::endl;
-			paths[k].emplace_back(loc, time, orientation);
+			paths[k].emplace_back(PathStep(State(loc, time, orientation)));
 		}
-		timestep = min(timestep, paths[k].back().timestep);
+		timestep = min(timestep, paths[k].back().state.timestep);
 	}
 	myfile.close();
 

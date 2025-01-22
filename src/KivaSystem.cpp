@@ -25,7 +25,7 @@ void KivaSystem::initialize()
 	finished_tasks.resize(num_of_drives);
 
 	std::cout << " resized"<< std::endl;
-	// consider_rotation = true;
+	consider_rotation = true;
 	bool succ = load_records(); // continue simulating from the records
 	std::cout << " load records"<< std::endl;
 	if (!succ)
@@ -35,8 +35,24 @@ void KivaSystem::initialize()
 		if (!succ)
 		{
 			cout << "Randomly generating initial locations" << endl;
-			initialize_start_locations();
-			initialize_goal_locations();
+			// initialize_start_locations();
+			// initialize_goal_locations();
+			starts[0] = State(G.agent_home_locations[0], 0, 1);
+			std::cout << "start for agent " << 0 << " is " << starts[0] << std::endl;
+			paths[0].emplace_back(starts[0]);
+			finished_tasks[0].emplace_back(G.agent_home_locations[0], 0);
+
+			starts[1] = State(G.agent_home_locations[1], 0, 1);
+			std::cout << "start for agent " << 1 << " is " << starts[1] << std::endl;
+			paths[1].emplace_back(starts[1]);
+			finished_tasks[1].emplace_back(G.agent_home_locations[1], 0);
+
+			int goal1 = 20;
+			int goal2 = 37;
+			goal_locations[0].emplace_back(goal1, 0);
+			std::cout << "goal for agent " << 0 << " is " << goal1 << std::endl;
+			goal_locations[1].emplace_back(goal2, 0);
+			std::cout << "goal for agent " << 1 << " is " << goal2 << std::endl;
 		}
 	}
 }
@@ -92,7 +108,7 @@ void KivaSystem::update_goal_locations()
 		unordered_map<int, int> held_locations; // <location, agent id>
 		for (int k = 0; k < num_of_drives; k++)
 		{
-			int curr = paths[k][timestep].location; // current location
+			int curr = paths[k][timestep].state.location; // current location
 			if (goal_locations[k].empty())
 			{
 				int next = G.endpoints[rand() % (int)G.endpoints.size()];
@@ -103,8 +119,8 @@ void KivaSystem::update_goal_locations()
 				goal_locations[k].emplace_back(next, 0);
 				held_endpoints.insert(next);
 			}
-			if (paths[k].back().location == goal_locations[k].back().first &&  // agent already has paths to its goal location
-				paths[k].back().timestep >= goal_locations[k].back().second) // after its release time
+			if (paths[k].back().state.location == goal_locations[k].back().first &&  // agent already has paths to its goal location
+				paths[k].back().state.timestep >= goal_locations[k].back().second) // after its release time
 			{
 				int agent = k;
 				int loc = goal_locations[k].back().first;
@@ -118,7 +134,7 @@ void KivaSystem::update_goal_locations()
 					cout << "Agent " << removed_agent << " has to wait for agent " << agent << " because of location " << loc << endl;
 					held_locations[loc] = agent; // this agent has to keep holding this location
 					agent = removed_agent;
-					loc = paths[agent][timestep].location; // another agent's start location
+					loc = paths[agent][timestep].state.location; // another agent's start location
 					it = held_locations.find(loc);
 				}
 				held_locations[loc] = agent;
@@ -147,7 +163,7 @@ void KivaSystem::update_goal_locations()
 					cout << "Agent " << removed_agent << " has to wait for agent " << agent << " because of location " << loc << endl;
 					held_locations[loc] = agent; // this agent has to keep holding its start location
 					agent = removed_agent;
-					loc = paths[agent][timestep].location; // another agent's start location
+					loc = paths[agent][timestep].state.location; // another agent's start location
 					it = held_locations.find(loc);
 				}
 				held_locations[loc] = agent;// this agent has to keep holding its start location
@@ -158,7 +174,7 @@ void KivaSystem::update_goal_locations()
 	{
 		for (int k = 0; k < num_of_drives; k++)
 		{
-			int curr = paths[k][timestep].location; // current location
+			int curr = paths[k][timestep].state.location; // current location
 			if (useDummyPaths)
 			{
 				if (goal_locations[k].empty())
@@ -207,6 +223,7 @@ void KivaSystem::update_goal_locations()
 						exit(-1);
 					}
 					std::cout << "update goal locations: next location is for " << k << " is " << next.first << std::endl;
+					std::cout << "num goal locations: " << goal_locations[k].size() << std::endl;
 					goal_locations[k].emplace_back(next);
 					min_timesteps += G.get_Manhattan_distance(next.first, goal.first); // G.heuristics.at(next)[goal];
 					goal = next;
