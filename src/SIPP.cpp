@@ -1,6 +1,8 @@
 #include "SIPP.h"
 #include <cstdlib>
 
+bool debug = false;
+
 Path SIPP::updatePath(const BasicGraph& G, const SIPPNode* goal)
 {
     Path path(goal->state.timestep + 1);
@@ -24,7 +26,7 @@ Path SIPP::updatePath(const BasicGraph& G, const SIPPNode* goal)
         else
         {
             const SIPPNode* prev = curr->parent;
-            int degree = G.get_rotate_degree(prev->state.orientation, curr->state.orientation);
+            // int degree = G.get_rotate_degree(prev->state.orientation, curr->state.orientation);
             int t = prev->state.timestep + 1;
 
             // std::cout << "curr " << curr->state << " interval: " << curr->interval << std::endl;
@@ -45,7 +47,7 @@ Path SIPP::updatePath(const BasicGraph& G, const SIPPNode* goal)
             {
                 // std::cout << "waiting? " << curr->state << std::endl;
                 // path[t] = State(prev->state.location, t, curr->state.orientation, prev->state.velocity); // wait at prev location
-                path[t] = PathStep(State(prev->state), prev->primitive_name);
+                path[t] = PathStep(State(prev->state), "moving");
                 t++;
             }
             path[curr->state.timestep] = PathStep(State(curr->state), curr->primitive_name); // move to current location
@@ -91,7 +93,7 @@ void SIPP::fill_primitives() {
         // ACCELERATION
         // Primitive tmp;
         tmp.v = 1; // ending velocity 1
-        tmp.name = "Acclerate";
+        tmp.name = "Accelerate";
         tmp.o=o; // end orientation is the same
 
         tmp.mvs = {
@@ -289,8 +291,10 @@ void SIPP::fill_primitives() {
 void SIPP::generate_successors(SIPPNode* curr, const BasicGraph &G, ReservationTable &rt, 
     int t_lower, int t_upper, const vector<pair<int, int> >& goal_location) {
     
-    std::cout << "generating successors for " << curr->state << ", goal_id: " << curr->goal_id << std::endl;
-    std::cout << "num of primitives: " << motion_primitives[curr->state.orientation][curr->state.velocity].size() << std::endl;
+    if (debug) {
+        std::cout << "generating successors for " << curr->state << ", goal_id: " << curr->goal_id << std::endl;
+        std::cout << "num of primitives: " << motion_primitives[curr->state.orientation][curr->state.velocity].size() << std::endl;
+    }
     // for possible primitives with that starting velocity
     for (auto &mp: motion_primitives[curr->state.orientation][curr->state.velocity]) {
         // std::cout << "applying primitive " << mp << std::endl;
@@ -303,7 +307,10 @@ void SIPP::generate_successors(SIPPNode* curr, const BasicGraph &G, ReservationT
 
         apply_primitive(curr, G, rt, t_lower, t_upper, mp, curr->goal.first);
     }
-    std::cout << "========= end successors ========" << std::endl;
+
+    if (debug) {
+        std::cout << "========= end successors ========" << std::endl;
+    }
 }
 
 // Generate acceleration primitive
@@ -334,8 +341,11 @@ void SIPP::apply_primitive(SIPPNode* curr, const BasicGraph &G, ReservationTable
     int t_lower, int t_upper, Primitive mp, int goal) {
 
     // logging
-    std::cout << "SIPP: applying primitive: " << std::endl;
-    std::cout << "  " << mp << std::endl;
+
+    if (debug) {
+        std::cout << "SIPP: applying primitive: " << std::endl;
+        std::cout << "  " << mp << std::endl;
+    }
 
 
     vector<pair<int, int>> time_intervals, tmp;
@@ -355,7 +365,9 @@ void SIPP::apply_primitive(SIPPNode* curr, const BasicGraph &G, ReservationTable
 
         // check out of bounds
         if (xx < 0 || xx >= G.get_rows() || yy < 0 || yy >= G.get_cols()) {
-            std::cout << "  apply primitive end location is invalid" << std::endl;
+            if (debug) {
+                std::cout << "  apply primitive end location is invalid" << std::endl;
+            }
             return;
         }
 
@@ -363,26 +375,28 @@ void SIPP::apply_primitive(SIPPNode* curr, const BasicGraph &G, ReservationTable
 
         // checking obstacles
         if (!G.valid_move(next_location, mv.cur_o)) {
-            std::cout << "  apply primitive conflicts with map" << std::endl;
-            std::cout << "      at " << next_location << " and orientation " << mv.cur_o << std::endl;
+            if (debug) {
+                std::cout << "  apply primitive conflicts with map" << std::endl;
+                std::cout << "      at " << next_location << " and orientation " << mv.cur_o << std::endl;
+            }
             return;
         }
 
         // delta
         int completion_time = mv.ftt - past_time;
 
-        std::cout << "  size of intervals: " << time_intervals.size() << std::endl;
+        // std::cout << "  size of intervals: " << time_intervals.size() << std::endl;
         // valid times to exist in the previous cell
         for (auto &it: time_intervals) {
-            std::cout << "          curr interval: " << it.first << ", " << it.second << std::endl;
+            // std::cout << "          curr interval: " << it.first << ", " << it.second << std::endl;
             
             int t_l = min(INTERVAL_MAX, it.first + completion_time); // time needed to complete this one move in the primitive
             int t_u = min(INTERVAL_MAX, it.second + completion_time);
 
             list<Interval> safe_ints = rt.getSafeIntervals(next_location, t_l, t_u);
-            if (safe_ints.empty()) {
-                std::cout << "SIPP: no safe intervals found for " << next_location << std::endl;
-            }
+            // if (safe_ints.empty()) {
+            //     std::cout << "SIPP: no safe intervals found for " << next_location << std::endl;
+            // }
 
             // for each safe interval check for an overlap
             for (auto &safe_it: safe_ints) {
@@ -470,7 +484,10 @@ void SIPP::apply_primitive(SIPPNode* curr, const BasicGraph &G, ReservationTable
         abs(G.get_xy(next_location).second - G.get_xy(goal).second);
 
     if (time_intervals.empty()) {
-        std::cout << "found no valid intervals for move " << mp << std::endl; 
+        if (debug) {
+            std::cout << "found no valid intervals for move " << mp << std::endl; 
+        }
+        
         return;
     }
     
@@ -482,8 +499,11 @@ void SIPP::apply_primitive(SIPPNode* curr, const BasicGraph &G, ReservationTable
         int timestep = t_lower+mp.mvs.back().swt + mp.mvs.back().ftt;
         generate_node({adjusted_tl, adjusted_tu, 0}, curr, next_state, G, 
             timestep, h_val, curr->goal, mp.name);
-        std::cout << "          generating new node with " << next_state << ", hval: " << h_val << 
-            ", tl: " << adjusted_tl << ", timestep: " << timestep << std::endl;
+        
+        if (debug) {
+            std::cout << "          generating new node with " << next_state << ", hval: " << h_val << 
+                ", tl: " << adjusted_tl << ", timestep: " << timestep << std::endl;
+        }
         // std::cout << "generating node with tl " << std::get<0>(it) << " + " << mp.mvs.back().swt
         //     << ", tu " << std::get<1>(it) << " + " << mp.mvs.back().swt << ", min timestep " 
         //     << t_lower+mp.mvs.back().swt + mp.mvs.back().ftt << " state: " << next_state << std::endl;
@@ -497,15 +517,13 @@ Path SIPP::run(const BasicGraph& G, const State& start,
                const vector<pair<int, int> >& goal_location,
                ReservationTable& rt)
 {
-    std::cout << "SIPP: running SIPP" << std::endl;
-    // ROBOT_HEIGHT = 1.5
-    // ROBOT_WIDTH = 3
+    std::cout << "          ======= SIPP ======= " << std::endl;
+
     num_expanded = 0;
     num_generated = 0;
     runtime = 0;
     clock_t t = std::clock();
     
-
     // heuristic from start to end
 	// double h_val = compute_h_value(G, start.location, 0, goal_location);
     // compute manhattan distance
@@ -518,7 +536,7 @@ Path SIPP::run(const BasicGraph& G, const State& start,
 		cout << "The start and goal locations are disconnected!" << endl;
 		return Path();
 	}
-    cout << "sipp: start location " << start << endl;
+    cout << "           sipp: start location " << start << endl;
 
     // Start at the first safe interval
     // beginning state is the start.location @ first safe interval
@@ -562,19 +580,32 @@ Path SIPP::run(const BasicGraph& G, const State& start,
 	if (hold_endpoints)
 		earliest_holding_time = rt.getHoldingTimeFromSIT(goal_location.back().first);
 
-    // std::cout << "starting focal list, " << focal_list.size() << std::endl;
+    std::cout << "          SIPP: starting focal list, " << focal_list.size() << std::endl;
     // take from focal list
     while (!focal_list.empty())
     {
-        std::cout << "SIPP LOGGING: Focal list size: " << focal_list.size() << std::endl;
+        // std::cout << "SIPP LOGGING: Focal list size: " << focal_list.size() << std::endl;
+
+        if ((double)(std::clock() - t) / CLOCKS_PER_SEC > 30)
+        {
+            cout << "SIPP: TIME LIMIT EXCEEDED" << endl;
+            releaseClosedListNodes();
+            open_list.clear();
+            focal_list.clear();
+            return Path();
+        }
 
         SIPPNode* curr = focal_list.top(); focal_list.pop();
-        cout << "cur state: " << curr->state << endl;
-        cout << "fval: " << curr->getFVal() << endl;
-        if (curr->parent != nullptr)
-            cout << "parent: " << curr->parent->state << endl;
 
-        cout << "cur goal id: " << curr->goal_id << ", location: " << curr->goal.first << endl;
+        if (debug) {
+            cout << "cur state: " << curr->state << endl;
+            cout << "fval: " << curr->getFVal() << endl;
+            if (curr->parent != nullptr) {
+                cout << "parent: " << curr->parent->state << endl;
+            }
+            cout << "cur goal id: " << curr->goal_id << ", location: " << curr->goal.first << endl;
+        }
+
         // std::cout << "focal size, " << focal_list.size() << std::endl;
         open_list.erase(curr->open_handle); // remove from open
         curr->in_openlist = false; // removed
@@ -584,23 +615,27 @@ Path SIPP::run(const BasicGraph& G, const State& start,
         if (curr->state.location == goal_location[curr->goal_id].first &&
             curr->state.timestep >= goal_location[curr->goal_id].second) // reach the goal location after its release time
         {
-            cout << "SIPP: reached goal location " << curr->goal_id << ", " << curr->state << endl;
             curr->goal_id++;
             if (curr->goal_id == (int)goal_location.size() &&
                 earliest_holding_time > curr->state.timestep) {
                 curr->goal_id--;
             }
-            cout << "SIPP: reached goal location NEW GOAL ID " << curr->goal_id << ", loc: " << goal_location[curr->goal_id].first << endl;
+            // cout << "SIPP: reached goal location NEW GOAL ID " << curr->goal_id << ", loc: " << goal_location[curr->goal_id].first << endl;
             // curr->goal = goal_location[curr->goal_id];
             // reset open, closed ,and focal list
             if (curr->goal_id == (int)goal_location.size())
             {
+                // cout << "SIPP: reached goal location " << curr->goal_id - 1 << ", " << curr->state << endl;
                 Path path = updatePath(G, curr);
                 releaseClosedListNodes();
                 open_list.clear();
                 focal_list.clear();
                 runtime = (std::clock() - t) * 1.0 / CLOCKS_PER_SEC;
-                cout << "SIPP: returning path " << curr->goal_id << "path: " << path << endl;
+                // if (debug) {
+                cout << "           SIPP: returning path," << endl;
+                std::cout << "          Time elapsed: " << (std::clock() - t) * 1.0 / CLOCKS_PER_SEC << " seconds" << std::endl;
+                // cout << "====== END SIPP ======" << endl;
+                // }
                 return path;
             }
             // curr->goal = goal_location[curr->goal_id];
@@ -610,8 +645,11 @@ Path SIPP::run(const BasicGraph& G, const State& start,
             new_node->goal = goal_location[new_node->goal_id];
             open_list.clear();
             focal_list.clear();
-            std::cout << "AFTER CLEARING: Focal list size: " << focal_list.size() << std::endl;
-            std::cout << "after clearing " << new_node->state << ", goal id: " << new_node->goal_id << std::endl;
+
+            // if (debug) {
+            //     std::cout << "AFTER CLEARING: Focal list size: " << focal_list.size() << std::endl;
+            //     std::cout << "after clearing " << new_node->state << ", goal id: " << new_node->goal_id << std::endl;
+            // }
 
             new_node->open_handle = open_list.push(new_node);
             new_node->in_openlist = true;
@@ -659,6 +697,8 @@ Path SIPP::run(const BasicGraph& G, const State& start,
                 }
 
                 // double h_val = compute_h_value(G, location, curr->goal_id, goal_location);
+
+                // NAT: changed to manhattan distance
                 double h_val = abs(G.get_xy(curr->state.location).first - G.get_xy(goal_location[curr->goal_id].first).first) + 
         abs(G.get_xy(curr->state.location).second - G.get_xy(goal_location[curr->goal_id].first).second);
 
@@ -714,9 +754,7 @@ Path SIPP::run(const BasicGraph& G, const State& start,
             {
                 break;
             }
-        }
-        else // add to focal list
-        {
+        } else { // add to focal list
             SIPPNode* open_head = open_list.top();
             if (open_head->getFVal() > min_f_val)
             {
@@ -741,7 +779,7 @@ Path SIPP::run(const BasicGraph& G, const State& start,
     open_list.clear();
     focal_list.clear();
 
-    // std::cout << 
+    std::cout << "          Time elapsed: " << (std::clock() - t) * 1.0 / CLOCKS_PER_SEC << " seconds" << std::endl;
     return Path();
 }
 

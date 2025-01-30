@@ -297,7 +297,7 @@ bool PBS::find_path(PBSNode* node, int agent)
 
     clock_t t = std::clock();
 	rt.copy(initial_rt);
-    std::cout << "pbs find path" << initial_constraints.size() << std::endl;
+    // std::cout << "pbs find path" << initial_constraints.size() << std::endl;
     //                                      high priority agents
     rt.build(paths, initial_constraints, node->priorities.get_reachable_nodes(agent),
              agent, starts[agent].location);
@@ -306,7 +306,7 @@ bool PBS::find_path(PBSNode* node, int agent)
     runtime_rt += (double)(std::clock() - t) / CLOCKS_PER_SEC;
 
     t = std::clock();
-    std::cout << "PBS find_path: running SIPP for agent " << agent << std::endl;
+    std::cout << "      PBS find_path: running SIPP for agent " << agent << std::endl;
     path = path_planner.run(G, starts[agent], goal_locations[agent], rt);
     
 	runtime_plan_paths += (double)(std::clock() - t) / CLOCKS_PER_SEC;
@@ -395,6 +395,7 @@ void PBS::find_replan_agents(PBSNode* node, const list<Conflict>& conflicts,
 
 bool PBS::find_consistent_paths(PBSNode* node, int agent)
 {
+    std::cout << "  PBS: Finding consistent paths for agent " << agent << " in node with priorities" << node->priority.first << " -> " << node->priority.second << std::endl;
     clock_t t = clock();
     int count = 0; // count the times that we call the low-level search.
     unordered_set<int> replan;
@@ -402,11 +403,13 @@ bool PBS::find_consistent_paths(PBSNode* node, int agent)
         replan.insert(agent);
 
     find_replan_agents(node, node->conflicts, replan);
-    /*clock_t t2 = clock();
-    PathTable pt(paths, window, k_robust);
-    runtime_detect_conflicts += (double)(std::clock() - t2) / CLOCKS_PER_SEC;*/
     while (!replan.empty())
     {
+        std::cout << "  PBS must replan agents: ";
+        for (auto a : replan)
+            std::cout << a << ", ";
+        std::cout << std::endl;
+
         // if u run low lvl too many times? 
         if (count > (int) node->paths.size() * 5)
         {
@@ -416,11 +419,10 @@ bool PBS::find_consistent_paths(PBSNode* node, int agent)
         int a = *replan.begin();
         replan.erase(a);
         count++;
-        /*t2 = clock();
-        pt.remove(paths[a], a);
-        runtime_detect_conflicts += (double)(std::clock() - t2) / CLOCKS_PER_SEC;*/
 
         // try to find a path for agent a
+        
+        std::cout << "  PBS consistent paths: looking for path for agent " << a << std::endl;
         if (!find_path(node, a))
         {
             runtime_find_consistent_paths += (double)(std::clock() - t) / CLOCKS_PER_SEC;
@@ -433,10 +435,11 @@ bool PBS::find_consistent_paths(PBSNode* node, int agent)
 
         // find conflicts that include the agent w/ new path
         find_conflicts(new_conflicts, a);
-        /*t2 = clock();
-        std::list< std::shared_ptr<Conflict> > new_conflicts = pt.add(paths[a], a);
-        runtime_detect_conflicts += (double)(std::clock() - t2) / CLOCKS_PER_SEC;*/
         find_replan_agents(node, new_conflicts, replan);
+        std::cout << "  after new plan, PBS must replan agents: ";
+        for (auto a : replan)
+            std::cout << a << ", ";
+        std::cout << std::endl;
 
         node->conflicts.splice(node->conflicts.end(), new_conflicts);
     }
@@ -463,6 +466,8 @@ bool PBS::validate_consistence(const list<Conflict>& conflicts, const PriorityGr
 
 bool PBS::generate_child(PBSNode* node, PBSNode* parent)
 {
+
+    std::cout << "  PBS: Generating PBS child node" << std::endl;
 	node->parent = parent;
 	node->g_val = parent->g_val;
 	node->makespan = parent->makespan;
@@ -502,6 +507,11 @@ bool PBS::generate_child(PBSNode* node, PBSNode* parent)
         clock_t t = clock();
         node->priorities.copy(node->parent->priorities);
         node->priorities.add(node->priority.first, node->priority.second);
+        
+        std::cout << "      PBS: adding priority " << node->priority.first << " -> " << node->priority.second << std::endl;
+
+        // print priorities of node
+        
         runtime_copy_priorities += (double)(std::clock() - t) / CLOCKS_PER_SEC;
         copy_conflicts(node->parent->conflicts, node->conflicts, -1); // copy all conflicts
         if (!find_consistent_paths(node, node->priority.first))
@@ -551,7 +561,7 @@ bool PBS::generate_root_node()
         }
     }
 
-    std::cout << " PBS: generating root node, constraints size " << initial_constraints.size() << std::endl;
+    std::cout << "PBS: generating root node, constraints size " << initial_constraints.size() << std::endl;
     // for each agent
     for (int i = 0; i < num_of_agents; i++) 
 	{
@@ -718,7 +728,7 @@ bool PBS::run(const vector<State>& starts,
 
 		curr->time_expanded = HL_num_expanded;
 		// if(screen == 2)
-			std::cout << "Expand Node " << curr->time_generated << " ( cost = " << curr->f_val << " , #conflicts = " <<
+			std::cout << "\n PBS: Expand Node " << curr->time_generated << " ( cost = " << curr->f_val << " , #conflicts = " <<
 			curr->num_of_collisions << " ) on conflict " << curr->conflict << std::endl;
 		
         // Expand into 2 nodes
@@ -761,6 +771,7 @@ bool PBS::run(const vector<State>& starts,
                     solution_cost = i->g_val;
                     best_node = i;
                     allNodes_table.push_back(i);
+                    std::cout << "  PBS: successfully generated child node" << std::endl;
                     break;
                 }
             }

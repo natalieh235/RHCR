@@ -209,8 +209,8 @@ void BasicSystem::update_paths(const std::vector<Path*>& MAPF_paths, int max_tim
 void BasicSystem::update_paths(const std::vector<Path>& MAPF_paths, int max_timestep = INT_MAX)
 {
     std::cout << "updating paths" << std::endl;
-    std::cout << "paths: " << MAPF_paths.size() << std::endl;
-    std::cout << "max timestep: " << max_timestep << std::endl;
+    // std::cout << "paths: " << MAPF_paths.size() << std::endl;
+    // std::cout << "max timestep: " << max_timestep << std::endl;
 
     if (MAPF_paths.empty()) {
         return;
@@ -225,14 +225,14 @@ void BasicSystem::update_paths(const std::vector<Path>& MAPF_paths, int max_time
         int length = min(max_timestep, (int) MAPF_paths[k].size());
         
         paths[k].resize(timestep + length);
-        std::cout << "after resizing" << paths[k].size() << std::endl;
+        // std::cout << "after resizing" << paths[k].size() << std::endl;
         for (int t = 0; t < length; t++)
         {
             paths[k][timestep + t] = MAPF_paths[k][t];
             paths[k][timestep + t].state.timestep = timestep + t;
         }
-        std::cout << "BasicSystem: updated path: " << std::endl;
-        std::cout << paths[k] << std::endl;
+        // std::cout << "BasicSystem: updated path: " << std::endl;
+        // std::cout << paths[k] << std::endl;
     }
 }
 
@@ -351,9 +351,9 @@ list<tuple<int, int, int>> BasicSystem::move()
     std::cout << "BasicSystem: move, " << start_timestep << ", " << end_timestep << std::endl;
 	list<tuple<int, int, int>> finished_tasks; // <agent_id, location, timestep>
 
-    for (auto path: paths) {
-        std::cout << "current paths: " << path << std::endl;
-    }
+    // for (auto path: paths) {
+    //     std::cout << "current paths: " << path << std::endl;
+    // }
     
     // for (int t = start_timestep; t <= end_timestep; t++)
     // {
@@ -375,7 +375,7 @@ list<tuple<int, int, int>> BasicSystem::move()
         {
             State curr = paths[k][t].state;
 
-            std::cout << "MOVE: Drive: " << k << " has state " << curr << std::endl;
+            // std::cout << "MOVE: Drive: " << k << " has state " << curr << std::endl;
             // remove goals if necessary
             if ((!hold_endpoints || paths[k].size() == t + 1) && !goal_locations[k].empty() && 
 				curr.location == goal_locations[k].front().first &&
@@ -383,7 +383,7 @@ list<tuple<int, int, int>> BasicSystem::move()
             {
                 goal_locations[k].erase(goal_locations[k].begin());
 				finished_tasks.emplace_back(k, curr.location, t);
-                std::cout << "MOVE: Drive: " << k << " reached goal location  " << curr.location << std::endl;
+                // std::cout << "MOVE: Drive: " << k << " reached goal location  " << curr.location << std::endl;
             }
 
             // check whether the move is valid
@@ -567,39 +567,37 @@ void BasicSystem::update_travel_times(unordered_map<int, double>& travel_times)
 void BasicSystem::solve()
 {
     // std::cout << "basic system solve called" << std::endl;
-    LRA_called = false;
-	LRAStar lra(G, solver.path_planner);
-	lra.simulation_window = simulation_window;
-	lra.k_robust = k_robust;
+    // LRA_called = false;
+	// LRAStar lra(G, solver.path_planner);
+	// lra.simulation_window = simulation_window;
+	// lra.k_robust = k_robust;
 	solver.clear();
-	if (solver.get_name() == "LRA")
-	{
-		// predict travel time
-		unordered_map<int, double> travel_times;
-		update_travel_times(solver.travel_times);
+	// if (solver.get_name() == "LRA")
+	// {
+	// 	// predict travel time
+	// 	unordered_map<int, double> travel_times;
+	// 	update_travel_times(solver.travel_times);
 
-		bool sol = solver.run(starts, goal_locations, time_limit);
-		update_paths(solver.solution);
-	}
-	else if (solver.get_name() == "WHCA")
-	{
-		update_initial_constraints(solver.initial_constraints);
+	// 	bool sol = solver.run(starts, goal_locations, time_limit);
+	// 	update_paths(solver.solution);
+	// }
+	// else if (solver.get_name() == "WHCA")
+	// {
+	// 	update_initial_constraints(solver.initial_constraints);
 
-		bool sol = solver.run(starts, goal_locations, time_limit);
-		if (sol)
-		{
-			update_paths(solver.solution);
-		}
-		else
-		{
-			lra.resolve_conflicts(solver.solution);
-			update_paths(lra.solution);
-		}
-	}
-	else // PBS or ECBS
-    {
-        //PriorityGraph initial_priorities;
-    //  std::cout << "solver initial constraints: " << solver.initial_constraints.size() << std::endl;
+	// 	bool sol = solver.run(starts, goal_locations, time_limit);
+	// 	if (sol)
+	// 	{
+	// 		update_paths(solver.solution);
+	// 	}
+	// 	else
+	// 	{
+	// 		lra.resolve_conflicts(solver.solution);
+	// 		update_paths(lra.solution);
+	// 	}
+	// }
+	// else // PBS or ECBS
+    // {
         update_initial_constraints(solver.initial_constraints);
 
         // solve
@@ -671,16 +669,16 @@ void BasicSystem::solve()
                 solver.save_constraints_in_goal_node(outfile + "/goal_nodes/" + std::to_string(timestep) + ".gv");
             update_paths(solver.solution);
         }
-        else
-        {
-            lra.resolve_conflicts(solver.solution);
-            update_paths(lra.solution);
-        }
+        // else
+        // {
+        //     lra.resolve_conflicts(solver.solution);
+        //     update_paths(lra.solution);
+        // }
         }
         if (log)
             solver.save_search_tree(outfile + "/search_trees/" + std::to_string(timestep) + ".gv");
 
-    }
+    // }
     solver.save_results(outfile + "/solver.csv", "Time: " + std::to_string(timestep) + "," 
                                     + "Num Drives: " + std::to_string(num_of_drives) + ", Seed: " + std::to_string(seed));
 }
