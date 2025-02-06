@@ -658,22 +658,21 @@ void BasicSystem::solve()
             // lra.resolve_conflicts(planned_paths, k_robust);
             update_paths(planned_paths);
         }
-        else
-        {
-        std::cout << "BasicSystem.cpp: starting solve" << std::endl;
-        bool sol = solver.run(starts, goal_locations, time_limit);
-        std::cout << "pbs returned " << sol << std::endl;
-        if (sol)
-        {
-            if (log)
-                solver.save_constraints_in_goal_node(outfile + "/goal_nodes/" + std::to_string(timestep) + ".gv");
-            update_paths(solver.solution);
-        }
-        // else
-        // {
-        //     lra.resolve_conflicts(solver.solution);
-        //     update_paths(lra.solution);
-        // }
+        else {
+            std::cout << "BasicSystem.cpp: starting solve" << std::endl;
+            bool sol = solver.run(starts, goal_locations, time_limit);
+            std::cout << "pbs returned " << sol << std::endl;
+            if (sol)
+            {
+                if (log)
+                    solver.save_constraints_in_goal_node(outfile + "/goal_nodes/" + std::to_string(timestep) + ".gv");
+                update_paths(solver.solution);
+            }
+            // else
+            // {
+            //     lra.resolve_conflicts(solver.solution);
+            //     update_paths(lra.solution);
+            // }
         }
         if (log)
             solver.save_search_tree(outfile + "/search_trees/" + std::to_string(timestep) + ".gv");

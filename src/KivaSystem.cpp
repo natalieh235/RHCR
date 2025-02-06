@@ -93,9 +93,12 @@ void KivaSystem::initialize_goal_locations()
 	// Goal locations are not necessarily unique
 	for (int k = 0; k < num_of_drives; k++)
 	{
+		// int goal_idx = rand() % (int)G.endpoints.size();
+		// std::cout << "goal idx " << goal_idx << std::endl;
 		int goal = G.endpoints[rand() % (int)G.endpoints.size()];
-		goal_locations[k].emplace_back(goal, 0);
 		std::cout << "goal for agent " << k << " is " << goal << std::endl;
+		goal_locations[k].emplace_back(goal, 0);
+		
 	}
 }
 

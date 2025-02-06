@@ -297,13 +297,9 @@ void SIPP::generate_successors(SIPPNode* curr, const BasicGraph &G, ReservationT
     }
     // for possible primitives with that starting velocity
     for (auto &mp: motion_primitives[curr->state.orientation][curr->state.velocity]) {
-        // std::cout << "applying primitive " << mp << std::endl;
         auto cur_xy = G.get_xy(curr->state.location);
-        // int next_location = G.get_location(mp.mvs.back().dx + cur_xy.first, mp.mvs.back().dy + cur_xy.second);
-        // double h_val = compute_h_value(G, next_location, curr->goal_id, goal_location);
-        
         auto end_xy = G.get_xy(curr->goal.first);
-        double h_val = abs(end_xy.first - cur_xy.first) + abs(end_xy.second - cur_xy.second);
+        // double h_val = abs(end_xy.first - cur_xy.first) + abs(end_xy.second - cur_xy.second);
 
         apply_primitive(curr, G, rt, t_lower, t_upper, mp, curr->goal.first);
     }
@@ -348,9 +344,13 @@ void SIPP::apply_primitive(SIPPNode* curr, const BasicGraph &G, ReservationTable
     }
 
 
+    // init intervals
     vector<pair<int, int>> time_intervals, tmp;
     time_intervals.push_back({t_lower, t_upper});
+
     bool endCellTouched = false;
+
+    // track start location
     pair<int, int> xy = G.get_xy(curr->state.location);
     int x = xy.first, y = xy.second;
     int xx = xy.first, yy = xy.second, past_time = 0;
@@ -360,6 +360,8 @@ void SIPP::apply_primitive(SIPPNode* curr, const BasicGraph &G, ReservationTable
 
     // for each move in the primitive
     for (auto mv:mp.mvs) {
+
+        // new location
         xx = x + mv.dx;
         yy = y + mv.dy;
 
@@ -373,7 +375,7 @@ void SIPP::apply_primitive(SIPPNode* curr, const BasicGraph &G, ReservationTable
 
         next_location = G.get_location(xx, yy);
 
-        // checking obstacles
+        // checking obstacles  do i need? 
         if (!G.valid_move(next_location, mv.cur_o)) {
             if (debug) {
                 std::cout << "  apply primitive conflicts with map" << std::endl;
@@ -382,10 +384,15 @@ void SIPP::apply_primitive(SIPPNode* curr, const BasicGraph &G, ReservationTable
             return;
         }
 
-        // delta
+        // delta = lb_cell - t
         int completion_time = mv.ftt - past_time;
 
+        // t = lb_cell
+        past_time = mv.ftt;
+
         // std::cout << "  size of intervals: " << time_intervals.size() << std::endl;
+
+        // for each ti in time_ints do:
         // valid times to exist in the previous cell
         for (auto &it: time_intervals) {
             // std::cout << "          curr interval: " << it.first << ", " << it.second << std::endl;
@@ -394,16 +401,18 @@ void SIPP::apply_primitive(SIPPNode* curr, const BasicGraph &G, ReservationTable
             int t_u = min(INTERVAL_MAX, it.second + completion_time);
 
             list<Interval> safe_ints = rt.getSafeIntervals(next_location, t_l, t_u);
-            // if (safe_ints.empty()) {
-            //     std::cout << "SIPP: no safe intervals found for " << next_location << std::endl;
-            // }
+            if (debug && safe_ints.empty()) {
+                std::cout << "SIPP: no safe intervals found for " << next_location << std::endl;
+            }
 
             // for each safe interval check for an overlap
             for (auto &safe_it: safe_ints) {
-                int safe_lower = std::get<0>(safe_it);
-                int safe_upper = std::get<1>(safe_it);
+                // t_earliest = max(t_l + delta, lb_safe)
                 int t_earliest = max(t_l, safe_lower);
+
+                // t_latest = min(t_u + delta, ub_safe)
                 int t_latest = min(t_u, safe_upper - mv.swt);
+
                 // After adjustment, check if the interval is valid
                 if (t_earliest <= t_latest) {
                     tmp.push_back({t_earliest, t_latest});
@@ -471,14 +480,8 @@ void SIPP::apply_primitive(SIPPNode* curr, const BasicGraph &G, ReservationTable
         }
 
         time_intervals = tmp;
-        tmp.clear();
-        past_time = mv.ftt;
-        // if(mv.isEndCell){
-        //     endCellTouched = true;
-        // }
-    }
-
-    vector<pair<int, int>> intervals;
+        tmp.clear(); 
+    } // end of for loop through primitive edges
 
     double h_val = abs(G.get_xy(next_location).first - G.get_xy(goal).first) +
         abs(G.get_xy(next_location).second - G.get_xy(goal).second);
@@ -517,7 +520,8 @@ Path SIPP::run(const BasicGraph& G, const State& start,
                const vector<pair<int, int> >& goal_location,
                ReservationTable& rt)
 {
-    std::cout << "          ======= SIPP ======= " << std::endl;
+    if (debug)
+        std::cout << "          ======= SIPP ======= " << std::endl;
 
     num_expanded = 0;
     num_generated = 0;
@@ -536,6 +540,8 @@ Path SIPP::run(const BasicGraph& G, const State& start,
 		cout << "The start and goal locations are disconnected!" << endl;
 		return Path();
 	}
+
+    if (debug)
     cout << "           sipp: start location " << start << endl;
 
     // Start at the first safe interval
@@ -580,7 +586,9 @@ Path SIPP::run(const BasicGraph& G, const State& start,
 	if (hold_endpoints)
 		earliest_holding_time = rt.getHoldingTimeFromSIT(goal_location.back().first);
 
-    std::cout << "          SIPP: starting focal list, " << focal_list.size() << std::endl;
+
+    if (debug)
+        std::cout << "          SIPP: starting focal list, " << focal_list.size() << std::endl;
     // take from focal list
     while (!focal_list.empty())
     {
@@ -620,8 +628,7 @@ Path SIPP::run(const BasicGraph& G, const State& start,
                 earliest_holding_time > curr->state.timestep) {
                 curr->goal_id--;
             }
-            // cout << "SIPP: reached goal location NEW GOAL ID " << curr->goal_id << ", loc: " << goal_location[curr->goal_id].first << endl;
-            // curr->goal = goal_location[curr->goal_id];
+
             // reset open, closed ,and focal list
             if (curr->goal_id == (int)goal_location.size())
             {
@@ -631,25 +638,19 @@ Path SIPP::run(const BasicGraph& G, const State& start,
                 open_list.clear();
                 focal_list.clear();
                 runtime = (std::clock() - t) * 1.0 / CLOCKS_PER_SEC;
-                // if (debug) {
-                cout << "           SIPP: returning path," << endl;
-                std::cout << "          Time elapsed: " << (std::clock() - t) * 1.0 / CLOCKS_PER_SEC << " seconds" << std::endl;
+                if (debug) {
+                    cout << "           SIPP: returning path," << endl;
                 // cout << "====== END SIPP ======" << endl;
-                // }
+                }
+                std::cout << "          Time elapsed: " << (std::clock() - t) * 1.0 / CLOCKS_PER_SEC << " seconds" << std::endl;
                 return path;
             }
-            // curr->goal = goal_location[curr->goal_id];
 
             SIPPNode* new_node = new SIPPNode(curr->state, curr->g_val, curr->h_val, curr->interval, curr->parent, curr->conflicts, curr->goal);
             new_node->goal_id++;
             new_node->goal = goal_location[new_node->goal_id];
             open_list.clear();
             focal_list.clear();
-
-            // if (debug) {
-            //     std::cout << "AFTER CLEARING: Focal list size: " << focal_list.size() << std::endl;
-            //     std::cout << "after clearing " << new_node->state << ", goal id: " << new_node->goal_id << std::endl;
-            // }
 
             new_node->open_handle = open_list.push(new_node);
             new_node->in_openlist = true;
@@ -663,11 +664,9 @@ Path SIPP::run(const BasicGraph& G, const State& start,
             new_node->focal_handle = focal_list.push(new_node);
             continue;
         }
-        // check if agent has reached all goal locations
         
         bool use_primitives = true;
         if (use_primitives) {
-            // cout << "ummm im here?? " << endl;
             generate_successors(curr, G, rt, 
             std::get<0>(curr->interval), std::get<1>(curr->interval),
             goal_location);
@@ -725,10 +724,8 @@ Path SIPP::run(const BasicGraph& G, const State& start,
         // update FOCAL if min f-val increased
         if (open_list.empty())  // in case OPEN is empty, no path found
         {
-            // std::cout << "SIPP: open list empty" << std::endl;
             if(prioritize_start) // the agent has the highest priority at its start location
             {
-                // std::cout << "prioritize start" << std::endl;
                 // This is correct only when k_robust <= 1. Otherwise, agents might not be able to
                 // wait at its start locations due to initial constraints caused by the previous actions
                 // of other agents.
@@ -771,7 +768,6 @@ Path SIPP::run(const BasicGraph& G, const State& start,
                 focal_bound = new_focal_bound;
             }
         }
-        // std::cout << "focal size at end, " << focal_list.size() << std::endl;
     }  // end while loop
 
     // no path found
@@ -779,6 +775,7 @@ Path SIPP::run(const BasicGraph& G, const State& start,
     open_list.clear();
     focal_list.clear();
 
+    // if (debug)
     std::cout << "          Time elapsed: " << (std::clock() - t) * 1.0 / CLOCKS_PER_SEC << " seconds" << std::endl;
     return Path();
 }
@@ -812,7 +809,6 @@ void SIPP::generate_node(const Interval& interval, SIPPNode* curr, State next_st
     // if this node does not exist in allNodes
     if (it == allNodes_table.end())
     {
-        // std::cout << "      generating: node doesn't exist" << next->state << ", fval: " << next->getFVal() << std::endl;
         next->open_handle = open_list.push(next);
         next->in_openlist = true;
         num_generated++;
@@ -825,8 +821,6 @@ void SIPP::generate_node(const Interval& interval, SIPPNode* curr, State next_st
     // update existing node if needed (only in the open_list)
     SIPPNode* existing_next = *it;
     double existing_f_val = existing_next->getFVal();
-
-    // std::cout << "      generating: existing node " << existing_next->state << ", fval: " << existing_f_val << std::endl;
 
     if (existing_next->in_openlist)
     {  // if its in the open list
