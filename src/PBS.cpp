@@ -406,8 +406,7 @@ bool PBS::find_consistent_paths(PBSNode* node, int agent)
         replan.insert(agent);
 
     find_replan_agents(node, node->conflicts, replan);
-    while (!replan.empty())
-    {
+    while (!replan.empty()) {
         if (screen == 2) {
             std::cout << "  PBS must replan agents: ";
             for (auto a : replan)
@@ -416,8 +415,7 @@ bool PBS::find_consistent_paths(PBSNode* node, int agent)
         }
 
         // if u run low lvl too many times? 
-        if (count > (int) node->paths.size() * 5)
-        {
+        if (count > (int) node->paths.size() * 5){
             runtime_find_consistent_paths += (double)(std::clock() - t) / CLOCKS_PER_SEC;
             return false;
         }
@@ -429,8 +427,7 @@ bool PBS::find_consistent_paths(PBSNode* node, int agent)
         
         if (screen == 2)
             std::cout << "  PBS consistent paths: looking for path for agent " << a << std::endl;
-        if (!find_path(node, a))
-        {
+        if (!find_path(node, a)) {
             runtime_find_consistent_paths += (double)(std::clock() - t) / CLOCKS_PER_SEC;
             return false;
         }
@@ -713,8 +710,7 @@ bool PBS::run(const vector<State>& starts,
 	while (!dfs.empty() && !solution_found)
 	{
 		runtime = (double)(std::clock() - start)  / CLOCKS_PER_SEC;
-        if (runtime > time_limit)
-		{  // timeout
+        if (runtime > time_limit) {  // timeout
 			solution_cost = -1;
 			solution_found = false;
 			break;
@@ -726,8 +722,7 @@ bool PBS::run(const vector<State>& starts,
         // for paths found initially
 		update_paths(curr);
 
-        if (curr->conflicts.empty())
-        {// found a solution (and finish the while look)
+        if (curr->conflicts.empty()) {// found a solution (and finish the while look)
             solution_found = true;
             solution_cost = curr->g_val;
             best_node = curr;
@@ -762,21 +757,17 @@ bool PBS::run(const vector<State>& starts,
         // int loc = std::get<2>(*curr->conflict);
         // then 
         vector<Path*> copy(paths);
-        for (auto & i : n)
-        {
+        for (auto & i : n) {
             // copy over parent priorities to child one
             // then add the newly generated priority
             // copy all conflicts
-            // replan the higher priority one? 
-            // update num_collisions and update h and f vals
+            // calls find_consistent_paths
             bool sol = generate_child(i, curr);
-            if (sol)
-            {
+            if (sol) {
                 HL_num_generated++;
                 i->time_generated = HL_num_generated;
             }
-            if (sol)
-            {
+            if (sol) {
                 if (screen == 2)
                 {
                     std::cout << "Generate #" << i->time_generated << " with "
@@ -784,8 +775,7 @@ bool PBS::run(const vector<State>& starts,
                               << i->g_val - curr->g_val << " delta cost and "
                               << i->num_of_collisions << " conflicts " << std::endl;
                 }
-                if (i->f_val == min_f_val && i->num_of_collisions == 0) //no conflicts
-                {// found a solution (and finish the while look)
+                if (i->f_val == min_f_val && i->num_of_collisions == 0) {// found a solution (and finish the while look)
                     solution_found = true;
                     solution_cost = i->g_val;
                     best_node = i;
@@ -796,19 +786,15 @@ bool PBS::run(const vector<State>& starts,
                     break;
                 }
             }
-		    else
-		    {
+		    else {
 			    delete i;
 			    i = nullptr;
 		    }
 		    paths = copy;
         }
 
-       
-
         // add nodes to dfs
-        if (!solution_found)
-        {   
+        if (!solution_found) {   
             if (screen == 2)
                 std::cout << "  PBS: solution not found, adding child to dfs" << std::endl;
             if (n[0] != nullptr && n[1] != nullptr) {
@@ -845,30 +831,25 @@ bool PBS::run(const vector<State>& starts,
         std::cout << "  PBS: DFS DONE" << std::endl;
 
 	runtime = (double)(std::clock() - start) / CLOCKS_PER_SEC;
+    total_runtime += runtime;
     get_solution();
 
     // std::cout << "got solution" << std::endl;
-	if (solution_found && !validate_solution())
-	{
+	if (solution_found && !validate_solution()) {
         std::cout << "Solution invalid!!!" << std::endl;
-        // print_paths();
         exit(-1);
 	}
 
-    // std::cout << "path stuff" << std::endl;
     min_sum_of_costs = 0;
-    for (int i = 0; i < num_of_agents; i++)
-    {
+    for (int i = 0; i < num_of_agents; i++) {
         int start_loc = starts[i].location;
         // std::cout << "Agent " << i << ", start location " << start_loc << std::endl;
-        for (const auto& goal : goal_locations[i])
-        {
+        for (const auto& goal : goal_locations[i]) {
             min_sum_of_costs += G.heuristics.at(goal.first)[start_loc];
             start_loc = goal.first;
         }
     }
 
-    // std::cout << "  PBS: Done" << std::endl;
 	if (screen > 0) // 1 or 2
 		print_results();
 	return solution_found;

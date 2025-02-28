@@ -515,6 +515,30 @@ src/PBSNode.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/PBSNode.cpp.s
 .PHONY : src/PBSNode.cpp.s
 
+src/PP.o: src/PP.cpp.o
+.PHONY : src/PP.o
+
+# target to build an object file
+src/PP.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/PP.cpp.o
+.PHONY : src/PP.cpp.o
+
+src/PP.i: src/PP.cpp.i
+.PHONY : src/PP.i
+
+# target to preprocess a source file
+src/PP.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/PP.cpp.i
+.PHONY : src/PP.cpp.i
+
+src/PP.s: src/PP.cpp.s
+.PHONY : src/PP.s
+
+# target to generate assembly for a file
+src/PP.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/PP.cpp.s
+.PHONY : src/PP.cpp.s
+
 src/PathTable.o: src/PathTable.cpp.o
 .PHONY : src/PathTable.o
 
@@ -862,6 +886,9 @@ help:
 	@echo "... src/PBSNode.o"
 	@echo "... src/PBSNode.i"
 	@echo "... src/PBSNode.s"
+	@echo "... src/PP.o"
+	@echo "... src/PP.i"
+	@echo "... src/PP.s"
 	@echo "... src/PathTable.o"
 	@echo "... src/PathTable.i"
 	@echo "... src/PathTable.s"

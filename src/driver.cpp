@@ -57,8 +57,7 @@ MAPFSolver* set_solver(const BasicGraph& G, const boost::program_options::variab
 	// 	ecbs->suboptimal_bound = vm["suboptimal_bound"].as<double>();
 	// 	mapf_solver = ecbs;
 	// }
-	if (solver_name == "PBS")
-	{
+	if (solver_name == "PBS") {
 		PBS* pbs = new PBS(G, *path_planner);
 		pbs->lazyPriority = vm["lazyP"].as<bool>();
         auto prioritize_start = vm["prioritize_start"].as<bool>();
@@ -67,6 +66,13 @@ MAPFSolver* set_solver(const BasicGraph& G, const boost::program_options::variab
         pbs->prioritize_start = prioritize_start;
         pbs->setRT(vm["CAT"].as<bool>(), prioritize_start);
 		mapf_solver = pbs;
+	} else if (solver_name == "PP") {
+		PP* pp = new PP(G, *path_planner);
+		pp->num_order_sample = 30;
+		auto prioritize_start = vm["prioritize_start"].as<bool>();
+		pp->prioritize_start = prioritize_start;
+		pp->setRT(vm["CAT"].as<bool>(), prioritize_start);
+		mapf_solver = pp;
 	}
 	// else if (solver_name == "WHCA")
 	// {
@@ -109,7 +115,7 @@ int main(int argc, char** argv)
 		("cutoffTime,t", po::value<int>()->default_value(60), "cutoff time (seconds)")
 		("seed,d", po::value<int>(), "random seed")
 		("screen,s", po::value<int>()->default_value(1), "screen option (0: none; 1: results; 2:all)")
-		("solver", po::value<string>()->default_value("PBS"), "solver (LRA, PBS, WHCA, ECBS)")
+		("solver", po::value<string>()->default_value("PBS"), "solver (LRA, PBS, WHCA, ECBS, PP)")
 		("id", po::value<bool>()->default_value(false), "independence detection")
 		("single_agent_solver", po::value<string>()->default_value("SIPP"), "single-agent solver (ASTAR, SIPP)")
 		("lazyP", po::value<bool>()->default_value(false), "use lazy priority")
@@ -182,7 +188,7 @@ int main(int argc, char** argv)
 	if (vm["scenario"].as<string>() == "KIVA")
 	{
 		double robot_height = 1.0;
-		double robot_width = 1.5;
+		double robot_width = 1.0;
 		KivaGrid G = KivaGrid(robot_width, robot_height);
 		if (!G.load_map(vm["map"].as<std::string>()))
 			return -1;

@@ -47,7 +47,7 @@ public:
     std::pair<int, int> get_xy(int location) const {return std::make_pair(location/cols, location%cols);}
     int get_location(int x, int y) const {return (x * cols + y);}
 
-    double robot_width = 1.5;
+    double robot_width = 1.0;
     double robot_height = 1.0;
 
     std::vector<int> get_occupied_cells(int location, int orientation) const;

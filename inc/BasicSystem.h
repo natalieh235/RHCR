@@ -6,6 +6,7 @@
 #include "WHCAStar.h"
 #include "ECBS.h"
 #include "LRAStar.h"
+#include "PP.h"
 
 
 class BasicSystem

@@ -214,17 +214,18 @@ void ReservationTable::insertSoftConstraint2SIT(int location, int t_min, int t_m
 
 void ReservationTable::insertPath2CT(const Path& path)
 {
+	// std::cout << "RT: INSERTING PATH TO CT" << path << std::endl;
 	if (path.empty())
 		return;
 	auto prev = path.begin();
 	auto curr = path.begin();
 	++curr;
-	while (curr != path.end() && curr->state.timestep - k_robust <= window)
-	{
-		if (prev->state.location != curr->state.location)
-		{
+	while (curr != path.end() && curr->state.timestep - k_robust <= window) {
+		if (prev->state.location != curr->state.location) {
+			// std::cout << "inserting loc to ct, " << prev->state.location << ", " << curr->state.location << std::endl;
 			if (G.types[prev->state.location] != "Magic") {
 				for (auto cell: G.get_occupied_cells(prev->state.location, prev->state.orientation)) {
+					// std::cout << "loc " << prev->state.location << " uses cell " << cell << std::endl;
 					ct[cell].emplace_back(prev->state.timestep - k_robust, curr->state.timestep + k_robust);
 				}	
 			}
@@ -238,6 +239,7 @@ void ReservationTable::insertPath2CT(const Path& path)
 		}
 		++curr;
 	}
+
 	if (curr != path.end())
 	{
 		if (G.types[prev->state.location] != "Magic")
@@ -250,8 +252,7 @@ void ReservationTable::insertPath2CT(const Path& path)
 			ct[getEdgeIndex(curr->state.location, prev->state.location)].emplace_back(curr->state.timestep, curr->state.timestep + 1);
 		}
 	}
-	else
-	{
+	else {
 		if (G.types[prev->state.location] != "Magic")
 			for (auto cell: G.get_occupied_cells(prev->state.location, prev->state.orientation)) {
 				ct[cell].emplace_back(prev->state.timestep - k_robust, path.back().state.timestep + 1 + k_robust);
@@ -320,19 +321,23 @@ void ReservationTable::build(const vector<Path*>& paths,
 
     // add hard constraints
     vector<bool> soft(num_of_agents, true);
+
+	// std::cout << "adding hard constraints, size of high priority agents: " << high_priority_agents.size() << std::endl;
     for (auto i : high_priority_agents)
     {
+		// std::cout << "dafque" << std::endl;
         if (paths[i] == nullptr)
             continue;
 		insertPath2CT(*paths[i]);
 		soft[i] = false;
     }
 
-    if (prioritize_start) // prioritize waits at start locations
-    {
-        insertConstraints4starts(paths, current_agent, start_location);
-    }
+    // if (prioritize_start) // prioritize waits at start locations
+    // {
+    //     insertConstraints4starts(paths, current_agent, start_location);
+    // }
 
+	// std::cout << "adding initial constraints" << std::endl;
 	addInitialConstraints(initial_constraints, current_agent); // add initial constraints
    
     runtime = (std::clock() - t) * 1.0  / CLOCKS_PER_SEC;

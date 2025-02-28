@@ -140,7 +140,7 @@ public:
              ReservationTable& RT);
     
     void apply_primitive(SIPPNode* curr, const BasicGraph &G, ReservationTable &rt, 
-        int t_lower, int t_upper, Primitive mp, int goal);
+        int t_lower, int t_upper, Primitive mp, int goal_id, const vector<pair<int, int> > &goal_location);
     void fill_primitives();
 
 	string getName() const { return "SIPP"; }

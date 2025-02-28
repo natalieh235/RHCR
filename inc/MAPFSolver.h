@@ -12,6 +12,7 @@ public:
 	bool hold_endpoints;
 
 	double runtime;
+	double total_runtime;
     int screen;
 
 	bool solution_found;

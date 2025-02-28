@@ -66,21 +66,33 @@ void KivaSystem::initialize_start_locations()
 	// Any non-obstacle locations can be start locations
 	// Start locations should be unique
 	// std::cout << "initializing start location" << consider_rotation << std::endl;
+
+	// std::vector<std::pair<int, int>> hardcoded_starts = {
+	// 	{131, 1}, 
+	// 	{134, 1},
+	// 	{137, 1},
+	// };
+
 	for (int k = 0; k < num_of_drives; k++)
 	{
 		int orientation = -1;
-		if (consider_rotation)
-		{
+		int start_location = G.agent_home_locations[k];
+		if (consider_rotation) {
 			orientation = rand() % 4;
-			while (!G.valid_move(G.agent_home_locations[k], orientation)) {
+			while (!G.valid_move(start_location, orientation)) {
+				std::cout << "invalid orientation " << orientation << std::endl;
 				orientation = rand() % 4;
 			}
 		}
 
-		starts[k] = State(G.agent_home_locations[k], 0, orientation);
+		// int start_location = hardcoded_starts[k].first;
+    	// int orientation = hardcoded_starts[k].second;
+
+		starts[k] = State(start_location, 0, orientation);
+		// starts[k] = State(G.agent_home_locations[k], 0, orientation);
 		std::cout << "start for agent " << k << " is " << starts[k] << std::endl;
 		paths[k].emplace_back(starts[k]);
-		finished_tasks[k].emplace_back(G.agent_home_locations[k], 0);
+		finished_tasks[k].emplace_back(start_location, 0);
 	}
 }
 
@@ -285,6 +297,7 @@ void KivaSystem::simulate(int simulation_time)
 
 	update_start_locations();
 	std::cout << std::endl << "AM I DONE!" << std::endl;
+	std::cout << "Solver total runtime: " << solver.total_runtime << std::endl;
 	save_results();
 }
 

@@ -297,11 +297,8 @@ void SIPP::generate_successors(SIPPNode* curr, const BasicGraph &G, ReservationT
     }
     // for possible primitives with that starting velocity
     for (auto &mp: motion_primitives[curr->state.orientation][curr->state.velocity]) {
-        auto cur_xy = G.get_xy(curr->state.location);
-        auto end_xy = G.get_xy(curr->goal.first);
-        // double h_val = abs(end_xy.first - cur_xy.first) + abs(end_xy.second - cur_xy.second);
-
-        apply_primitive(curr, G, rt, t_lower, t_upper, mp, curr->goal.first);
+        // double h_val = compute_h_value(G, location, curr->goal_id, goal_location);
+        apply_primitive(curr, G, rt, t_lower, t_upper, mp, curr->goal_id, goal_location);
     }
 
     if (debug) {
@@ -309,32 +306,9 @@ void SIPP::generate_successors(SIPPNode* curr, const BasicGraph &G, ReservationT
     }
 }
 
-// Generate acceleration primitive
-// Primitive generate_acceleration_primitive(double v0, double vf, double max_acc, int cur_o) {
-//     vector<Primitive::move> moves;
-//     int dx = 0, dy = 1; 
-
-//     // Iterate over velocity increments
-//     for (int v = v0 + 1; v <= vf; ++v) {
-//         double t = (v - v0) / max_acc; // Time to reach vf
-//         double s = v0 * t + 0.5 * max_acc * t * t;          // Distance traveled
-//         int cells = static_cast<int>(s / grid_size);        // Convert to grid cells
-
-//         // Add move to primitive
-//         moves.emplace_back(dx * cells, dy * cells, static_cast<int>(t), static_cast<int>(t), cur_o, vf == max_v);
-//     }
-
-//     // Return the Primitive
-//     return Primitive(moves, cur_o, max_v);
-// }
-
-// generate wait intervals (belongs to safe interval)
-// node to extand: n = (v, [tl, tu])
-// outputs set of time intervals st. each ti belongs to one of the safe intervals of the target
-// intervals do not overlap
 
 void SIPP::apply_primitive(SIPPNode* curr, const BasicGraph &G, ReservationTable &rt, 
-    int t_lower, int t_upper, Primitive mp, int goal) {
+    int t_lower, int t_upper, Primitive mp, int goal_id, const vector<pair<int, int> > &goal_location) {
 
     // logging
 
@@ -408,83 +382,26 @@ void SIPP::apply_primitive(SIPPNode* curr, const BasicGraph &G, ReservationTable
             // for each safe interval check for an overlap
             for (auto &safe_it: safe_ints) {
                 // t_earliest = max(t_l + delta, lb_safe)
-                int t_earliest = max(t_l, safe_lower);
+                int t_earliest = max(t_l, std::get<0>(safe_it));
 
                 // t_latest = min(t_u + delta, ub_safe)
-                int t_latest = min(t_u, safe_upper - mv.swt);
+                int t_latest = min(t_u, std::get<1>(safe_it) - mv.swt);
 
                 // After adjustment, check if the interval is valid
                 if (t_earliest <= t_latest) {
                     tmp.push_back({t_earliest, t_latest});
                 }
             }
-
-            // bool is_safe = false;
-            // for (auto cell: G.get_occupied_cells(next_location, mv.cur_o)) {
-            //     list<Interval> safe_ints = rt.getSafeIntervals(cell, t_l, t_u);
-            //     if (safe_ints.empty()) {
-            //         std::cout << "SIPP: no safe intervals found for " << cell << std::endl;
-            //     }
-            //     // for (auto &it: rt.getSafeIntervals(cell, t_l, t_u)) {
-            //     for (auto &it: safe_ints) {
-            //         if (t_l >= std::get<0>(it) && t_u <= std::get<1>(it)) {
-            //             is_safe = true; // Valid interval found
-            //             break;
-            //         }
-            //         // IS THIS VALID?? check
-            //         // If [t_l, t_u] is outside the safe interval, adjust it
-            //         if (t_l < std::get<0>(it)) {
-            //             t_l = std::get<1>(it); // Adjust t_l to the start of the safe interval
-            //         }
-            //         if (t_u > std::get<1>(it)) {
-            //             t_u = std::get<0>(it); // Adjust t_u to the end of the safe interval
-            //         }
-            //         // After adjustment, check if the interval is valid
-            //         if (t_l <= t_u) {
-            //             is_safe = true;
-            //             break;
-            //         }
-            //     }
-            // }
-            // if (!is_safe) {
-            //     std::cout << "SIPP RECTANGLE CHECKING FAILED " << std::endl;
-            //     std::cout << "  at " << next_location << std::endl;
-            //     // If we cannot adjust [t_l, t_u] to fit, the move is invalid
-            //     // return;
-            // }
-
-
-            // this is wrong because you shouldn't check constraints here??
-            // auto vertex_intervals = rt.getSafeIntervals(next_location, t_l, t_u);
-
-            // for (auto &safe_it: vertex_intervals) {
-            //     // std::cout << "safe interval: " << std::get<0>(safe_it) << ", " << std::get<1>(safe_it) << std::endl;
-            //     // how do i generate new projected intervals?
-            //     int new_tl = max(t_l, std::get<0>(safe_it));
-            //     int new_tu = min(t_u, std::get<1>(safe_it) - mv.swt);
-
-            //     // std::cout << "new bounds " << new_tl << ", " << new_tu << std::endl;
- 
-            //     // if waiting is allowed at the target vertex, extend the safe interval
-            //     // to the upper bound of the SI at the target vertex
-            //     if (new_tl <= new_tu && (mv.isEndCell && !endCellTouched) && mp.v == 0) {
-            //         // std::cout << "adjusting, " << std::get<0>(safe_it) - mv.swt << std::endl;
-            //         new_tu = std::get<1>(safe_it) - mv.swt;
-            //     }
-
-            //     if (new_tl <= new_tu) {
-            //         // std::cout << "found interval " << new_tl << ", " << new_tu << std::endl;
-            //         tmp.push_back({new_tl, new_tu});
-            //     }
-            // }
         }
 
-        time_intervals = tmp;
+        // time_intervals = tmp;
+        time_intervals.swap(tmp);
         tmp.clear(); 
     } // end of for loop through primitive edges
 
-    double h_val = abs(G.get_xy(next_location).first - G.get_xy(goal).first) +
-        abs(G.get_xy(next_location).second - G.get_xy(goal).second);
+    // double h_val = abs(G.get_xy(next_location).first - G.get_xy(goal).first) +
+    //     abs(G.get_xy(next_location).second - G.get_xy(goal).second);
+    double h_val = compute_h_value(G, next_location, goal_id, goal_location);
 
     if (time_intervals.empty()) {
         if (debug) {
@@ -594,7 +511,7 @@ Path SIPP::run(const BasicGraph& G, const State& start,
     {
         // std::cout << "SIPP LOGGING: Focal list size: " << focal_list.size() << std::endl;
 
-        if ((double)(std::clock() - t) / CLOCKS_PER_SEC > 30)
+        if ((double)(std::clock() - t) / CLOCKS_PER_SEC > 7)
         {
             cout << "SIPP: TIME LIMIT EXCEEDED" << endl;
             releaseClosedListNodes();
@@ -641,8 +558,8 @@ Path SIPP::run(const BasicGraph& G, const State& start,
                 if (debug) {
                     cout << "           SIPP: returning path," << endl;
                 // cout << "====== END SIPP ======" << endl;
+                    std::cout << "          Time elapsed: " << (std::clock() - t) * 1.0 / CLOCKS_PER_SEC << " seconds" << std::endl;
                 }
-                std::cout << "          Time elapsed: " << (std::clock() - t) * 1.0 / CLOCKS_PER_SEC << " seconds" << std::endl;
                 return path;
             }
 
@@ -775,8 +692,8 @@ Path SIPP::run(const BasicGraph& G, const State& start,
     open_list.clear();
     focal_list.clear();
 
-    // if (debug)
-    std::cout << "          Time elapsed: " << (std::clock() - t) * 1.0 / CLOCKS_PER_SEC << " seconds" << std::endl;
+    if (debug)
+        std::cout << "          Time elapsed: " << (std::clock() - t) * 1.0 / CLOCKS_PER_SEC << " seconds" << std::endl;
     return Path();
 }
 

@@ -23,6 +23,7 @@ public:
     double runtime_find_consistent_paths = 0;
     double runtime_find_replan_agents = 0;
 
+    // double total_runtime = 0;
 
 	PBSNode* dummy_start = nullptr;
 	PBSNode* best_node;

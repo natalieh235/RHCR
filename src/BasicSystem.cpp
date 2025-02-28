@@ -467,7 +467,8 @@ void BasicSystem::save_results()
         << "robust: " << k_robust << std::endl
         << "rotate: " << consider_rotation << std::endl
         << "use_dummy_paths: " << useDummyPaths << std::endl
-        << "hold_endpoints: " << hold_endpoints << std::endl;
+        << "hold_endpoints: " << hold_endpoints << std::endl
+        << "total runtime: " << solver.total_runtime << std::endl;
 
     output.close();
 
@@ -777,10 +778,10 @@ bool BasicSystem::load_records()
 		for (auto it = std::next(tok1.begin()); it != tok1.end(); ++it)
 		{
             auto task = *it;
-            std::cout << "print: " << task << std::endl;
+            // std::cout << "print: " << task << std::endl;
 			boost::tokenizer< boost::char_separator<char> > tok2(task, sep2);
 			boost::tokenizer< boost::char_separator<char> >::iterator beg = tok2.begin();
-            std::cout << "cur: " << *beg << std::endl;
+            // std::cout << "cur: " << *beg << std::endl;
 			int loc = atoi((*beg).c_str());
 			beg++;
 			int orientation = atoi((*beg).c_str());
