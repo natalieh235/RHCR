@@ -1,7 +1,5 @@
 ﻿#include "KivaSystem.h"
-#include "SortingSystem.h"
 #include "OnlineSystem.h"
-#include "BeeSystem.h"
 #include "ID.h"
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
@@ -49,14 +47,6 @@ MAPFSolver* set_solver(const BasicGraph& G, const boost::program_options::variab
 	}
 
 	solver_name = vm["solver"].as<string>();
-	// if (solver_name == "ECBS")
-	// {
-	// 	ECBS* ecbs = new ECBS(G, *path_planner);
-	// 	ecbs->potential_function = vm["potential_function"].as<string>();
-	// 	ecbs->potential_threshold = vm["potential_threshold"].as<double>();
-	// 	ecbs->suboptimal_bound = vm["suboptimal_bound"].as<double>();
-	// 	mapf_solver = ecbs;
-	// }
 	if (solver_name == "PBS") {
 		PBS* pbs = new PBS(G, *path_planner);
 		pbs->lazyPriority = vm["lazyP"].as<bool>();
@@ -74,14 +64,6 @@ MAPFSolver* set_solver(const BasicGraph& G, const boost::program_options::variab
 		pp->setRT(vm["CAT"].as<bool>(), prioritize_start);
 		mapf_solver = pp;
 	}
-	// else if (solver_name == "WHCA")
-	// {
-	// 	mapf_solver = new WHCAStar(G, *path_planner);
-	// }
-	// else if (solver_name == "LRA")
-	// {
-	// 	mapf_solver = new LRAStar(G, *path_planner);
-	// }
 	else
 	{
 		cout << "Solver " << solver_name << "does not exist!" << endl;
@@ -200,76 +182,6 @@ int main(int argc, char** argv)
 		system.simulate(vm["simulation_time"].as<int>());
 		return 0;
 	}
-	// else if (vm["scenario"].as<string>() == "SORTING")
-	// {
-	// 	 SortingGrid G;
-	// 	 if (!G.load_map(vm["map"].as<std::string>()))
-	// 		 return -1;
-	// 	 MAPFSolver* solver = set_solver(G, vm);
-	// 	 SortingSystem system(G, *solver);
-	// 	 assert(!system.hold_endpoints);
-	// 	 assert(!system.useDummyPaths);
-	// 	 set_parameters(system, vm);
-	// 	 G.preprocessing(system.consider_rotation);
-	// 	 system.simulate(vm["simulation_time"].as<int>());
-	// 	 return 0;
-	// }
-	// else if (vm["scenario"].as<string>() == "ONLINE")
-	// {
-	// 	OnlineGrid G;
-	// 	if (!G.load_map(vm["map"].as<std::string>()))
-	// 		return -1;
-	// 	MAPFSolver* solver = set_solver(G, vm);
-	// 	OnlineSystem system(G, *solver);
-	// 	assert(!system.hold_endpoints);
-	// 	assert(!system.useDummyPaths);
-	// 	set_parameters(system, vm);
-	// 	G.preprocessing(system.consider_rotation);
-	// 	system.simulate(vm["simulation_time"].as<int>());
-	// 	return 0;
-	// }
-	// else if (vm["scenario"].as<string>() == "BEE")
-	// {
-	// 	BeeGraph G;
-	// 	if (!G.load_map(vm["map"].as<std::string>()))
-	// 		return -1;
-	// 	MAPFSolver* solver = set_solver(G, vm);
-	// 	BeeSystem system(G, *solver);
-	// 	assert(!system.hold_endpoints);
-	// 	assert(!system.useDummyPaths);
-	// 	set_parameters(system, vm);
-	// 	G.preprocessing(vm["task"].as<std::string>(), system.consider_rotation);
-	// 	system.load_task_assignments(vm["task"].as<std::string>());
-	// 	system.simulate();
-	// 	double runtime = (double)(clock() - start_time)/ CLOCKS_PER_SEC;
-	// 	cout << "Overall runtime:			" << runtime << " seconds." << endl;
-	// 	// cout << "	Reading from file:		" << G.loading_time + system.loading_time << " seconds." << endl;
-	// 	// cout << "	Preprocessing:			" << G.preprocessing_time << " seconds." << endl;
-	// 	// cout << "	Writing to file:		" << system.saving_time << " seconds." << endl;
-	// 	cout << "Makespan:		" << system.get_makespan() << " timesteps." << endl;
-	// 	cout << "Flowtime:		" << system.get_flowtime() << " timesteps." << endl;
-	// 	cout << "Flowtime lowerbound:	" << system.get_flowtime_lowerbound() << " timesteps." << endl;
-	// 	auto flower_ids = system.get_missed_flower_ids();
-	// 	cout << "Missed tasks:";
-	// 	for (auto id : flower_ids)
-	// 		cout << " " << id;
-	// 	cout << endl;
-	// 	// cout << "Remaining tasks: " << system.get_num_of_remaining_tasks() << endl;
-	// 	cout << "Objective: " << system.get_objective() << endl;
-	// 	std::ofstream output;
-	// 	output.open(vm["output"].as<std::string>() + "/MAPF_results.txt", std::ios::out);
-	// 	output << "Overall runtime: " << runtime << " seconds." << endl;;
-	// 	output << "Makespan: " << system.get_makespan() << " timesteps." << endl;
-	// 	output << "Flowtime: " << system.get_flowtime() << " timesteps." << endl;
-	// 	output << "Flowtime lowerbound: " << system.get_flowtime_lowerbound() << " timesteps." << endl;
-	// 	output << "Missed tasks:";
-	// 	for (auto id : flower_ids)
-	// 		output << " " << id;
-	// 	output << endl;
-	// 	output << "Objective: " << system.get_objective() << endl;
-	// 	output.close();
-    //     return 0;
-	// }
 	else
 	{
 		cout << "Scenario " << vm["scenario"].as<string>() << "does not exist!" << endl;

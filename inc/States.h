@@ -4,7 +4,7 @@
 struct State
 {
     int location;
-    int timestep;
+    float timestep;
     int orientation;
     int velocity;
 

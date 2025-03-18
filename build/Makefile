@@ -203,102 +203,6 @@ src/BasicSystem.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/BasicSystem.cpp.s
 .PHONY : src/BasicSystem.cpp.s
 
-src/BeeGraph.o: src/BeeGraph.cpp.o
-.PHONY : src/BeeGraph.o
-
-# target to build an object file
-src/BeeGraph.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/BeeGraph.cpp.o
-.PHONY : src/BeeGraph.cpp.o
-
-src/BeeGraph.i: src/BeeGraph.cpp.i
-.PHONY : src/BeeGraph.i
-
-# target to preprocess a source file
-src/BeeGraph.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/BeeGraph.cpp.i
-.PHONY : src/BeeGraph.cpp.i
-
-src/BeeGraph.s: src/BeeGraph.cpp.s
-.PHONY : src/BeeGraph.s
-
-# target to generate assembly for a file
-src/BeeGraph.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/BeeGraph.cpp.s
-.PHONY : src/BeeGraph.cpp.s
-
-src/BeeSystem.o: src/BeeSystem.cpp.o
-.PHONY : src/BeeSystem.o
-
-# target to build an object file
-src/BeeSystem.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/BeeSystem.cpp.o
-.PHONY : src/BeeSystem.cpp.o
-
-src/BeeSystem.i: src/BeeSystem.cpp.i
-.PHONY : src/BeeSystem.i
-
-# target to preprocess a source file
-src/BeeSystem.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/BeeSystem.cpp.i
-.PHONY : src/BeeSystem.cpp.i
-
-src/BeeSystem.s: src/BeeSystem.cpp.s
-.PHONY : src/BeeSystem.s
-
-# target to generate assembly for a file
-src/BeeSystem.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/BeeSystem.cpp.s
-.PHONY : src/BeeSystem.cpp.s
-
-src/ECBS.o: src/ECBS.cpp.o
-.PHONY : src/ECBS.o
-
-# target to build an object file
-src/ECBS.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/ECBS.cpp.o
-.PHONY : src/ECBS.cpp.o
-
-src/ECBS.i: src/ECBS.cpp.i
-.PHONY : src/ECBS.i
-
-# target to preprocess a source file
-src/ECBS.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/ECBS.cpp.i
-.PHONY : src/ECBS.cpp.i
-
-src/ECBS.s: src/ECBS.cpp.s
-.PHONY : src/ECBS.s
-
-# target to generate assembly for a file
-src/ECBS.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/ECBS.cpp.s
-.PHONY : src/ECBS.cpp.s
-
-src/ECBSNode.o: src/ECBSNode.cpp.o
-.PHONY : src/ECBSNode.o
-
-# target to build an object file
-src/ECBSNode.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/ECBSNode.cpp.o
-.PHONY : src/ECBSNode.cpp.o
-
-src/ECBSNode.i: src/ECBSNode.cpp.i
-.PHONY : src/ECBSNode.i
-
-# target to preprocess a source file
-src/ECBSNode.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/ECBSNode.cpp.i
-.PHONY : src/ECBSNode.cpp.i
-
-src/ECBSNode.s: src/ECBSNode.cpp.s
-.PHONY : src/ECBSNode.s
-
-# target to generate assembly for a file
-src/ECBSNode.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/ECBSNode.cpp.s
-.PHONY : src/ECBSNode.cpp.s
-
 src/ID.o: src/ID.cpp.o
 .PHONY : src/ID.o
 
@@ -659,54 +563,6 @@ src/SingleAgentSolver.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/SingleAgentSolver.cpp.s
 .PHONY : src/SingleAgentSolver.cpp.s
 
-src/SortingGraph.o: src/SortingGraph.cpp.o
-.PHONY : src/SortingGraph.o
-
-# target to build an object file
-src/SortingGraph.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/SortingGraph.cpp.o
-.PHONY : src/SortingGraph.cpp.o
-
-src/SortingGraph.i: src/SortingGraph.cpp.i
-.PHONY : src/SortingGraph.i
-
-# target to preprocess a source file
-src/SortingGraph.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/SortingGraph.cpp.i
-.PHONY : src/SortingGraph.cpp.i
-
-src/SortingGraph.s: src/SortingGraph.cpp.s
-.PHONY : src/SortingGraph.s
-
-# target to generate assembly for a file
-src/SortingGraph.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/SortingGraph.cpp.s
-.PHONY : src/SortingGraph.cpp.s
-
-src/SortingSystem.o: src/SortingSystem.cpp.o
-.PHONY : src/SortingSystem.o
-
-# target to build an object file
-src/SortingSystem.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/SortingSystem.cpp.o
-.PHONY : src/SortingSystem.cpp.o
-
-src/SortingSystem.i: src/SortingSystem.cpp.i
-.PHONY : src/SortingSystem.i
-
-# target to preprocess a source file
-src/SortingSystem.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/SortingSystem.cpp.i
-.PHONY : src/SortingSystem.cpp.i
-
-src/SortingSystem.s: src/SortingSystem.cpp.s
-.PHONY : src/SortingSystem.s
-
-# target to generate assembly for a file
-src/SortingSystem.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/SortingSystem.cpp.s
-.PHONY : src/SortingSystem.cpp.s
-
 src/StateTimeAStar.o: src/StateTimeAStar.cpp.o
 .PHONY : src/StateTimeAStar.o
 
@@ -754,30 +610,6 @@ src/States.s: src/States.cpp.s
 src/States.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/States.cpp.s
 .PHONY : src/States.cpp.s
-
-src/WHCAStar.o: src/WHCAStar.cpp.o
-.PHONY : src/WHCAStar.o
-
-# target to build an object file
-src/WHCAStar.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/WHCAStar.cpp.o
-.PHONY : src/WHCAStar.cpp.o
-
-src/WHCAStar.i: src/WHCAStar.cpp.i
-.PHONY : src/WHCAStar.i
-
-# target to preprocess a source file
-src/WHCAStar.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/WHCAStar.cpp.i
-.PHONY : src/WHCAStar.cpp.i
-
-src/WHCAStar.s: src/WHCAStar.cpp.s
-.PHONY : src/WHCAStar.s
-
-# target to generate assembly for a file
-src/WHCAStar.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/WHCAStar.cpp.s
-.PHONY : src/WHCAStar.cpp.s
 
 src/common.o: src/common.cpp.o
 .PHONY : src/common.o
@@ -847,18 +679,6 @@ help:
 	@echo "... src/BasicSystem.o"
 	@echo "... src/BasicSystem.i"
 	@echo "... src/BasicSystem.s"
-	@echo "... src/BeeGraph.o"
-	@echo "... src/BeeGraph.i"
-	@echo "... src/BeeGraph.s"
-	@echo "... src/BeeSystem.o"
-	@echo "... src/BeeSystem.i"
-	@echo "... src/BeeSystem.s"
-	@echo "... src/ECBS.o"
-	@echo "... src/ECBS.i"
-	@echo "... src/ECBS.s"
-	@echo "... src/ECBSNode.o"
-	@echo "... src/ECBSNode.i"
-	@echo "... src/ECBSNode.s"
 	@echo "... src/ID.o"
 	@echo "... src/ID.i"
 	@echo "... src/ID.s"
@@ -904,21 +724,12 @@ help:
 	@echo "... src/SingleAgentSolver.o"
 	@echo "... src/SingleAgentSolver.i"
 	@echo "... src/SingleAgentSolver.s"
-	@echo "... src/SortingGraph.o"
-	@echo "... src/SortingGraph.i"
-	@echo "... src/SortingGraph.s"
-	@echo "... src/SortingSystem.o"
-	@echo "... src/SortingSystem.i"
-	@echo "... src/SortingSystem.s"
 	@echo "... src/StateTimeAStar.o"
 	@echo "... src/StateTimeAStar.i"
 	@echo "... src/StateTimeAStar.s"
 	@echo "... src/States.o"
 	@echo "... src/States.i"
 	@echo "... src/States.s"
-	@echo "... src/WHCAStar.o"
-	@echo "... src/WHCAStar.i"
-	@echo "... src/WHCAStar.s"
 	@echo "... src/common.o"
 	@echo "... src/common.i"
 	@echo "... src/common.s"

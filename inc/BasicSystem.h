@@ -3,8 +3,6 @@
 #include "States.h"
 #include "PriorityGraph.h"
 #include "PBS.h"
-#include "WHCAStar.h"
-#include "ECBS.h"
 #include "LRAStar.h"
 #include "PP.h"
 

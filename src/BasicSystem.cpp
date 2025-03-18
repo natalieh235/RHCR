@@ -8,136 +8,6 @@ BasicSystem::BasicSystem(const BasicGraph& G, MAPFSolver& solver): G(G), solver(
 BasicSystem::~BasicSystem() {}
 
 
-// TODO: implement the random instance generator
-/*bool BasicSystem::load_config(std::string fname)
-{
-    std::string line;
-    std::ifstream myfile(fname.c_str());
-    if (!myfile.is_open()) {
-        std::cout << "Config file " << fname << " does not exist. " << std::endl;
-        return false;
-    }
-    getline(myfile, line);
-    boost::char_separator<char> sep(" ");
-    boost::tokenizer<boost::char_separator<char> > tok(line, sep);
-    boost::tokenizer<boost::char_separator<char> >::iterator beg = tok.begin();
-    duration = atoi((*beg).c_str());
-    getline(myfile, line);
-    tok.assign(line, sep);
-    fiducial = atoi((*beg).c_str());
-    getline(myfile, line);
-    tok.assign(line, sep);
-    double length = atoi((*beg).c_str()) / fiducial;
-    getline(myfile, line);
-    tok.assign(line, sep);
-    double width = atoi((*beg).c_str()) / fiducial;
-    getline(myfile, line);
-    tok.assign(line, sep);
-    double v_max = atoi((*beg).c_str()) * duration / fiducial / 1000;
-    getline(myfile, line);
-    tok.assign(line, sep);
-    double a_max = atoi((*beg).c_str()) * duration * duration / fiducial / 1000000;
-    getline(myfile, line);
-    tok.assign(line, sep);
-    double rotate90 = atoi((*beg).c_str()) / duration;
-    getline(myfile, line);
-    tok.assign(line, sep);
-    int rotate180 = atoi((*beg).c_str()) / duration;
-    getline(myfile, line);
-    tok.assign(line, sep);
-    planning_window = atoi((*beg).c_str()) / duration;
-    getline(myfile, line);
-    tok.assign(line, sep);
-    simulation_time = atoi((*beg).c_str()) / duration;
-
-    myfile.close();
-return true;
-
-}
-bool BasicSystem::generate_random_MAPF_instance()
-{
-    std::cout << "*** Generating instance " << seed << " ***" << std::endl;
-    clock_t t = std::clock();
-    // initialize_start_locations();
-    // initialize_goal_locations();
-    double runtime = (std::clock() - t) / CLOCKS_PER_SEC;
-    std::cout << "Done! (" << runtime << " s)" << std::endl;
-    // print_MAPF_instance();
-    
-    return true;
-}
-
-
-void BasicSystem::print_MAPF_instance() const
-{
-    std::cout << "*** instance " << seed << " ***" << std::endl;
-    for (int k = 0; k < (int)starts.size(); k++)
-    {
-        cout << "Agent " << k << ": " << starts[k];
-        for (int goal : goal_locations[k])
-            cout << "->" << goal;
-        cout << endl;
-    }
-}
-
-
-void BasicSystem::save_MAPF_instance(std::string fname) const
-{
-    std::ofstream stats;
-    stats.open(fname, std::ios::app);
-    stats << starts.size();
-    for (int k = 0; k < (int)starts.size(); k++)
-    {
-        stats << k << "," << starts[k].location;
-        for (int goal : goal_locations[k])
-            cout << "," << goal;
-        cout << endl;
-    }
-    stats.close();
-}
-
-bool BasicSystem::read_MAPF_instance(std::string fname)
-{
-    std::string line;
-    std::ifstream myfile(fname.c_str());
-    if (!myfile.is_open()) {
-        std::cout << "MAPF instance file " << fname << " does not exist. " << std::endl;
-        return false;
-    }
-
-    std::cout << "*** Reading instance " << fname << " ***" << std::endl;
-
-    getline(myfile, line);
-    boost::char_separator<char> sep(",");
-    boost::tokenizer<boost::char_separator<char> > tok(line, sep);
-    boost::tokenizer<boost::char_separator<char> >::iterator beg = tok.begin();
-    this->num_of_drives = atoi((*beg).c_str()); // read number of cols
-    this->starts.resize(num_of_drives);
-    this->goal_locations.resize(num_of_drives);
-
-    for (int i = 0; i < num_of_drives; i++) {
-        getline(myfile, line);
-        boost::tokenizer<boost::char_separator<char> > tok(line, sep);
-        beg = tok.begin();
-        beg++; // skip id
-        starts[i] = State(std::atoi(beg->c_str()));
-        goal_locations[i].emplace_back(std::atoi(beg->c_str()));
-    }
-
-    myfile.close();
-    return true;
-}
-
-
-bool BasicSystem::run()
-{
-	bool sol = pbs.run(starts, goal_locations, time_limit, vector<Path>(), PriorityGraph());
-	pbs.save_results(outfile, std::to_string(num_of_drives) + "," + std::to_string(seed));
-	pbs.best_node->priorities.save_as_digraph("goal_node.gv");
-	return sol;
-}
-*/
-
 bool BasicSystem::load_locations()
 {
 	string fname = G.map_name + "_rotation=" + std::to_string(consider_rotation) +
@@ -573,32 +443,6 @@ void BasicSystem::solve()
 	// lra.simulation_window = simulation_window;
 	// lra.k_robust = k_robust;
 	solver.clear();
-	// if (solver.get_name() == "LRA")
-	// {
-	// 	// predict travel time
-	// 	unordered_map<int, double> travel_times;
-	// 	update_travel_times(solver.travel_times);
-
-	// 	bool sol = solver.run(starts, goal_locations, time_limit);
-	// 	update_paths(solver.solution);
-	// }
-	// else if (solver.get_name() == "WHCA")
-	// {
-	// 	update_initial_constraints(solver.initial_constraints);
-
-	// 	bool sol = solver.run(starts, goal_locations, time_limit);
-	// 	if (sol)
-	// 	{
-	// 		update_paths(solver.solution);
-	// 	}
-	// 	else
-	// 	{
-	// 		lra.resolve_conflicts(solver.solution);
-	// 		update_paths(lra.solution);
-	// 	}
-	// }
-	// else // PBS or ECBS
-    // {
         update_initial_constraints(solver.initial_constraints);
 
         // solve
@@ -650,11 +494,6 @@ void BasicSystem::solve()
                         exit(-1);
                     }
                 }
-                else
-                {
-                    sol = solve_by_WHCA(planned_paths, new_starts, new_goal_locations);
-                    assert(sol);
-                }
             }
             // lra.resolve_conflicts(planned_paths, k_robust);
             update_paths(planned_paths);
@@ -681,59 +520,6 @@ void BasicSystem::solve()
     // }
     solver.save_results(outfile + "/solver.csv", "Time: " + std::to_string(timestep) + "," 
                                     + "Num Drives: " + std::to_string(num_of_drives) + ", Seed: " + std::to_string(seed));
-}
-
-bool BasicSystem::solve_by_WHCA(vector<Path>& planned_paths,
-	const vector<State>& new_starts, const vector< vector<pair<int, int> > >& new_goal_locations)
-{
-	WHCAStar whca(G, solver.path_planner);
-    whca.k_robust = k_robust;
-    whca.window = INT_MAX;
-    whca.hold_endpoints = hold_endpoints || useDummyPaths;
-    whca.screen = screen;
-	whca.initial_rt.hold_endpoints = true;
-	whca.initial_rt.map_size = G.size();
-	whca.initial_rt.k_robust = k_robust;
-	whca.initial_rt.window = INT_MAX;
-	whca.initial_rt.copy(solver.initial_rt);
-    whca.initial_solution.resize(new_starts.size());
-    if (whca.hold_endpoints)
-    {
-        if (timestep == 0)
-        {
-            for (int i = 0; i < (int)new_starts.size(); i++)
-                whca.initial_solution[i].emplace_back(starts[i]); // hold initial location
-        }
-        else
-        {
-            whca.initial_solution.clear();
-            for (auto agent : new_agents)
-                whca.initial_solution.emplace_back(planned_paths[agent]); // hold old paths
-        }
-    }
-	bool sol = false;
-    if (timestep == 0)
-    {
-        sol = whca.run(new_starts, new_goal_locations, 10 * time_limit);
-    }
-    else
-    {
-
-        sol = whca.run(new_starts, new_goal_locations, time_limit);
-    }
-	whca.save_results(outfile + "/solver.csv", std::to_string(timestep) + ","
-		+ std::to_string(num_of_drives) + "," + std::to_string(seed));
-    if (sol)
-    {
-        auto pt = whca.solution.begin();
-        for (int i : new_agents)
-        {
-            planned_paths[i] = *pt;
-            ++pt;
-        }
-    }
-	whca.clear();
-	return sol;
 }
 
 void BasicSystem::initialize_solvers()
