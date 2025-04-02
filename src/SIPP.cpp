@@ -26,27 +26,9 @@ Path SIPP::updatePath(const BasicGraph& G, const SIPPNode* goal)
         else
         {
             const SIPPNode* prev = curr->parent;
-            // int degree = G.get_rotate_degree(prev->state.orientation, curr->state.orientation);
             int t = prev->state.timestep + 1;
-
-            // std::cout << "curr " << curr->state << " interval: " << curr->interval << std::endl;
-            // std::cout << "prev: " << curr->parent->state << " interval: " << curr->parent->interval << std::endl;
-            // if (degree == 1) // turn right or turn left
-            // {
-            //     path[t] = State(prev->state.location, t, curr->state.orientation);
-            //     t++;
-            // }
-            // else if (degree == 2) // turn back
-            // {
-            //     path[t] = State(prev->state.location, t, (prev->state.orientation + 1) % 4); // turn right
-            //     t++;
-            //     path[t] = State(prev->state.location, t, curr->state.orientation); // turn right
-            //     t++;
-            // }
             while ( t < curr->state.timestep)
             {
-                // std::cout << "waiting? " << curr->state << std::endl;
-                // path[t] = State(prev->state.location, t, curr->state.orientation, prev->state.velocity); // wait at prev location
                 path[t] = PathStep(State(prev->state), "moving");
                 t++;
             }
@@ -64,7 +46,6 @@ void SIPP::fill_primitives() {
     float MAX_ACC = 1.0;
     int minimalTransitionCost = 1; // the minimum cost to go from one cell to next (0.5s = 5 timesteps).
     int dx[4] = {0, -1, 0, 1}, dy[4] = {1, 0, -1, 0};
-    // int turn_dx[4] = {}
 
     std::string nameArray[4] = {"Right", "Up", "Left", "Down"};
 
@@ -161,132 +142,6 @@ void SIPP::fill_primitives() {
         std::cout << "constant: " << tmp << std::endl;
     }
 }
-
-// // for large agents
-// void SIPP::fill_primitives() {
-//     std::cout << "SIPP: filling primitives" << std::endl;
-//     float MAXV  = 2.0;
-//     float MAX_ACC = 1.0;
-//     int minimalTransitionCost = 1; // the minimum cost to go from one cell to next (0.5s = 5 timesteps).
-//     int dx[4] = {0, -1, 0, 1}, dy[4] = {1, 0, -1, 0};
-//     // int turn_dx[4] = {}
-    
-//     //  turn from 0 to 1
-//     Primitive tmp;
-//     tmp.mvs = {Primitive::move(0, 1, 1, 1, 0, 0), Primitive::move(-1, 1, 1, 1, 1, 0), 
-//             Primitive::move(-1, 0, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
-//     tmp.v = 0;
-//     tmp.o = 1;
-//     motion_primitives[0][0].emplace_back(tmp);
-
-//     tmp.mvs.clear();
-
-//     // turn from 0 to 3
-//     tmp.mvs = {Primitive::move(0, 1, 1, 1, 0, 0), Primitive::move(1, 1, 1, 1, 1, 0), 
-//             Primitive::move(1, 0, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
-//     tmp.v = 0;
-//     tmp.o = 3;
-//     motion_primitives[0][0].emplace_back(tmp);
-//     tmp.mvs.clear();
-
-//     // 1 to 2
-//     tmp.mvs = {Primitive::move(-1, 0, 1, 1, 0, 0), Primitive::move(-1, -1, 1, 1, 1, 0), 
-//             Primitive::move(0, -1, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
-//     tmp.v = 0;
-//     tmp.o = 2;
-//     motion_primitives[1][0].emplace_back(tmp);
-//     tmp.mvs.clear();
-
-//     // 1 to 0
-//     tmp.mvs = {Primitive::move(-1, 0, 1, 1, 0, 0), Primitive::move(-1, 1, 1, 1, 1, 0), 
-//             Primitive::move(0, 1, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
-//     tmp.v = 0;
-//     tmp.o = 0;
-//     motion_primitives[1][0].emplace_back(tmp);
-//     tmp.mvs.clear();
-
-//     // 2 to 3
-//     tmp.mvs = {Primitive::move(0, -1, 1, 1, 0, 0), Primitive::move(1, -1, 1, 1, 1, 0), 
-//             Primitive::move(1, 0, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
-//     tmp.v = 0;
-//     tmp.o = 3;
-//     motion_primitives[2][0].emplace_back(tmp);
-//     tmp.mvs.clear();
-
-//     // 2 to 1
-//     tmp.mvs = {Primitive::move(0, -1, 1, 1, 0, 0), Primitive::move(-1, -1, 1, 1, 1, 0), 
-//             Primitive::move(-1, 0, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
-//     tmp.v = 0;
-//     tmp.o = 1;
-//     motion_primitives[2][0].emplace_back(tmp);
-//     tmp.mvs.clear();
-
-//     // 3 to 0
-//     tmp.mvs = {Primitive::move(1, 0, 1, 1, 0, 0), Primitive::move(1, 1, 1, 1, 1, 0), 
-//             Primitive::move(0, 1, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
-//     tmp.v = 0;
-//     tmp.o = 0;
-//     motion_primitives[3][0].emplace_back(tmp);
-//     tmp.mvs.clear();
-
-//     // 3 to 2
-//     tmp.mvs = {Primitive::move(1, 0, 1, 1, 0, 0), Primitive::move(1, -1, 1, 1, 1, 0), 
-//             Primitive::move(0, -1, 1, 1, 1, 0), Primitive::move(0, 0, 1, 1, 1, 1)};
-//     tmp.v = 0;
-//     tmp.o = 2;
-//     motion_primitives[3][0].emplace_back(tmp);
-//     tmp.mvs.clear();
-
-//     for (int o = 0; o < MXO; ++o) {
-//         std::cout << "primitives for " << o << std::endl;
-//         // ACCELERATION
-//         // Primitive tmp;
-//         tmp.v = 1; // ending velocity 1
-//         tmp.o=o; // end orientation is the same
-
-//         // (0, 0)  (0, 1)
-//         // (1, 0)
-//         tmp.mvs = {
-//             Primitive::move(dx[o]*0, dy[o]*0, 0, 1, o, 0), // time = 0, occupies first cell for 1 second
-//             Primitive::move(dx[o]*1, dy[o]*1, 0, 1, o, 0), // time = 1, displacement is 1 cell
-//             Primitive::move(dx[o]*2, dy[o]*2, 1, 1, o, 0),
-//             Primitive::move(dx[o]*3, dy[o]*3, 1, 1, o, 1),
-//             // Primitive::move(dx[o]*4, dy[o]*4, 1, 1, o, 0)
-//         };
-
-//         motion_primitives[o][0].push_back(tmp);
-
-//         std::cout << "acclereation: " << tmp << std::endl;
-
-//         // deceleration
-//         tmp.mvs.clear();
-//         tmp.v = 0;
-//         tmp.o = o;
-//         tmp.mvs = {
-//             Primitive::move(dx[o]*0, dy[o]*0, 0, 1, o, 0), 
-//             Primitive::move(dx[o]*1, dy[o]*1, 0, 1, o, 0), 
-//             Primitive::move(dx[o]*2, dy[o]*2, 1, 1, o, 0),
-//             Primitive::move(dx[o]*3, dy[o]*3, 1, 1, o, 1),
-//             // Primitive::move(dx[o]*4, dy[o]*4, 1, 1, o, 0)
-//         };
-
-//         motion_primitives[o][1].push_back(tmp);
-
-//         std::cout << "decel: " << tmp << std::endl;
-
-//         // just go forward
-//         // goes forward with constant velocity in 1 timestep, can only do with vel=1
-//         // because robot has width 2.0, covers cells 0-2
-//         tmp.mvs = {Primitive::move(0, 0, 0, 0, o, 0), 
-//                     Primitive::move(dx[o], dy[o], 0, 1, o, 0), 
-//                     Primitive::move(dx[o]*2, dy[o]*2, 0, 1, o, 0)};
-//         tmp.o = o;
-//         tmp.v = 1;
-//         motion_primitives[o][1].emplace_back(tmp);
-
-//         std::cout << "constant: " << tmp << std::endl;
-//     }
-// }
 
 void SIPP::generate_successors(SIPPNode* curr, const BasicGraph &G, ReservationTable &rt, 
     int t_lower, int t_upper, const vector<pair<int, int> >& goal_location) {
@@ -446,11 +301,11 @@ Path SIPP::run(const BasicGraph& G, const State& start,
     clock_t t = std::clock();
     
     // heuristic from start to end
-	// double h_val = compute_h_value(G, start.location, 0, goal_location);
+	double h_val = compute_h_value(G, start.location, 0, goal_location);
     // compute manhattan distance
     // auto start_xy = /
-    double h_val = abs(G.get_xy(start.location).first - G.get_xy(goal_location[0].first).first) + 
-        abs(G.get_xy(start.location).second - G.get_xy(goal_location[0].first).second);
+    // double h_val = abs(G.get_xy(start.location).first - G.get_xy(goal_location[0].first).first) + 
+    //     abs(G.get_xy(start.location).second - G.get_xy(goal_location[0].first).second);
 
 	if (h_val > INT_MAX)
 	{
@@ -612,11 +467,11 @@ Path SIPP::run(const BasicGraph& G, const State& start,
                     continue;
                 }
 
-                // double h_val = compute_h_value(G, location, curr->goal_id, goal_location);
+                double h_val = compute_h_value(G, location, curr->goal_id, goal_location);
 
                 // NAT: changed to manhattan distance
-                double h_val = abs(G.get_xy(curr->state.location).first - G.get_xy(goal_location[curr->goal_id].first).first) + 
-        abs(G.get_xy(curr->state.location).second - G.get_xy(goal_location[curr->goal_id].first).second);
+        //         double h_val = abs(G.get_xy(curr->state.location).first - G.get_xy(goal_location[curr->goal_id].first).first) + 
+        // abs(G.get_xy(curr->state.location).second - G.get_xy(goal_location[curr->goal_id].first).second);
 
                 if (h_val > INT_MAX)   // This vertex cannot reach the goal vertex
                     continue;
@@ -651,9 +506,9 @@ Path SIPP::run(const BasicGraph& G, const State& start,
                 if (std::get<1>(interval) == INTERVAL_MAX) {
                     break;
                 }
-                // double h_val = compute_h_value(G, start.location, 0, goal_location);
-                double h_val = abs(G.get_xy(start.location).first - G.get_xy(goal_location[0].first).first) + 
-        abs(G.get_xy(start.location).second - G.get_xy(goal_location[0].first).second);
+                double h_val = compute_h_value(G, start.location, 0, goal_location);
+        //         double h_val = abs(G.get_xy(start.location).first - G.get_xy(goal_location[0].first).first) + 
+        // abs(G.get_xy(start.location).second - G.get_xy(goal_location[0].first).second);
 
                 auto node2 = new SIPPNode(start, 0, h_val, interval2, nullptr, 0, goal_location[0]);
                 num_generated++;

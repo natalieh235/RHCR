@@ -199,6 +199,27 @@ bool KivaGrid::load_unweighted_map(std::string fname)
     return true;
 }
 
+// std::vector<int> KivaGrid::get_reachable_vertices(int loc) {
+//     std::vector<int> reachable_vertices;
+
+//     // Try each possible turning direction (0 = UP, 1 = RIGHT, 2 = DOWN, 3 = LEFT)
+//     for (int orientation = 0; orientation < 4; orientation++) {
+//         if (!valid_move(loc, orientation)) // Skip if we can't turn to this direction
+//             continue;
+        
+// 		int next_loc = loc + move[orientation];
+
+//         // Move in a straight line from next_loc until we hit an obstacle
+//         while (valid_location(next_loc) && valid_move(next_loc, orientation)) {
+//             reachable_vertices.push_back(next_loc);
+//             next_loc = get_next_location(next_loc, orientation); // Move forward
+//         }
+//     }
+
+//     return reachable_vertices;
+// }
+
+
 void KivaGrid::preprocessing(bool consider_rotation)
 {
 	std::cout << "*** PreProcessing map ***" << std::endl;

@@ -78,7 +78,7 @@ void KivaSystem::initialize_start_locations()
 		if (consider_rotation) {
 			orientation = rand() % 4;
 			while (!G.valid_move(start_location, orientation)) {
-				std::cout << "invalid orientation " << orientation << std::endl;
+				// std::cout << "invalid orientation " << orientation << std::endl;
 				orientation = rand() % 4;
 			}
 		}

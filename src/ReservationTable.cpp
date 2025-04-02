@@ -495,6 +495,37 @@ list<Interval> ReservationTable::getSafeIntervals(int location, int lower_bound,
     return safe_intervals;
 }
 
+list<Interval> ReservationTable::getConflictIntervals(int location, int lower_bound, int upper_bound)
+{
+	list<Interval> conflict_intervals;
+	
+	list<Interval> safe_intervals = getSafeIntervals(location, lower_bound, upper_bound);
+	if (safe_intervals.empty())
+	{
+		conflict_intervals.emplace_back(lower_bound, upper_bound, 0);
+		return conflict_intervals;
+	}
+
+	int cur_lower = lower_bound;
+
+	for (auto it : safe_intervals)
+	{
+		if (cur_lower < std::get<0>(it))
+		{
+			conflict_intervals.emplace_back(cur_lower, std::get<0>(it), 0);
+		}
+		cur_lower = std::get<1>(it);
+	}
+
+	if (cur_lower < upper_bound)
+	{
+		conflict_intervals.emplace_back(cur_lower, upper_bound, 1);
+	}
+
+	return conflict_intervals;
+}
+
+
 // [lower_bound, upper_bound)
 list<Interval> ReservationTable::getSafeIntervals(int from, int to, int lower_bound, int upper_bound)
 {

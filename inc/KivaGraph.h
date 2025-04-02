@@ -13,7 +13,9 @@ public:
     bool load_map(string fname);
     void preprocessing(bool consider_rotation); // compute heuristics
     bool valid_move(int loc, int dir) const;
+    std::vector<int> get_reachable_vertices(int loc);
 private:
     bool load_weighted_map(string fname);
     bool load_unweighted_map(string fname);
+
 };
