@@ -2,6 +2,7 @@
 #include "StateTimeAStar.h"
 #include "SingleAgentSolver.h"
 #include "CStates.h"
+#include "MotionModel.h"
 
 class CSIPPNode {
 public:
@@ -95,14 +96,22 @@ public:
 class CSIPP: public SingleAgentSolver
 {
     public:
-        Path run(const BasicGraph& G, const CState& start,
+        CPath run_continuous(const BasicGraph& G, const CState& start,
+                const vector<pair<int, int> >& goal_locations,
+                ReservationTable& RT);
+
+        Path run(const BasicGraph& G, const State& start,
                 const vector<pair<int, int> >& goal_locations,
                 ReservationTable& RT);
 
         string getName() const { return "CSIPP"; }
         CSIPP(): SingleAgentSolver() {}
+        CSIPP(MotionModel motion_model): SingleAgentSolver() {
+            this->motion_model = motion_model;
+        }
 
     private:
+        MotionModel motion_model;
         fibonacci_heap< CSIPPNode*, compare<CSIPPNode::compare_node> > open_list;
         fibonacci_heap< CSIPPNode*, compare<CSIPPNode::secondary_compare_node> > focal_list;
         unordered_set< CSIPPNode*, CSIPPNode::Hasher, CSIPPNode::EqNode> allNodes_table;
@@ -110,10 +119,10 @@ class CSIPP: public SingleAgentSolver
         void generate_node(const Interval& interval, CSIPPNode* curr, State next_state, const BasicGraph& G,
                         int min_timestep, double h_val, std::pair<int, int> goal, std::string primitive_name);
         // Updates the path
-        Path updatePath(const BasicGraph& G, const CSIPPNode* goal);
-        std::tuple<bool, Path> update_goals(CSIPPNode* curr, const vector<pair<int, int> >& goal_locations); 
+        std::tuple<bool, CPath> update_goals(CSIPPNode* curr, const vector<pair<int, int> >& goal_locations); 
         void generate_successors(CSIPPNode* curr, const BasicGraph &G, 
             ReservationTable &rt, int t_lower, int t_upper, 
             const vector<pair<int, int> >& goal_location);
         void add_node(CSIPPNode* next);
+        CPath updatePath(const CSIPPNode* goal);
 };

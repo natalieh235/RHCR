@@ -2,10 +2,33 @@
 #include <cstdlib>
 
 
-bool debug = true;
+CPath CSIPP::updatePath(const CSIPPNode* goal)
+{
+    CPath path;
+    path_cost = goal->getFVal();
+    num_of_conf = goal->conflicts;
 
-std::tuple<bool, Path> CSIPP::update_goals(CSIPPNode* curr, const vector<pair<int, int> >& goal_locations) {
+    const CSIPPNode* curr = goal;
+    while (true)
+    {
+        if (curr->parent == nullptr) // root node
+        {
+            path.emplace_back(curr->state);
+            break;
+        }
+        else {
+            const CSIPPNode* prev = curr->parent;
+            path.emplace_back(curr->state); // move to current location
+            curr = prev;
+        }
+    }
+    return path;
+}
+
+std::tuple<bool, CPath> CSIPP::update_goals(CSIPPNode* curr, const vector<pair<int, int> >& goal_locations) {
     // update goal id
+
+    cout << "updating goals, " << curr->state.location << " , " << curr->goal_id << endl;
     if (curr->state.location == goal_locations[curr->goal_id].first &&
         curr->state.timestep >= goal_locations[curr->goal_id].second) // reach the goal location after its release time
     {
@@ -16,7 +39,8 @@ std::tuple<bool, Path> CSIPP::update_goals(CSIPPNode* curr, const vector<pair<in
         {
             // cout << "SIPP: reached goal location " << curr->goal_id - 1 << ", " << curr->state << endl;
             // return path;
-            return {true, Path()};
+            // return {true, Path()};
+            return {true, updatePath(curr)};
         }
 
         CSIPPNode* new_node = new CSIPPNode(curr->state, curr->g_val, curr->h_val, curr->interval, curr->parent, curr->conflicts, curr->goal);
@@ -31,27 +55,35 @@ std::tuple<bool, Path> CSIPP::update_goals(CSIPPNode* curr, const vector<pair<in
         allNodes_table.insert(new_node);
     }
 
-    return {false, Path()};
+    return {false, CPath()};
 }
 
-Path CSIPP::run(const BasicGraph& G, const CState& start,
+CPath CSIPP::run_continuous(const BasicGraph& G, const CState& start,
                 const vector<pair<int, int> >& goal_locations,
                 ReservationTable& rt) 
 {
+
+    cout << "running csipp" << endl;
     num_expanded = 0;
     num_generated = 0;
     runtime = 0;
     clock_t t = std::clock();
 
+
     double h_val = compute_h_value(G, start.location, 0, goal_locations);
+
 	if (h_val > INT_MAX)
 	{
 		cout << "The start and goal locations are disconnected!" << endl;
-		return Path();
+		return CPath();
 	}
+
+    std::cout << "goal: " << goal_locations[0].first << ", " << goal_locations[0].second << std::endl;
 
     // state, g_val, h_val, interval, parent, # conflicts, goal
     auto node = new CSIPPNode(start, 0, h_val, rt.getFirstSafeInterval(start.location), nullptr, 0, goal_locations[0]);
+
+    cout << "start node: " << node->state << endl;
 
     num_generated++;
 
@@ -62,7 +94,7 @@ Path CSIPP::run(const BasicGraph& G, const CState& start,
     // unordered set of all nodes
     allNodes_table.insert(node);
 
-    std::tuple<bool, Path> res = {false, Path()};
+    std::tuple<bool, CPath> res = {false, CPath()};
 
     while (!open_list.empty()) {
         if ((double)(std::clock() - t) / CLOCKS_PER_SEC > 7) {
@@ -70,26 +102,33 @@ Path CSIPP::run(const BasicGraph& G, const CState& start,
             releaseClosedListNodes();
             open_list.clear();
             focal_list.clear();
-            return Path();
+            return CPath();
         }
 
         CSIPPNode* curr = open_list.top(); open_list.pop();
+
+        cout << "cur state: " << curr->state << endl;
+
         int loc = curr->state.location;
-        open_list.erase(curr->open_handle); // remove from open
+
+        // open_list.erase(curr->open_handle); // remove from open
+        // cout << "here" << endl;
         curr->in_openlist = false; // removed
         num_expanded++;
 
         res = update_goals(curr, goal_locations);
+
+        cout << "updated goals" << endl;
 
         if (std::get<0>(res)) {
             releaseClosedListNodes();
             open_list.clear();
             // focal_list.clear();
             runtime = (std::clock() - t) * 1.0 / CLOCKS_PER_SEC;
-            if (debug) {
-                cout << "           SIPP: returning path," << endl;
+            // if (debug) {
+                cout << "           CSIPP: returning path," << endl;
                 std::cout << "          Time elapsed: " << (std::clock() - t) * 1.0 / CLOCKS_PER_SEC << " seconds" << std::endl;
-            }
+            // }
 
             return std::get<1>(res);
         }
@@ -99,17 +138,27 @@ Path CSIPP::run(const BasicGraph& G, const CState& start,
             curr->state.timestep, 
             std::get<1>(curr->interval));
 
-        
+        cout << "start intervals: " << endl;
+        for (auto &interval : safe_ints) {
+            cout << interval << endl;
+        }
         vector<Interval> time_intervals, tmp;
+        
         time_intervals.assign(safe_ints.begin(), safe_ints.end());
-        // for start, end in timeIntervals
+
+        cout << "starting expansion" << endl;
 
         // for each possible turn + move 
         for (int orientation = 0; orientation < 4; orientation++) {
 
+            cout << "trying orientation " << orientation << endl;
+            cout << "move: " << G.move[orientation] << endl;
+
             // if you can't turn, stop
-            if (!G.valid_move(loc, orientation))
+            if (!G.valid_move(loc, orientation)) {
+                cout << "   cannot turn" << endl;
                 continue;
+            }
 
             // check this time stuff
             vector<Interval> tmp;
@@ -118,17 +167,36 @@ Path CSIPP::run(const BasicGraph& G, const CState& start,
             int turn_time = G.get_rotate_degree(curr->state.orientation, orientation);
             int dist = 0;
             // look through intervals and keep track of valid ones throughout all neighbors
+
+            int cur_len = 0;
+            // while (G.valid_move(next_loc, orientation)) {
+            //     max_len += 1;
+            //     next_loc += G.move[orientation];
+            // }
             while (G.valid_move(next_loc, orientation)) {
+            // for (int len = 1; len <= max_len, len++) {
+                cout << "next loc: " << next_loc << endl;
+                // cur_len += 1;
+
+                // auto profile = motion_model.getProfile(cur_len);
+
                 for (auto &interval : time_intervals) {
                     int start = std::get<0>(interval);
                     int end = std::get<1>(interval);
 
                     list<Interval> conflicts = rt.getConflictIntervals(next_loc, start, INTERVAL_MAX);
+                    cout << "found num conflicts: " << conflicts.size() << endl;
+
+                    if (conflicts.empty()) {
+                        tmp.push_back(interval);
+                    }
+   
                     double t_d1 = 1; // sweeping time, constant right now
                     double t_d2 = dist + turn_time; // 
 
                     // for every reserved period, project back to [start, end)
                     for (auto &reserved : conflicts) {
+                        cout << "   conflict: " << std::get<0>(reserved) << ", " << std::get<1>(reserved) << endl;
                         int tl = std::get<0>(reserved);
                         int tr = std::get<1>(reserved);
 
@@ -163,8 +231,9 @@ Path CSIPP::run(const BasicGraph& G, const CState& start,
                 double h_val = compute_h_value(G, next_loc, curr->goal_id, goal_locations);
 
                 for (auto &it: time_intervals) {
+                    cout << "   interval: " << it << endl;
                     int sweeping_time = 1;
-                    CState next_state = CState(next_loc, std::get<0>(it) + sweeping_time, orientation, 0);
+                    CState next_state = CState(next_loc, curr->state.timestep + sweeping_time, orientation, 0);
                     int conflicts = std::get<2>(it) + curr->conflicts;
 
                     CSIPPNode* new_node = new CSIPPNode(
@@ -186,7 +255,16 @@ Path CSIPP::run(const BasicGraph& G, const CState& start,
             }
         }
     }
+
+    return CPath();
 }
+
+Path CSIPP::run(const BasicGraph& G, const State& start,
+                const vector<pair<int, int> >& goal_locations,
+                ReservationTable& RT) 
+{
+    return Path();
+};
 
 void CSIPP::add_node(CSIPPNode* next)
 {

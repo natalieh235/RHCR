@@ -59,3 +59,5 @@ struct CState
 };
 
 std::ostream & operator << (std::ostream &out, const CState &s);
+typedef std::vector<CState> CPath;
+std::ostream & operator << (std::ostream &out, const CPath &path);

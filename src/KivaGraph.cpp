@@ -262,6 +262,9 @@ void KivaGrid::preprocessing(bool consider_rotation)
 
 bool KivaGrid::valid_move(int loc, int dir) const
 {
+	if (loc >= rows*cols || loc < 0) {
+		return false;
+	}
 	// std::cout << "kiva valid move, loc: " << loc << " dir: " << dir << std::endl;
 	std::vector<int> occupied_cells = get_occupied_cells(loc, dir);
 	for (auto &cell: occupied_cells) {

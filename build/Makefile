@@ -227,6 +227,30 @@ src/CSIPP.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/CSIPP.cpp.s
 .PHONY : src/CSIPP.cpp.s
 
+src/CStates.o: src/CStates.cpp.o
+.PHONY : src/CStates.o
+
+# target to build an object file
+src/CStates.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/CStates.cpp.o
+.PHONY : src/CStates.cpp.o
+
+src/CStates.i: src/CStates.cpp.i
+.PHONY : src/CStates.i
+
+# target to preprocess a source file
+src/CStates.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/CStates.cpp.i
+.PHONY : src/CStates.cpp.i
+
+src/CStates.s: src/CStates.cpp.s
+.PHONY : src/CStates.s
+
+# target to generate assembly for a file
+src/CStates.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/CStates.cpp.s
+.PHONY : src/CStates.cpp.s
+
 src/ID.o: src/ID.cpp.o
 .PHONY : src/ID.o
 
@@ -706,6 +730,9 @@ help:
 	@echo "... src/CSIPP.o"
 	@echo "... src/CSIPP.i"
 	@echo "... src/CSIPP.s"
+	@echo "... src/CStates.o"
+	@echo "... src/CStates.i"
+	@echo "... src/CStates.s"
 	@echo "... src/ID.o"
 	@echo "... src/ID.i"
 	@echo "... src/ID.s"

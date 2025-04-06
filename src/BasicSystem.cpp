@@ -572,7 +572,7 @@ bool BasicSystem::load_records()
 			beg++;
 			int orientation = atoi((*beg).c_str());
 			beg++;
-			int time = atoi((*beg).c_str());
+			double time = atoi((*beg).c_str());
             std::cout << loc <<" , "  <<  time << ", " << orientation << std::endl;
 			paths[k].emplace_back(PathStep(State(loc, time, orientation)));
 		}

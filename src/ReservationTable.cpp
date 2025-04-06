@@ -3,6 +3,8 @@
 // update SIT at the given location
 void ReservationTable::updateSIT(size_t location)
 {
+
+	// std::cout << "update sit with location " << location << std::endl;
 	// if the location is not in the SIT
 	if (sit.find(location) == sit.end())
 	{
