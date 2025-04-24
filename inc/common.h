@@ -41,8 +41,12 @@ enum heuristics_type { NONE, CG, DG, WDG, STRATEGY_COUNT };
 
 typedef tuple<int, int, int, int, bool> Constraint;
 typedef tuple<int, int, int, int, int> Conflict;
+
+// a1, a2, loc1, loc2, t
+typedef tuple<int, int, int, int, double> CConflict;
 // typedef vector<unordered_set<std::pair<int,int> > > ConstraintTable;
 typedef tuple<int, int, bool> Interval; // [t_min, t_max), have conflicts or not
+// typedef tuple<double, double> CResTableInterval;
 typedef tuple<double, double, bool> CInterval;
 #define INTERVAL_MAX 10000
 #define MXO 4

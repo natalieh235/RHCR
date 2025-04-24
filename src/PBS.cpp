@@ -226,29 +226,10 @@ void PBS::choose_conflict(PBSNode &node)
 	// choose the earliest
     for (auto conflict : node.conflicts)
     {
-        /*int a1 = std::get<0>(*conflict);
-        int a2 = std::get<1>(*conflict);
-        if (goal_locations[a1] == goal_locations[a2])
-        {
-            node.conflict = conflict;
-            return;
-        }*/
         if (std::get<4>(conflict) < std::get<4>(node.conflict))
             node.conflict = conflict;
     }
     node.earliest_collision = std::get<4>(node.conflict);
-
-    // choose the pair of agents with smaller indices
-    /*for (auto conflict : node.conflicts)
-    {
-        if (min(std::get<0>(*conflict), std::get<1>(*conflict)) <
-            min(std::get<0>(*node.conflict), std::get<1>(*node.conflict)) ||
-                (min(std::get<0>(*conflict), std::get<1>(*conflict)) ==
-                 min(std::get<0>(*node.conflict), std::get<1>(*node.conflict)) &&
-                    max(std::get<0>(*conflict), std::get<1>(*conflict)) <
-                    max(std::get<0>(*node.conflict), std::get<1>(*node.conflict))))
-            node.conflict = conflict;
-    }*/
 
     if (!nogood.empty())
     {
@@ -270,9 +251,6 @@ void PBS::choose_conflict(PBSNode &node)
 
     runtime_choose_conflict += (double)(std::clock() - t) / CLOCKS_PER_SEC;
 }
-
-
-
 
 double PBS::get_path_cost(const Path& path) const
 {
@@ -586,9 +564,15 @@ bool PBS::generate_root_node()
         double path_cost;
         int start_location  = starts[i].location;
         clock_t t = std::clock();
+
+        const unordered_set<int> &high_priority_agents = dummy_start->priorities.get_reachable_nodes(i);
+        std::cout << "current agent: " << i << std::endl;
+        for (auto j: high_priority_agents) {
+            std::cout << "  higher priority: " << i << std::endl;
+        }
         // copy reservation table
 		rt.copy(initial_rt);
-        rt.build(paths, initial_constraints, dummy_start->priorities.get_reachable_nodes(i), i, start_location);
+        rt.build(paths, initial_constraints, high_priority_agents, i, start_location);
         runtime_get_higher_priority_agents += dummy_start->priorities.runtime;
         runtime_rt += (double)(std::clock() - t) / CLOCKS_PER_SEC;
 
@@ -922,62 +906,6 @@ void PBS::print_paths() const
 	}
 }
 
-
-// adding new nodes to FOCAL (those with min-f-val*f_weight between the old and new LB)
-void PBS::update_focal_list()
-{
-	/*PBSNode* open_head = open_list.top();
-	if (open_head->f_val > min_f_val)
-	{
-		if (screen == 2)
-		{
-			std::cout << "  Note -- FOCAL UPDATE!! from |FOCAL|=" << focal_list.size() << " with |OPEN|=" << open_list.size() << " to |FOCAL|=";
-		}
-		min_f_val = open_head->f_val;
-		double new_focal_list_threshold = min_f_val * focal_w;
-		for (PBSNode* n : open_list)
-		{
-			if (n->f_val > focal_list_threshold &&
-				n->f_val <= new_focal_list_threshold)
-				n->focal_handle = focal_list.push(n);
-		}
-		focal_list_threshold = new_focal_list_threshold;
-		if (screen == 2)
-		{
-			std::cout << focal_list.size() << std::endl;
-		}
-	}*/
-}
-
-void PBS::update_CAT(int ex_ag)
-{
-    size_t makespan = 0;
-	for (int ag = 0; ag < num_of_agents; ag++) 
-    {
-        if (ag == ex_ag || paths[ag] == nullptr)
-            continue;
-        makespan = std::max(makespan, paths[ag]->size());
-    }
-	cat.clear();
-    cat.resize(makespan);
-    for (int t = 0; t < (int)makespan; t++)
-        cat[t].resize(G.size(), false);
-
-    for (int ag = 0; ag < num_of_agents; ag++) 
-	{
-        if (ag == ex_ag || paths[ag] == nullptr)
-            continue; 
-		for (int timestep = 0; timestep < (int)paths[ag]->size() - 1; timestep++)
-		{
-			int loc = paths[ag]->at(timestep).state.location;
-			if (loc < 0)
-			    continue;
-			for (int t = max(0, timestep - k_robust); t <= timestep + k_robust; t++)
-			    cat[t][loc] = true;
-		}
-	}
-}
-
 void PBS::print_results() const
 {
     std::cout << "PBS:";
@@ -1069,3 +997,32 @@ void PBS::get_solution()
     }
     avg_path_length /= num_of_agents;
 }
+
+// void PBS::update_CAT(int ex_ag)
+// {
+//     size_t makespan = 0;
+// 	for (int ag = 0; ag < num_of_agents; ag++) 
+//     {
+//         if (ag == ex_ag || paths[ag] == nullptr)
+//             continue;
+//         makespan = std::max(makespan, paths[ag]->size());
+//     }
+// 	cat.clear();
+//     cat.resize(makespan);
+//     for (int t = 0; t < (int)makespan; t++)
+//         cat[t].resize(G.size(), false);
+
+//     for (int ag = 0; ag < num_of_agents; ag++) 
+// 	{
+//         if (ag == ex_ag || paths[ag] == nullptr)
+//             continue; 
+// 		for (int timestep = 0; timestep < (int)paths[ag]->size() - 1; timestep++)
+// 		{
+// 			int loc = paths[ag]->at(timestep).state.location;
+// 			if (loc < 0)
+// 			    continue;
+// 			for (int t = max(0, timestep - k_robust); t <= timestep + k_robust; t++)
+// 			    cat[t][loc] = true;
+// 		}
+// 	}
+// }

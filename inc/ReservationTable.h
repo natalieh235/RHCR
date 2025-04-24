@@ -59,8 +59,6 @@ private:
 	void updateSIT(size_t location); // update SIT at the gvien location
 	void mergeIntervals(list<Interval >& intervals) const; //merge successive safe intervals with the same number of conflicts.
 
-
-
     // void insertConstraint2SIT(int location, int t_min, int t_max);
     void insertSoftConstraint2SIT(int location, int t_min, int t_max);
     void insertConstraints4starts(const vector<Path*>& paths, int current_agent, int start_location);	

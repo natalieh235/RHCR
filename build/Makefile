@@ -203,6 +203,30 @@ src/BasicSystem.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/BasicSystem.cpp.s
 .PHONY : src/BasicSystem.cpp.s
 
+src/CReservationTable.o: src/CReservationTable.cpp.o
+.PHONY : src/CReservationTable.o
+
+# target to build an object file
+src/CReservationTable.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/CReservationTable.cpp.o
+.PHONY : src/CReservationTable.cpp.o
+
+src/CReservationTable.i: src/CReservationTable.cpp.i
+.PHONY : src/CReservationTable.i
+
+# target to preprocess a source file
+src/CReservationTable.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/CReservationTable.cpp.i
+.PHONY : src/CReservationTable.cpp.i
+
+src/CReservationTable.s: src/CReservationTable.cpp.s
+.PHONY : src/CReservationTable.s
+
+# target to generate assembly for a file
+src/CReservationTable.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/CReservationTable.cpp.s
+.PHONY : src/CReservationTable.cpp.s
+
 src/CSIPP.o: src/CSIPP.cpp.o
 .PHONY : src/CSIPP.o
 
@@ -370,6 +394,30 @@ src/MAPFSolver.s: src/MAPFSolver.cpp.s
 src/MAPFSolver.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/MAPFSolver.cpp.s
 .PHONY : src/MAPFSolver.cpp.s
+
+src/MotionModel.o: src/MotionModel.cpp.o
+.PHONY : src/MotionModel.o
+
+# target to build an object file
+src/MotionModel.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/MotionModel.cpp.o
+.PHONY : src/MotionModel.cpp.o
+
+src/MotionModel.i: src/MotionModel.cpp.i
+.PHONY : src/MotionModel.i
+
+# target to preprocess a source file
+src/MotionModel.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/MotionModel.cpp.i
+.PHONY : src/MotionModel.cpp.i
+
+src/MotionModel.s: src/MotionModel.cpp.s
+.PHONY : src/MotionModel.s
+
+# target to generate assembly for a file
+src/MotionModel.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/MotionModel.cpp.s
+.PHONY : src/MotionModel.cpp.s
 
 src/OnlineGraph.o: src/OnlineGraph.cpp.o
 .PHONY : src/OnlineGraph.o
@@ -727,6 +775,9 @@ help:
 	@echo "... src/BasicSystem.o"
 	@echo "... src/BasicSystem.i"
 	@echo "... src/BasicSystem.s"
+	@echo "... src/CReservationTable.o"
+	@echo "... src/CReservationTable.i"
+	@echo "... src/CReservationTable.s"
 	@echo "... src/CSIPP.o"
 	@echo "... src/CSIPP.i"
 	@echo "... src/CSIPP.s"
@@ -748,6 +799,9 @@ help:
 	@echo "... src/MAPFSolver.o"
 	@echo "... src/MAPFSolver.i"
 	@echo "... src/MAPFSolver.s"
+	@echo "... src/MotionModel.o"
+	@echo "... src/MotionModel.i"
+	@echo "... src/MotionModel.s"
 	@echo "... src/OnlineGraph.o"
 	@echo "... src/OnlineGraph.i"
 	@echo "... src/OnlineGraph.s"

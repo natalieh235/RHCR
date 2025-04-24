@@ -2,7 +2,8 @@
 #include "StateTimeAStar.h"
 #include "SingleAgentSolver.h"
 #include "CStates.h"
-#include "MotionModel.h"
+// #include "MotionModel.h"
+#include "CReservationTable.h"
 
 class CSIPPNode {
 public:
@@ -18,6 +19,7 @@ public:
 
     double g_val;
     double h_val;
+    double wait_time;
     int conflicts;
     int goal_id;
 
@@ -66,8 +68,8 @@ public:
     CSIPPNode(): parent(nullptr), in_openlist(false), g_val(0), h_val(0), goal_id(0), conflicts(0) {}
 
     CSIPPNode(const CState& state, double g_val, double h_val, const Interval& interval,
-            CSIPPNode* parent, int conflicts, std::pair<int, int> goal):
-            state(state), parent(parent), interval(interval), goal(goal), in_openlist(false), g_val(g_val), h_val(h_val), conflicts(conflicts) {}
+            CSIPPNode* parent, int conflicts, std::pair<int, int> goal, double wait_time):
+            state(state), parent(parent), interval(interval), goal(goal), in_openlist(false), g_val(g_val), h_val(h_val), conflicts(conflicts), wait_time(wait_time) {}
     // The following is used to  check whether two nodes are equal
     // we say that two nodes are equal iff
     // both agree on the id and timestep
@@ -98,7 +100,7 @@ class CSIPP: public SingleAgentSolver
     public:
         CPath run_continuous(const BasicGraph& G, const CState& start,
                 const vector<pair<int, int> >& goal_locations,
-                ReservationTable& RT);
+                ContinuousReservationTable& RT);
 
         Path run(const BasicGraph& G, const State& start,
                 const vector<pair<int, int> >& goal_locations,
@@ -116,7 +118,7 @@ class CSIPP: public SingleAgentSolver
         fibonacci_heap< CSIPPNode*, compare<CSIPPNode::secondary_compare_node> > focal_list;
         unordered_set< CSIPPNode*, CSIPPNode::Hasher, CSIPPNode::EqNode> allNodes_table;
         inline void releaseClosedListNodes();
-        void generate_node(const Interval& interval, CSIPPNode* curr, State next_state, const BasicGraph& G,
+        void generate_node(const CInterval& interval, CSIPPNode* curr, State next_state, const BasicGraph& G,
                         int min_timestep, double h_val, std::pair<int, int> goal, std::string primitive_name);
         // Updates the path
         std::tuple<bool, CPath> update_goals(CSIPPNode* curr, const vector<pair<int, int> >& goal_locations); 

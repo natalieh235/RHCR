@@ -12,8 +12,9 @@ std::ostream & operator << (std::ostream &out, const CState &s)
 
 std::ostream & operator << (std::ostream &out, const CPath &path)
 {
-    for (auto s : path)
+    for (auto data : path)
     {
+        CState s = std::get<0>(data);
         // CState s = step.state;
         if(s.location < 0)
             continue;

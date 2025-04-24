@@ -3,6 +3,7 @@
 #include "KivaGraph.h"
 #include "KivaSystem.h"
 #include "KivaSystem.h"
+#include "CSIPP.h"
 
 void test_valid_move() {
     // Create a sample graph/grid (this will depend on how your Graph is implemented)
@@ -109,20 +110,51 @@ void test_system() {
     std::cout << "All planning small tests passed!" << std::endl;
 }
 
+void test_motion_model() {
+    MotionModel motion_model = MotionModel(2.0, 1.0, 0.0);
+    Profile profile = motion_model.getTrapezoidalProfile(5);
+    std::cout << profile << std::endl;
+
+    profile = motion_model.getTrapezoidalProfile(4);
+    std::cout << profile << std::endl;
+
+    profile = motion_model.getTrapezoidalProfile(3);
+    std::cout << profile << std::endl;
+
+    // profile = motion_model.getTrapezoidalProfile(10);
+    // std::cout << profile << std::endl;
+
+    // profile = motion_model.getTrapezoidalProfile(45);
+    // std::cout << profile << std::endl;
+    // Test the trapezoidal profile
+    // assert(profile.length == 5);
+    // assert(profile.start_time == 0);
+    // assert(profile.arrival_time == 4);
+
+    // // Test the entries
+    // assert(profile.entries.size() == 5);
+    // assert(profile.entries[0].first == 0.0);
+    // assert(profile.entries[0].second == 1.0);
+
+    std::cout << "All motion model tests passed!" << std::endl;
+}
+
 void test_csipp() {
     KivaGrid G = KivaGrid(1.0, 1.0);
     assert((G.load_map("../maps/symbotic/symbotic_tiny.map")) == 1);
 
     G.preprocessing(true);
     //(double max_speed, double acceleration, double deceleration)
-    MotionModel motion_model = MotionModel(1.0, 1.0, 1.0);
-
+    
+    MotionModel motion_model = MotionModel(2.0, 1.0, 0.0);
     CSIPP *path_planner = new CSIPP(motion_model);
 
-    ReservationTable rt = ReservationTable(G);
-    rt.hold_endpoints = true;
-    rt.map_size = G.size();
-    rt.num_of_agents = 1;
+    ContinuousReservationTable rt = ContinuousReservationTable(G, motion_model);
+
+    // ReservationTable rt = ReservationTable(G);
+    // rt.hold_endpoints = true;
+    // rt.map_size = G.size();
+    // rt.num_of_agents = 1;
 
     // void ReservationTable::build(const vector<Path*>& paths,
     //     const list< tuple<int, int, int> >& initial_constraints,
@@ -137,14 +169,22 @@ void test_csipp() {
 
     int start = 95;
     int goal = 7;
-    rt.build(paths, initial_constraints, high_priority_agents, current_agent, start);
+
+    // rt.build(paths, initial_constraints, high_priority_agents, current_agent, start);
 
     std::cout << "built rt" << std::endl;
 
+    
     const vector<std::pair<int, int>> goal_locations = {{goal, 0}};
-    CPath sol = path_planner->run_continuous(G, CState(start, 0, 1), goal_locations, rt);
+    // CPath sol = path_planner->run_continuous(G, CState(start, 0, 1), goal_locations, rt);
+    // std::cout << "sol: " << sol << std::endl;
 
-    std::cout << sol << std::endl;
+    rt.addReservation(82, 1, 3);
+    CPath sol = path_planner->run_continuous(G, CState(start, 0, 1), goal_locations, rt);
+    std::cout << "sol: " << sol << std::endl;
+
+    rt.insertPath(sol);
+
 }
 
 void test_small_plan() {
@@ -225,6 +265,8 @@ int main() {
 
     // test_system();
     // test_valid_move();
+
+    test_motion_model();
     test_csipp();
     return 0;
 }

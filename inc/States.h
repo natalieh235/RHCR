@@ -60,7 +60,7 @@ struct State
 std::ostream & operator << (std::ostream &out, const State &s);
 
 struct PathStep {
-    State state;           // The resulting state after applying the motion primitive
+State state;           // The resulting state after applying the motion primitive
     std::string primitive;   // The motion primitive that caused the transition
 
     PathStep(): state(State()), primitive("default") {}

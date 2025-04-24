@@ -59,5 +59,5 @@ struct CState
 };
 
 std::ostream & operator << (std::ostream &out, const CState &s);
-typedef std::vector<CState> CPath;
+typedef std::vector<std::tuple<CState, double>> CPath;
 std::ostream & operator << (std::ostream &out, const CPath &path);
