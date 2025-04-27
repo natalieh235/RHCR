@@ -54,17 +54,26 @@ const Profile &MotionModel::getTrapezoidalProfile(int length)
             }
         }
     };
+ 
 
     // Compute profile entries
     for (int i = 0; i <= length; i++) {
-        double front_touch = i * cell_length;
-        double front_exit = (i + 1) * cell_length + robot_length;
+        // time the front end touches the cell is the distance from the start of the robot to the start of the cell
+        // if robot is at x, front end is at x + (robot_length/2). the cell start is at (i - 0.5) * cell_length
+        // double front_touch = (i + 0.5) * cell_length;
+        double front_touch_distance = std::max((i-0.5)*cell_length - robot_length/2, 0.0);
 
-        double t_touch = timeToReach(front_touch);
-        double t_depart = timeToReach(front_exit);
+        double exit_distance = (i+0.5)*cell_length - robot_length/2;
 
-        // std::cout << "i: " << i << " | front_touch: " << front_touch
-        //           << " | front_exit: " << front_exit << " | t_touch: " << t_touch
+        if (i == length) {
+            exit_distance = d;
+        }
+
+        double t_touch = timeToReach(front_touch_distance);
+        double t_depart = timeToReach(exit_distance);
+
+        // std::cout << "i: " << i << " | front_touch: " << front_touch_distance
+        //           << " | front_exit: " << exit_distance << " | t_touch: " << t_touch
         //           << " | t_depart: " << t_depart << std::endl;
 
         profile.entries.emplace_back(t_touch, t_depart - t_touch);

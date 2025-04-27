@@ -59,5 +59,5 @@ struct CState
 };
 
 std::ostream & operator << (std::ostream &out, const CState &s);
-typedef std::vector<std::tuple<CState, double>> CPath;
+typedef std::vector<std::tuple<CState, double>> CPath; // the second number is the wait time at the node
 std::ostream & operator << (std::ostream &out, const CPath &path);

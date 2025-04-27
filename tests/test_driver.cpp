@@ -179,8 +179,12 @@ void test_csipp() {
     // CPath sol = path_planner->run_continuous(G, CState(start, 0, 1), goal_locations, rt);
     // std::cout << "sol: " << sol << std::endl;
 
-    rt.addReservation(82, 1, 3);
+    // rt.addReservation(82, 1, 3);
     CPath sol = path_planner->run_continuous(G, CState(start, 0, 1), goal_locations, rt);
+    std::cout << "sol: " << sol << std::endl;
+
+    rt.addReservation(82, 1, 3);
+    sol = path_planner->run_continuous(G, CState(start, 0, 1), goal_locations, rt);
     std::cout << "sol: " << sol << std::endl;
 
     rt.insertPath(sol);
@@ -188,8 +192,6 @@ void test_csipp() {
 }
 
 void test_small_plan() {
-    // Create a sample graph/grid (this will depend on how your Graph is implemented)
-    // KivaGrid G;
     KivaGrid G = KivaGrid(1.0, 1.0);
     assert((G.load_map("../maps/sippip.map")) == 1);
 

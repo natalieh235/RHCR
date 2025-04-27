@@ -22,7 +22,7 @@ std::ostream & operator << (std::ostream &out, const CPath &path)
         out << "(" << s.location << ","
             << s.orientation << "," 
             << s.timestep << ","
-            << s.velocity << ")->";
+            << s.velocity << ") wait: " << std::get<1>(data) << " ->";
     }
     out << std::endl;
     return out;

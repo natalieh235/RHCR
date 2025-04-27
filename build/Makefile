@@ -203,6 +203,78 @@ src/BasicSystem.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/BasicSystem.cpp.s
 .PHONY : src/BasicSystem.cpp.s
 
+src/CMAPFSolver.o: src/CMAPFSolver.cpp.o
+.PHONY : src/CMAPFSolver.o
+
+# target to build an object file
+src/CMAPFSolver.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/CMAPFSolver.cpp.o
+.PHONY : src/CMAPFSolver.cpp.o
+
+src/CMAPFSolver.i: src/CMAPFSolver.cpp.i
+.PHONY : src/CMAPFSolver.i
+
+# target to preprocess a source file
+src/CMAPFSolver.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/CMAPFSolver.cpp.i
+.PHONY : src/CMAPFSolver.cpp.i
+
+src/CMAPFSolver.s: src/CMAPFSolver.cpp.s
+.PHONY : src/CMAPFSolver.s
+
+# target to generate assembly for a file
+src/CMAPFSolver.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/CMAPFSolver.cpp.s
+.PHONY : src/CMAPFSolver.cpp.s
+
+src/CPBS.o: src/CPBS.cpp.o
+.PHONY : src/CPBS.o
+
+# target to build an object file
+src/CPBS.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/CPBS.cpp.o
+.PHONY : src/CPBS.cpp.o
+
+src/CPBS.i: src/CPBS.cpp.i
+.PHONY : src/CPBS.i
+
+# target to preprocess a source file
+src/CPBS.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/CPBS.cpp.i
+.PHONY : src/CPBS.cpp.i
+
+src/CPBS.s: src/CPBS.cpp.s
+.PHONY : src/CPBS.s
+
+# target to generate assembly for a file
+src/CPBS.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/CPBS.cpp.s
+.PHONY : src/CPBS.cpp.s
+
+src/CPPBest.o: src/CPPBest.cpp.o
+.PHONY : src/CPPBest.o
+
+# target to build an object file
+src/CPPBest.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/CPPBest.cpp.o
+.PHONY : src/CPPBest.cpp.o
+
+src/CPPBest.i: src/CPPBest.cpp.i
+.PHONY : src/CPPBest.i
+
+# target to preprocess a source file
+src/CPPBest.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/CPPBest.cpp.i
+.PHONY : src/CPPBest.cpp.i
+
+src/CPPBest.s: src/CPPBest.cpp.s
+.PHONY : src/CPPBest.s
+
+# target to generate assembly for a file
+src/CPPBest.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/CPPBest.cpp.s
+.PHONY : src/CPPBest.cpp.s
+
 src/CReservationTable.o: src/CReservationTable.cpp.o
 .PHONY : src/CReservationTable.o
 
@@ -775,6 +847,15 @@ help:
 	@echo "... src/BasicSystem.o"
 	@echo "... src/BasicSystem.i"
 	@echo "... src/BasicSystem.s"
+	@echo "... src/CMAPFSolver.o"
+	@echo "... src/CMAPFSolver.i"
+	@echo "... src/CMAPFSolver.s"
+	@echo "... src/CPBS.o"
+	@echo "... src/CPBS.i"
+	@echo "... src/CPBS.s"
+	@echo "... src/CPPBest.o"
+	@echo "... src/CPPBest.i"
+	@echo "... src/CPPBest.s"
 	@echo "... src/CReservationTable.o"
 	@echo "... src/CReservationTable.i"
 	@echo "... src/CReservationTable.s"

@@ -1,7 +1,7 @@
 #pragma once
 #include "PBSNode.h"
 #include "SIPP.h"
-// #include "CSIPP.h"
+#include "CSIPP.h"
 #include <ctime>
 
 // Base class for MAPF solvers
@@ -21,6 +21,15 @@ public:
 	double avg_path_length;
 	double min_sum_of_costs;
     vector<Path> solution;
+
+	int num_failed_order = 0;
+
+    vector<int> current_order;
+	vector<vector<int>> current_order_group;
+	vector<int> best_order;
+
+	vector<Path> shortest_paths;
+	vector<int> shortest_path_costs;
 
 	// initial data
 	ReservationTable initial_rt;
@@ -58,6 +67,8 @@ public:
     // validate
     bool validate_solution();
     void print_solution() const;
+
+	void find_shortest_paths();
 protected:
     vector<vector<bool> > cat; // conflict avoidance table
     vector<unordered_set< pair<int, int> > > constraint_table;
