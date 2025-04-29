@@ -265,8 +265,6 @@ void KivaSystem::simulate(int simulation_time)
 
 		update_start_locations();
 		update_goal_locations();
-		// std::cout << "start size" << starts.size() << " end size" << goal_locations.size() << std::endl;
-		// std::cout << "Calling solve..." << std::endl;
 		solve();
 
 		// move drives
@@ -282,8 +280,6 @@ void KivaSystem::simulate(int simulation_time)
 			std::tie(id, loc, t) = task;
 			finished_tasks[id].emplace_back(loc, t);
 			num_of_tasks++;
-			if (hold_endpoints)
-				held_endpoints.erase(loc);
 		}
 
 		if (congested())

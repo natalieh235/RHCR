@@ -203,6 +203,54 @@ src/BasicSystem.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/BasicSystem.cpp.s
 .PHONY : src/BasicSystem.cpp.s
 
+src/CBasicSystem.o: src/CBasicSystem.cpp.o
+.PHONY : src/CBasicSystem.o
+
+# target to build an object file
+src/CBasicSystem.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/CBasicSystem.cpp.o
+.PHONY : src/CBasicSystem.cpp.o
+
+src/CBasicSystem.i: src/CBasicSystem.cpp.i
+.PHONY : src/CBasicSystem.i
+
+# target to preprocess a source file
+src/CBasicSystem.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/CBasicSystem.cpp.i
+.PHONY : src/CBasicSystem.cpp.i
+
+src/CBasicSystem.s: src/CBasicSystem.cpp.s
+.PHONY : src/CBasicSystem.s
+
+# target to generate assembly for a file
+src/CBasicSystem.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/CBasicSystem.cpp.s
+.PHONY : src/CBasicSystem.cpp.s
+
+src/CKivaSystem.o: src/CKivaSystem.cpp.o
+.PHONY : src/CKivaSystem.o
+
+# target to build an object file
+src/CKivaSystem.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/CKivaSystem.cpp.o
+.PHONY : src/CKivaSystem.cpp.o
+
+src/CKivaSystem.i: src/CKivaSystem.cpp.i
+.PHONY : src/CKivaSystem.i
+
+# target to preprocess a source file
+src/CKivaSystem.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/CKivaSystem.cpp.i
+.PHONY : src/CKivaSystem.cpp.i
+
+src/CKivaSystem.s: src/CKivaSystem.cpp.s
+.PHONY : src/CKivaSystem.s
+
+# target to generate assembly for a file
+src/CKivaSystem.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lifelong_lib.dir/build.make CMakeFiles/lifelong_lib.dir/src/CKivaSystem.cpp.s
+.PHONY : src/CKivaSystem.cpp.s
+
 src/CMAPFSolver.o: src/CMAPFSolver.cpp.o
 .PHONY : src/CMAPFSolver.o
 
@@ -847,6 +895,12 @@ help:
 	@echo "... src/BasicSystem.o"
 	@echo "... src/BasicSystem.i"
 	@echo "... src/BasicSystem.s"
+	@echo "... src/CBasicSystem.o"
+	@echo "... src/CBasicSystem.i"
+	@echo "... src/CBasicSystem.s"
+	@echo "... src/CKivaSystem.o"
+	@echo "... src/CKivaSystem.i"
+	@echo "... src/CKivaSystem.s"
 	@echo "... src/CMAPFSolver.o"
 	@echo "... src/CMAPFSolver.i"
 	@echo "... src/CMAPFSolver.s"

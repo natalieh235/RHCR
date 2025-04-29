@@ -43,3 +43,20 @@ void CMAPFSolver::print_solution() const
         cout << endl;
     }
 }
+
+void CMAPFSolver::find_shortest_paths()
+{
+    shortest_paths.clear();
+    for (int i = 0; i < num_of_agents; i++)
+    {
+        CPath path;
+        int start_location = starts[i].location;
+        path = path_planner.run_continuous(G, starts[i], goal_locations[i], rt);
+        // std::cout << "here1" << std::endl;
+        shortest_paths.push_back(path);
+        // std::cout << "here" << std::endl;
+        shortest_path_costs.push_back(path_planner.path_cost);
+
+        std::cout << "  done finding shortest path for agent " << i << std::endl;
+    }
+}

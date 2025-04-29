@@ -436,76 +436,22 @@ void BasicSystem::solve()
     solver.clear();
     update_initial_constraints(solver.initial_constraints);
 
-    // solve
-    if (hold_endpoints || useDummyPaths)
+
+    std::cout << "BasicSystem.cpp: starting solve" << std::endl;
+    bool sol = solver.run(starts, goal_locations, time_limit);
+    std::cout << "pbs returned " << sol << std::endl;
+    if (sol)
     {
-        vector<State> new_starts;
-        vector<vector<pair<int, int>>> new_goal_locations;
-        for (int i : new_agents)
-        {
-            new_starts.emplace_back(starts[i]);
-            new_goal_locations.emplace_back(goal_locations[i]);
-        }
-        vector<Path> planned_paths(num_of_drives);
-        solver.initial_rt.clear();
-        auto p = new_agents.begin();
-        for (int i = 0; i < num_of_drives; i++)
-        {
-            planned_paths[i].resize(paths[i].size() - timestep);
-            for (int t = 0; t < (int)planned_paths[i].size(); t++)
-            {
-                planned_paths[i][t] = paths[i][timestep + t];
-                planned_paths[i][t].state.timestep = t;
-            }
-            if (p == new_agents.end() || *p != i)
-            {
-                solver.initial_rt.insertPath2CT(planned_paths[i]);
-            }
-            else
-                ++p;
-        }
-        if (!new_agents.empty())
-        {
-            bool sol;
-            if (timestep == 0)
-                sol = solver.run(new_starts, new_goal_locations, 10 * time_limit);
-            else
-                sol = solver.run(new_starts, new_goal_locations, time_limit);
-            if (sol)
-            {
-                auto pt = solver.solution.begin();
-                for (int i : new_agents)
-                {
-                    planned_paths[i] = *pt;
-                    ++pt;
-                }
-                if (check_collisions(planned_paths))
-                {
-                    cout << "COLLISIONS!" << endl;
-                    exit(-1);
-                }
-            }
-        }
-        // lra.resolve_conflicts(planned_paths, k_robust);
-        update_paths(planned_paths);
+        if (log)
+            solver.save_constraints_in_goal_node(outfile + "/goal_nodes/" + std::to_string(timestep) + ".gv");
+        update_paths(solver.solution);
     }
-    else
-    {
-        std::cout << "BasicSystem.cpp: starting solve" << std::endl;
-        bool sol = solver.run(starts, goal_locations, time_limit);
-        std::cout << "pbs returned " << sol << std::endl;
-        if (sol)
-        {
-            if (log)
-                solver.save_constraints_in_goal_node(outfile + "/goal_nodes/" + std::to_string(timestep) + ".gv");
-            update_paths(solver.solution);
-        }
-        // else
-        // {
-        //     lra.resolve_conflicts(solver.solution);
-        //     update_paths(lra.solution);
-        // }
-    }
+    // else
+    // {
+    //     lra.resolve_conflicts(solver.solution);
+    //     update_paths(lra.solution);
+    // }
+
     if (log)
         solver.save_search_tree(outfile + "/search_trees/" + std::to_string(timestep) + ".gv");
 

@@ -11,13 +11,13 @@ public:
 
     double runtime_rt = 0;
     double runtime_plan_paths = 0;
-    int num_order_sample = 300;
+    int num_order_sample = 50;
     // vector<int> best_order;
     string get_name() const {return "Continuous PPBest"; };
 
-    bool run(const vector<CState>& starts,
-            const vector< vector<pair<int, int> > >& goal_locations, // an ordered list of pairs of <location, release time>
-            double _time_limit);
+    bool run(const vector<CState> &starts,
+        const vector<vector<pair<int, int>>> &goal_locations, // an ordered list of pairs of <location, release time>
+        int time_limit);
 
     // void save_results(const std::string &fileName, const std::string &instanceName) const;
     void save_results(const std::string &fileName, const std::string &instanceName) const {};

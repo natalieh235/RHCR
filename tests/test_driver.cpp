@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cassert>
 #include "KivaGraph.h"
-#include "KivaSystem.h"
+#include "CKivaSystem.h"
 #include "KivaSystem.h"
 #include "CSIPP.h"
 
@@ -110,6 +110,63 @@ void test_system() {
     std::cout << "All planning small tests passed!" << std::endl;
 }
 
+void continuous_test_system() {
+    KivaGrid G = KivaGrid(1.0, 1.0);
+    assert((G.load_map("../maps/symbotic/symbotic_tiny.map")) == 1);
+
+    G.preprocessing(true);
+
+    MotionModel motion_model = MotionModel(2.0, 1.0, 0.0);
+    CSIPP *path_planner = new CSIPP(motion_model);
+
+    ContinuousReservationTable rt = ContinuousReservationTable(G, motion_model);
+
+    CPPBest *solver = new CPPBest(G, *path_planner);
+    CKivaSystem system(G, *solver);
+
+    system.outfile = "../RHCR/exp/continuous_tests";
+	system.screen = 2;
+	system.num_of_drives = 1;
+	system.time_limit = 60;
+	system.simulation_window = 5;
+	system.planning_window = 1073741823;
+	system.travel_time_window = 0;
+    system.simulation_time = 200;
+	system.consider_rotation = true;
+	system.seed = 0;
+	srand(system.seed);
+
+    system.initialize_solvers();
+    system.starts.resize(system.num_of_drives);
+    system.goal_locations.resize(system.num_of_drives);
+    system.finished_tasks.resize(system.num_of_drives);
+    system.paths.resize(system.num_of_drives);
+
+    system.starts = {CState(95, 0, 1, 1)};
+    std::pair<int, int> goal1(7, 0);
+    system.goal_locations = {{goal1}};
+
+    system.simulate(10);
+
+    // system.solve();
+
+    // std::cout << "solved" << std::endl;
+    // auto new_finished_tasks = system.move();
+	// std::cout << new_finished_tasks.size() << " tasks has been finished" << std::endl;
+
+    // for (auto task : new_finished_tasks)
+	// 	{
+	// 		int id, loc, t;
+	// 		std::tie(id, loc, t) = task;
+	// 		system.finished_tasks[id].emplace_back(loc, t);
+	// 		system.num_of_tasks++;
+	// 	}
+    
+    // system.save_results();
+
+    // std::cout << "All planning small tests passed!" << std::endl;
+}
+
 void test_motion_model() {
     MotionModel motion_model = MotionModel(2.0, 1.0, 0.0);
     Profile profile = motion_model.getTrapezoidalProfile(5);
@@ -150,15 +207,6 @@ void test_csipp() {
     CSIPP *path_planner = new CSIPP(motion_model);
 
     ContinuousReservationTable rt = ContinuousReservationTable(G, motion_model);
-
-    // ReservationTable rt = ReservationTable(G);
-    // rt.hold_endpoints = true;
-    // rt.map_size = G.size();
-    // rt.num_of_agents = 1;
-
-    // void ReservationTable::build(const vector<Path*>& paths,
-    //     const list< tuple<int, int, int> >& initial_constraints,
-    //     const unordered_set<int>& high_priority_agents, int current_agent, int start_location)
     
     vector<Path*> paths;
     paths.resize(1);
@@ -166,14 +214,12 @@ void test_csipp() {
     unordered_set<int> high_priority_agents;
     int current_agent = 0;
 
-
     int start = 95;
     int goal = 7;
 
     // rt.build(paths, initial_constraints, high_priority_agents, current_agent, start);
 
     std::cout << "built rt" << std::endl;
-
     
     const vector<std::pair<int, int>> goal_locations = {{goal, 0}};
     // CPath sol = path_planner->run_continuous(G, CState(start, 0, 1), goal_locations, rt);
@@ -268,7 +314,8 @@ int main() {
     // test_system();
     // test_valid_move();
 
-    test_motion_model();
-    test_csipp();
+    // test_motion_model();
+    continuous_test_system();
+    // test_csipp();
     return 0;
 }

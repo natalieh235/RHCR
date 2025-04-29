@@ -4,7 +4,7 @@
 #include "PriorityGraph.h"
 #include "PBS.h"
 #include "LRAStar.h"
-#include "CPPest.h"
+#include "CPPBest.h"
 
 
 class CBasicSystem
@@ -50,7 +50,7 @@ public:
 
     // record movements of drives
     std::vector<CPath> paths;
-    std::vector<std::list<std::pair<int, int> > > finished_tasks; // location + finish time
+    std::vector<std::list<std::pair<int, double> > > finished_tasks; // location + finish time
 
     bool congested() const;
 	bool check_collisions(const vector<CPath>& input_paths) const;

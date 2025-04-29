@@ -1,4 +1,4 @@
-#include "CCBasicSystem.h"
+#include "CBasicSystem.h"
 #include <stdlib.h>
 #include <boost/tokenizer.hpp>
 
@@ -35,8 +35,8 @@ bool CBasicSystem::load_locations()
         beg++;
         int start_orient = atoi((*beg).c_str());
         beg++;
-        starts[k] = State(start_loc, 0, start_orient);
-        paths[k].emplace_back(starts[k]);
+        starts[k] = CState(start_loc, 0, start_orient);
+        paths[k].emplace_back(std::make_tuple(starts[k], 0.0));
         finished_tasks[k].push_back(std::make_pair(start_loc, 0));
         // goals
         int goal = atoi((*beg).c_str());
@@ -71,7 +71,7 @@ void CBasicSystem::update_paths(const std::vector<CPath*>& MAPF_paths, int max_t
     for (int k = 0; k < num_of_drives; k++)
     {
 
-        if (MAPF_paths[k].empty()) {
+        if (MAPF_paths[k]->empty()) {
             continue;
         }
 
@@ -80,7 +80,7 @@ void CBasicSystem::update_paths(const std::vector<CPath*>& MAPF_paths, int max_t
         for (int t = 0; t < (int)MAPF_paths[k]->size(); t++)
         {
             // paths[k][timestep + t] = MAPF_paths[k]->at(t);
-            paths[k][old_length + t] = MAPF_paths[k][t];
+            paths[k][old_length + t] = (*MAPF_paths[k])[t];
             // paths[k][timestep + t].state.timestep = timestep + t;
         }
     }
@@ -103,8 +103,8 @@ void CBasicSystem::update_paths(const std::vector<CPath>& MAPF_paths, int max_ti
             continue;
 
         int old_length = (int)paths[k].size();
-        paths[k].resize(paths[k].size() + (int)MAPF_paths[k]->size());
-        for (int t = 0; t < (int)MAPF_paths[k]->size(); t++)
+        paths[k].resize(paths[k].size() + (int)MAPF_paths[k].size());
+        for (int t = 0; t < (int)MAPF_paths[k].size(); t++)
         {
             paths[k][old_length + t] = MAPF_paths[k][t];
         }
@@ -163,58 +163,58 @@ void CBasicSystem::update_paths(const std::vector<CPath>& MAPF_paths, int max_ti
 // }
 
 
-bool CBasicSystem::check_collisions(const vector<CPath>& input_paths) const
-{
-	for (int a1 = 0; a1 < (int)input_paths.size(); a1++)
-	{
-		for (int a2 = a1 + 1; a2 < (int)input_paths.size(); a2++)
-		{
-			// TODO: add k-robust
-			size_t min_path_length = input_paths[a1].size() < input_paths[a2].size() ? input_paths[a1].size() : input_paths[a2].size();
-			for (size_t timestep = 0; timestep < min_path_length; timestep++)
-			{
-				int loc1 = input_paths[a1].at(timestep).state.location;
-				int loc2 = input_paths[a2].at(timestep).state.location;
-				if (loc1 == loc2)
-					return true;
-				else if (timestep < min_path_length - 1
-					&& loc1 == input_paths[a2].at(timestep + 1).state.location
-					&& loc2 == input_paths[a1].at(timestep + 1).state.location)
-					return true;
-			}
-			if ((hold_endpoints || useDummyPaths) && input_paths[a1].size() != input_paths[a2].size())
-			{
-				int a1_ = input_paths[a1].size() < input_paths[a2].size() ? a1 : a2;
-				int a2_ = input_paths[a1].size() < input_paths[a2].size() ? a2 : a1;
-				int loc1 = input_paths[a1_].back().state.location;
-				for (size_t timestep = min_path_length; timestep < input_paths[a2_].size(); timestep++)
-				{
-					int loc2 = input_paths[a2_].at(timestep).state.location;
-					if (loc1 == loc2)
-						return true;
-				}
-			}
-		}
-	}
-	return false;
-}
+// bool CBasicSystem::check_collisions(const vector<CPath>& input_paths) const
+// {
+// 	for (int a1 = 0; a1 < (int)input_paths.size(); a1++)
+// 	{
+// 		for (int a2 = a1 + 1; a2 < (int)input_paths.size(); a2++)
+// 		{
+// 			// TODO: add k-robust
+// 			size_t min_path_length = input_paths[a1].size() < input_paths[a2].size() ? input_paths[a1].size() : input_paths[a2].size();
+// 			for (size_t timestep = 0; timestep < min_path_length; timestep++)
+// 			{
+// 				int loc1 = input_paths[a1].at(timestep).state.location;
+// 				int loc2 = input_paths[a2].at(timestep).state.location;
+// 				if (loc1 == loc2)
+// 					return true;
+// 				else if (timestep < min_path_length - 1
+// 					&& loc1 == input_paths[a2].at(timestep + 1).state.location
+// 					&& loc2 == input_paths[a1].at(timestep + 1).state.location)
+// 					return true;
+// 			}
+// 			if ((hold_endpoints || useDummyPaths) && input_paths[a1].size() != input_paths[a2].size())
+// 			{
+// 				int a1_ = input_paths[a1].size() < input_paths[a2].size() ? a1 : a2;
+// 				int a2_ = input_paths[a1].size() < input_paths[a2].size() ? a2 : a1;
+// 				int loc1 = input_paths[a1_].back().state.location;
+// 				for (size_t timestep = min_path_length; timestep < input_paths[a2_].size(); timestep++)
+// 				{
+// 					int loc2 = input_paths[a2_].at(timestep).state.location;
+// 					if (loc1 == loc2)
+// 						return true;
+// 				}
+// 			}
+// 		}
+// 	}
+// 	return false;
+// }
 
-bool CBasicSystem::congested() const
-{
-	if (simulation_window <= 1)
-		return false;
-    int wait_agents = 0;
-    for (const auto& path : paths)
-    {
-        int t = 0;
-        while (t < simulation_window && path[timestep].state.location == path[timestep + t].state.location &&
-                path[timestep].state.orientation == path[timestep + t].state.orientation)
-            t++;
-        if (t == simulation_window)
-            wait_agents++;
-    }
-    return wait_agents > num_of_drives / 2;  // more than half of drives didn't make progress
-}
+// bool CBasicSystem::congested() const
+// {
+// 	if (simulation_window <= 1)
+// 		return false;
+//     int wait_agents = 0;
+//     for (const auto& path : paths)
+//     {
+//         int t = 0;
+//         while (t < simulation_window && path[timestep].state.location == path[timestep + t].state.location &&
+//                 path[timestep].state.orientation == path[timestep + t].state.orientation)
+//             t++;
+//         if (t == simulation_window)
+//             wait_agents++;
+//     }
+//     return wait_agents > num_of_drives / 2;  // more than half of drives didn't make progress
+// }
 
 // move all agents from start_timestep to end_timestep
 // return a list of finished tasks
@@ -224,48 +224,46 @@ list<tuple<int, int, int>> CBasicSystem::move()
     int end_timestep = timestep + simulation_window;
 
     std::cout << "CBasicSystem: move, " << start_timestep << ", " << end_timestep << std::endl;
-	list<tuple<int, int, int>> finished_tasks; // <agent_id, location, timestep>
+	list<tuple<int, int, int>> cur_finished_tasks; // <agent_id, location, timestep>
 
+    // const std::vector<CPath>& MAPF_paths
 
-    for (int t = start_timestep; t <= end_timestep; t++)
-    {
-        for (int k = 0; k < num_of_drives; k++)
-        {
-            State curr = paths[k][t].state;
+    for (int k = 0; k < num_of_drives; k++) {
+        if (solver.solution[k].empty()) {
+            continue;
+        }
 
-            // std::cout << "MOVE: Drive: " << k << " has state " << curr << std::endl;
-            // remove goals if necessary
-            if ((!hold_endpoints || paths[k].size() == t + 1) && !goal_locations[k].empty() && 
-				curr.location == goal_locations[k].front().first &&
-				curr.timestep >= goal_locations[k].front().second) // the agent finish its current task
-            {
+        for (auto p : solver.solution[k]) {
+            CState curr = std::get<0>(p);
+            if (!goal_locations[k].empty() && 
+                curr.timestep >= start_timestep && 
+                curr.timestep < end_timestep && 
+                curr.location == goal_locations[k].front().first &&
+                curr.timestep >= goal_locations[k].front().second
+                ) {
                 goal_locations[k].erase(goal_locations[k].begin());
-				finished_tasks.emplace_back(k, curr.location, t);
-                // std::cout << "MOVE: Drive: " << k << " reached goal location  " << curr.location << std::endl;
+                cur_finished_tasks.emplace_back(k, curr.location, curr.timestep);
             }
-
-            // Check whether this move has conflicts with other agents
-			if (G.types[curr.location] != "Magic")
-			{
-				for (int j = k + 1; j < num_of_drives; j++)
-				{
-					for (int i = max(0, t - k_robust); i <= min(t + k_robust, end_timestep); i++)
-					{
-						if ((int)paths[j].size() <= i)
-							break;
-						if (paths[j][i].state.location == curr.location)
-						{
-							cout << "Drive " << k << " at " << curr << " has a conflict with drive " << j
-								<< " at " << paths[j][i].state << endl;
-							save_results(); //TODO: write termination reason to files
-							exit(-1);
-						}
-					}
-				}
-			}
         }
     }
-    return finished_tasks;
+    
+    // for (int t = start_timestep; t <= end_timestep; t++)
+    // {
+    //     for (int k = 0; k < num_of_drives; k++)
+    //     {
+    //         State curr = paths[k][t].state;
+
+    //         if (!goal_locations[k].empty() && 
+	// 			curr.location == goal_locations[k].front().first &&
+	// 			curr.timestep >= goal_locations[k].front().second) // the agent finish its current task
+    //         {
+    //             goal_locations[k].erase(goal_locations[k].begin());
+	// 			finished_tasks.emplace_back(k, curr.location, t);
+    //         }
+
+    //     }
+    // }
+    return cur_finished_tasks;
 }
 
 
@@ -349,8 +347,8 @@ void CBasicSystem::save_results()
         output << "Agent-" << k << ";";
         for (auto p : paths[k])
         {
-            if (p.state.timestep <= timestep)
-                output << p.state << ";";
+            if (std::get<0>(p).timestep <= timestep)
+                output << std::get<0>(p) << ";";
         }
         output << std::endl;
     }
@@ -361,50 +359,50 @@ void CBasicSystem::save_results()
 }
 
 
-void CBasicSystem::update_travel_times(unordered_map<int, double>& travel_times)
-{
-    if (travel_time_window <= 0)
-        return;
+// void CBasicSystem::update_travel_times(unordered_map<int, double>& travel_times)
+// {
+//     if (travel_time_window <= 0)
+//         return;
 
-    travel_times.clear();
-    unordered_map<int, int> count;
+//     travel_times.clear();
+//     unordered_map<int, int> count;
 
-    int t_min = max(0, timestep - travel_time_window);
-    if (t_min >= timestep)
-        return;
-    for (auto path : paths)
-    {
-        int t = timestep;
-        while (t >= t_min)
-        {
-            int loc = path[t].state.location;
-            int dir = path[t].state.orientation;
-            int wait = 0;
-            while (t > wait && path[t - 1 - wait].state.location == loc && path[t - 1 - wait].state.orientation == dir)
-                wait++;
-            auto it = travel_times.find(loc);
-            if (it == travel_times.end())
-            {
-                travel_times[loc] = wait;
-                count[loc] = 1;
-            }
-            else
-            {
-                travel_times[loc] += wait;
-                count[loc] += 1;
-            }
-            t = t - 1 - wait;
-        }
-    }
+//     int t_min = max(0, timestep - travel_time_window);
+//     if (t_min >= timestep)
+//         return;
+//     for (auto path : paths)
+//     {
+//         int t = timestep;
+//         while (t >= t_min)
+//         {
+//             int loc = path[t].state.location;
+//             int dir = path[t].state.orientation;
+//             int wait = 0;
+//             while (t > wait && path[t - 1 - wait].state.location == loc && path[t - 1 - wait].state.orientation == dir)
+//                 wait++;
+//             auto it = travel_times.find(loc);
+//             if (it == travel_times.end())
+//             {
+//                 travel_times[loc] = wait;
+//                 count[loc] = 1;
+//             }
+//             else
+//             {
+//                 travel_times[loc] += wait;
+//                 count[loc] += 1;
+//             }
+//             t = t - 1 - wait;
+//         }
+//     }
 
-    for (auto it : count)
-    {
-        if (it.second > 1)
-        {
-            travel_times[it.first] /= it.second;
-        }
-    }
-}
+//     for (auto it : count)
+//     {
+//         if (it.second > 1)
+//         {
+//             travel_times[it.first] /= it.second;
+//         }
+//     }
+// }
 
 
 void CBasicSystem::solve()
@@ -415,83 +413,27 @@ void CBasicSystem::solve()
 	// lra.simulation_window = simulation_window;
 	// lra.k_robust = k_robust;
 	solver.clear();
-        // update_initial_constraints(solver.initial_constraints);
 
-    // solve
-    if (hold_endpoints || useDummyPaths)
+    std::cout << "CBasicSystem.cpp: starting solve" << std::endl;
+    bool sol = solver.run(starts, goal_locations, time_limit);
+    std::cout << "high level solver returned " << sol << std::endl;
+    if (sol)
     {
-        vector<CState> new_starts;
-        vector< vector<pair<int, int> > > new_goal_locations;
-        for (int i : new_agents)
-        {
-            new_starts.emplace_back(starts[i]);
-            new_goal_locations.emplace_back(goal_locations[i]);
-        }
-        vector<CPath> planned_paths(num_of_drives);
-        solver.initial_rt.clear();
-        auto p = new_agents.begin();
-        for (int i = 0; i < num_of_drives; i++)
-        {
-            planned_paths[i].resize(paths[i].size() - timestep);
-            for (int t = 0; t < (int)planned_paths[i].size(); t++)
-            {
-                planned_paths[i][t] = paths[i][timestep + t];
-                planned_paths[i][t].state.timestep = t;
-            }
-            if (p == new_agents.end() || *p != i)
-            {
-                solver.initial_rt.insertPath2CT(planned_paths[i]);
-            }
-            else
-                ++p;
-        }
-        if (!new_agents.empty())
-        {
-            bool sol;
-        if (timestep == 0)
-            sol = solver.run(new_starts, new_goal_locations, 10 * time_limit);
-        else
-            sol = solver.run(new_starts, new_goal_locations, time_limit);
-        if (sol)
-            {
-                auto pt = solver.solution.begin();
-                for (int i : new_agents)
-                {
-                    planned_paths[i] = *pt;
-                    ++pt;
-                }
-                if (check_collisions(planned_paths))
-                {
-                    cout << "COLLISIONS!" << endl;
-                    exit(-1);
-                }
-            }
-        }
-        // lra.resolve_conflicts(planned_paths, k_robust);
-        update_paths(planned_paths);
+        if (log)
+            solver.save_constraints_in_goal_node(outfile + "/goal_nodes/" + std::to_string(timestep) + ".gv");
+        update_paths(solver.solution);
     }
-    else {
-        std::cout << "CBasicSystem.cpp: starting solve" << std::endl;
-        bool sol = solver.run(starts, goal_locations, time_limit);
-        std::cout << "pbs returned " << sol << std::endl;
-        if (sol)
-        {
-            if (log)
-                solver.save_constraints_in_goal_node(outfile + "/goal_nodes/" + std::to_string(timestep) + ".gv");
-            update_paths(solver.solution);
-        }
-        // else
-        // {
-        //     lra.resolve_conflicts(solver.solution);
-        //     update_paths(lra.solution);
-        // }
-    }
+    // else
+    // {
+    //     lra.resolve_conflicts(solver.solution);
+    //     update_paths(lra.solution);
+    // }
     if (log)
         solver.save_search_tree(outfile + "/search_trees/" + std::to_string(timestep) + ".gv");
 
     // }
-    solver.save_results(outfile + "/solver.csv", "Time: " + std::to_string(timestep) + "," 
-                                    + "Num Drives: " + std::to_string(num_of_drives) + ", Seed: " + std::to_string(seed));
+    // solver.save_results(outfile + "/solver.csv", "Time: " + std::to_string(timestep) + "," 
+    //                                 + "Num Drives: " + std::to_string(num_of_drives) + ", Seed: " + std::to_string(seed));
 }
 
 void CBasicSystem::initialize_solvers()
@@ -507,88 +449,89 @@ void CBasicSystem::initialize_solvers()
 	// solver.initial_rt.window = INT_MAX;
 }
 
-bool CBasicSystem::load_records()
-{
-	boost::char_separator<char> sep1(";");
-	boost::char_separator<char> sep2(",");
-    boost::char_separator<char> sep3(":");
-	string line;
+// bool CBasicSystem::load_records()
+// {
+// 	boost::char_separator<char> sep1(";");
+// 	boost::char_separator<char> sep2(",");
+//     boost::char_separator<char> sep3(":");
+// 	string line;
 
-	// load paths
-	std::ifstream myfile(outfile + "/paths.txt");
+// 	// load paths
+// 	std::ifstream myfile(outfile + "/paths.txt");
 
-	if (!myfile.is_open())
-			return false;
+// 	if (!myfile.is_open())
+// 			return false;
 
-	timestep = INT_MAX;
-	getline(myfile, line);
-	if (atoi(line.c_str()) != num_of_drives)
-	{
-		cout << "The path file does not match the settings." << endl;
-		exit(-1);
-	}
-	for (int k = 0; k < num_of_drives; k++)
-	{
-        // std::cout << "got hereee" << std::endl;
-		getline(myfile, line);
-		boost::tokenizer< boost::char_separator<char> > tok1(line, sep1);
+// 	timestep = INT_MAX;
+// 	getline(myfile, line);
+// 	if (atoi(line.c_str()) != num_of_drives)
+// 	{
+// 		cout << "The path file does not match the settings." << endl;
+// 		exit(-1);
+// 	}
+// 	for (int k = 0; k < num_of_drives; k++)
+// 	{
+//         // std::cout << "got hereee" << std::endl;
+// 		getline(myfile, line);
+// 		boost::tokenizer< boost::char_separator<char> > tok1(line, sep1);
  
-		for (auto it = std::next(tok1.begin()); it != tok1.end(); ++it)
-		{
-            auto task = *it;
-            // std::cout << "print: " << task << std::endl;
-			boost::tokenizer< boost::char_separator<char> > tok2(task, sep2);
-			boost::tokenizer< boost::char_separator<char> >::iterator beg = tok2.begin();
-            // std::cout << "cur: " << *beg << std::endl;
-			int loc = atoi((*beg).c_str());
-			beg++;
-			int orientation = atoi((*beg).c_str());
-			beg++;
-			double time = atoi((*beg).c_str());
-            std::cout << loc <<" , "  <<  time << ", " << orientation << std::endl;
-			paths[k].emplace_back(PathStep(State(loc, time, orientation)));
-		}
-		timestep = min(timestep, paths[k].back().state.timestep);
-	}
-	myfile.close();
+// 		for (auto it = std::next(tok1.begin()); it != tok1.end(); ++it)
+// 		{
+//             auto task = *it;
+//             // std::cout << "print: " << task << std::endl;
+// 			boost::tokenizer< boost::char_separator<char> > tok2(task, sep2);
+// 			boost::tokenizer< boost::char_separator<char> >::iterator beg = tok2.begin();
+//             // std::cout << "cur: " << *beg << std::endl;
+// 			int loc = atoi((*beg).c_str());
+// 			beg++;
+// 			int orientation = atoi((*beg).c_str());
+// 			beg++;
+// 			double time = atoi((*beg).c_str());
+//             std::cout << loc <<" , "  <<  time << ", " << orientation << std::endl;
+// 			// paths[k].emplace_back(PathStep(State(loc, time, orientation)));
+//             // paths[k].emplace
+// 		}
+// 		timestep = std::min(static_cast<double>(timestep), std::get<0>(paths[k].back()).timestep);
+// 	}
+// 	myfile.close();
 
-	// pick the timestep
-	timestep = int((timestep - 1) / simulation_window) * simulation_window; //int((timestep - 1) / simulation_window) * simulation_window;
+// 	// pick the timestep
+// 	timestep = int((timestep - 1) / simulation_window) * simulation_window; //int((timestep - 1) / simulation_window) * simulation_window;
 
-	// load tasks
-	myfile.open(outfile + "/tasks.txt");
-	if (!myfile.is_open())
-		return false;
+// 	// load tasks
+// 	myfile.open(outfile + "/tasks.txt");
+// 	if (!myfile.is_open())
+// 		return false;
 
-	getline(myfile, line);
-	if (atoi(line.c_str()) != num_of_drives)
-	{
-		cout << "The task file does not match the settings." << endl;
-		exit(-1);
-	}
-	for (int k = 0; k < num_of_drives; k++)
-	{
-		getline(myfile, line);
-		boost::tokenizer< boost::char_separator<char> > tok1(line, sep1);
-		for (auto task : tok1)
-		{
-			boost::tokenizer< boost::char_separator<char> > tok2(task, sep2);
-			boost::tokenizer< boost::char_separator<char> >::iterator beg = tok2.begin();
-			int loc = atoi((*beg).c_str());
-			beg++;
-			int time = atoi((*beg).c_str());
-			if (time >= 0 && time <= timestep)
-			{
-				finished_tasks[k].emplace_back(loc, time);
-				timestep = max(timestep, time);
-			}
-			else
-			{
-				goal_locations[k].emplace_back(loc, 0);
-			}
-		}
-	}
-	myfile.close();
-	return true;
-}
+// 	getline(myfile, line);
+// 	if (atoi(line.c_str()) != num_of_drives)
+// 	{
+// 		cout << "The task file does not match the settings." << endl;
+// 		exit(-1);
+// 	}
+// 	for (int k = 0; k < num_of_drives; k++)
+// 	{
+// 		getline(myfile, line);
+// 		boost::tokenizer< boost::char_separator<char> > tok1(line, sep1);
+// 		for (auto task : tok1)
+// 		{
+// 			boost::tokenizer< boost::char_separator<char> > tok2(task, sep2);
+// 			boost::tokenizer< boost::char_separator<char> >::iterator beg = tok2.begin();
+// 			int loc = atoi((*beg).c_str());
+// 			beg++;
+// 			int time = atoi((*beg).c_str());
+// 			if (time >= 0 && time <= timestep)
+// 			{
+// 				finished_tasks[k].emplace_back(loc, time);
+// 				timestep = max(timestep, time);
+// 			}
+// 			else
+// 			{
+// 				goal_locations[k].emplace_back(loc, 0);
+// 			}
+// 		}
+// 	}
+// 	myfile.close();
+// 	return true;
+// }
 
